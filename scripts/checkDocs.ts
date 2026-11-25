@@ -14,6 +14,7 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { packageFolders } from "./packageFolders.ts";
 import {
   DOCS_INDEX,
   type DocsProblem,
@@ -67,13 +68,11 @@ export function defaultIo(root: string): DocsIo {
       ),
     scripts: () => {
       const top = manifest(root);
-      // The workspaces are `<group>/*` globs (package.json).
-      const workspaces = top.workspaces.flatMap((glob) => {
-        const group = join(root, glob.slice(0, -"/*".length));
-        return readdirSync(group)
-          .filter((folder) => existsSync(join(group, folder, "package.json")))
-          .map((folder) => manifest(join(group, folder)));
-      });
+      // The workspaces are globs under a group, `<group>/*` or `<group>/*/*` (package.json).
+      const groups = [...new Set(top.workspaces.map((glob) => glob.split("/")[0]!))];
+      const workspaces = groups.flatMap((group) =>
+        packageFolders(root, group).map((folder) => manifest(join(root, folder))),
+      );
       return {
         root: Object.keys(top.scripts),
         workspaces: Object.fromEntries(

@@ -279,11 +279,11 @@ jobs:
       - name: The vocabulary, the deck library, robots.txt, the sitemap, the Client ID Document and the docs are in the artifact
         run: >-
           test -f apps/web/dist/ns/vocab/v1.ttl && test -f apps/web/dist/decks/index.ttl
-          && { { [ ! -f packages/build-tools/src/siteMap.ts ] && [ ! -f packages/vocab/tooling/siteMap.ts ]; } || {
+          && { { [ ! -f packages/build-tools/src/siteMap.ts ] && [ ! -f packages/lib/vocab/tooling/siteMap.ts ]; } || {
           test -f apps/web/dist/robots.txt
           && { [ ! -s CNAME ] || test -f apps/web/dist/sitemap.xml; }; }; }
           && { [ ! -f packages/build-tools/src/clientId.ts ] || [ ! -s CNAME ] || test -f apps/web/dist/clientid.jsonld; }
-          && { { [ ! -f packages/build-tools/src/publishDocs.ts ] && [ ! -f packages/markdown/tooling/publishDocs.ts ]; } || {
+          && { { [ ! -f packages/build-tools/src/publishDocs.ts ] && [ ! -f packages/lib/markdown/tooling/publishDocs.ts ]; } || {
           test -f apps/web/dist/docs/index.html
           && test -f apps/web/dist/docs/diagrams/OFL-Fredoka.txt
           && compgen -G 'apps/web/dist/docs/diagrams/*.svg' > /dev/null; }; }

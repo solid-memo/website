@@ -99,7 +99,7 @@ class Repository(unittest.TestCase):
         folder = tempfile.TemporaryDirectory()
         self.addCleanup(folder.cleanup)
         self.root = Path(folder.name)
-        self.vocab = self.root / "packages" / "vocab"
+        self.vocab = self.root / "packages" / "lib" / "vocab"
         for name, value in (("ROOT", self.root), ("VOCAB", self.vocab)):
             patch = mock.patch.object(crosscheck, name, value)
             patch.start()
@@ -111,9 +111,9 @@ class Repository(unittest.TestCase):
         for cached in (crosscheck.dcat_ap, crosscheck.library):
             cached.cache_clear()
             self.addCleanup(cached.cache_clear)
-        self.write("packages/vocab/vendor/dcat-ap/3.0.1/dcat-ap-SHACL.ttl", DCAT_AP)
-        self.write("packages/vocab/vendor/skohub/skos.shacl.ttl", SKOS)
-        self.write("packages/vocab/vendor/skohub/skos.bestPractice.shacl.ttl", "")
+        self.write("packages/lib/vocab/vendor/dcat-ap/3.0.1/dcat-ap-SHACL.ttl", DCAT_AP)
+        self.write("packages/lib/vocab/vendor/skohub/skos.shacl.ttl", SKOS)
+        self.write("packages/lib/vocab/vendor/skohub/skos.bestPractice.shacl.ttl", "")
         self.write("ns/vocab/external.ttl", 'ex:license a dct:LicenseDocument ; rdfs:label "A license" .')
         self.write("ns/vocab/topics.ttl", 'ex:topic a skos:Concept ; skos:prefLabel "A topic" .')
         self.write("ns/vocab/v1.ttl", 'sm:Thing a skos:Concept ; skos:prefLabel "Thing" .')
@@ -254,7 +254,7 @@ class DcatAp(Repository):
         ):
             with self.subTest(extra=extra):
                 crosscheck.dcat_ap.cache_clear()
-                self.write("packages/vocab/vendor/dcat-ap/3.0.1/dcat-ap-SHACL.ttl", DCAT_AP + extra)
+                self.write("packages/lib/vocab/vendor/dcat-ap/3.0.1/dcat-ap-SHACL.ttl", DCAT_AP + extra)
                 with self.assertRaisesRegex(ValueError, "DCAT_AP_TERMS"):
                     crosscheck.dcat_ap()
 
@@ -352,10 +352,10 @@ class Main(Repository):
         self.addCleanup(patch.stop)
         self.write("ns/shapes/thing/v1.ttl", THING_V1)
         self.write("decks/a/v1.ttl", 'ex:a a dcat:Dataset ; dct:title "A" ; dct:isPartOf ex:series .')
-        self.write("packages/vocab/fixtures/deck/v4/valid/pod.ttl", '<#deck> a dcat:Dataset ; dct:title "A deck" .')
-        self.write("packages/vocab/fixtures/library-deck/v6/valid/release.ttl", '<#deck> a dcat:Dataset ; dct:title "A release" .')
-        self.write("packages/vocab/fixtures/draft-deck/v1/valid/draft.ttl", '<#thing> a sm:Thing ; rdfs:label "A thing" .')
-        self.write("packages/vocab/fixtures/fsrs-review-state/v1/valid/state.ttl", '<#state> a ex:State .')
+        self.write("packages/lib/vocab/fixtures/deck/v4/valid/pod.ttl", '<#deck> a dcat:Dataset ; dct:title "A deck" .')
+        self.write("packages/lib/vocab/fixtures/library-deck/v6/valid/release.ttl", '<#deck> a dcat:Dataset ; dct:title "A release" .')
+        self.write("packages/lib/vocab/fixtures/draft-deck/v1/valid/draft.ttl", '<#thing> a sm:Thing ; rdfs:label "A thing" .')
+        self.write("packages/lib/vocab/fixtures/fsrs-review-state/v1/valid/state.ttl", '<#state> a ex:State .')
 
     def run_main(self) -> tuple[int, str]:
         out = io.StringIO()
@@ -381,7 +381,7 @@ class Main(Repository):
         self.assertTrue(out.endswith("9 of 9 documents conform.\n"))
 
     def test_fails_and_reports_each_document_that_does_not_conform(self) -> None:
-        self.write("packages/vocab/fixtures/draft-deck/v1/valid/draft.ttl", "<#thing> a sm:Thing .")
+        self.write("packages/lib/vocab/fixtures/draft-deck/v1/valid/draft.ttl", "<#thing> a sm:Thing .")
         self.write("ns/vocab/topics.ttl", "ex:topic a skos:Concept .")
         code, out = self.run_main()
         self.assertEqual(code, 1)

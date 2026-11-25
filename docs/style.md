@@ -49,9 +49,9 @@ holds everywhere. Beyond the recommended rules:
   fails on a list spread into `push` or `unshift` in the packages' and
   apps' `src/` code, which reads lists as long as a pod or a file makes
   them ([below](#typescript)). It leaves out their tests, the site's
-  build (`packages/build-tools`), the Turtle formatter (`packages/turtle`), and
+  build (`packages/build-tools`), the Turtle formatter (`packages/lib/turtle`), and
   the code outside `src/` that reads only this repository's files:
-  `packages/shacl/node`, `packages/vocab/tooling`, `scripts/` and
+  `packages/adapters/shacl/node`, `packages/lib/vocab/tooling`, `scripts/` and
   `e2e/`.
 
 **In an editor**, Biome's extension (`biomejs.biome` for VS Code, which
@@ -88,7 +88,7 @@ With `verbatimModuleSyntax`, a type is imported with `import type` or
   it isn't meant to change, and functions over it rather than classes. A
   class is for something with a lifetime: an adapter, a store, an error.
 - **Errors the user may see** are an `AppError` with a code, whose text
-  every language has ([appError.ts](../packages/domain/src/appError.ts)).
+  every language has ([appError.ts](../packages/core/domain/src/appError.ts)).
   An error only a programming mistake can cause stays a plain `Error`.
   A read that fails with an `AppError` or a lasting 4xx from the pod
   (any but 408 and 429) is shown at once, not
@@ -112,7 +112,7 @@ With `verbatimModuleSyntax`, a type is imported with `import type` or
   `push` and `unshift`, called plainly or optionally (`list?.push`).
 - **Many subjects are written at once.** A write of many subjects to a
   dataset sets them with `setThings` or one edit (`editOf` in
-  [datasetEdit.ts](../packages/solid/src/datasetEdit.ts)), and takes
+  [datasetEdit.ts](../packages/adapters/solid/src/datasetEdit.ts)), and takes
   them out with `removeThings`. Setting or removing the subjects one
   call at a time copies the whole document every time. A subject's
   many values for one property are set in one call of its builder
@@ -148,7 +148,7 @@ release), not abbreviations: `description`, not `desc`.
 
 The hand-written Turtle in `ns/`, `decks/`, `docs/` (the docs' index)
 and the vocab package's `fixtures/` has a house style, which
-[formatTurtle.ts](../packages/turtle/src/formatTurtle.ts) defines and
+[formatTurtle.ts](../packages/lib/turtle/src/formatTurtle.ts) defines and
 writes:
 
 - `@base` first, then the prefixes, aligned in one block; under a
@@ -385,7 +385,7 @@ messages in its other languages ([i18n.md](i18n.md)).
 
 A commit is one whole change: the code, its tests and its docs, with
 `npm run check` passing, and a generated file
-(`packages/vocab/src/*.generated.ts` from `ns/`) with the change that
+(`packages/lib/vocab/src/*.generated.ts` from `ns/`) with the change that
 generated it. Its message follows Conventional Commits, as
 [CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages) says: a header
 `type(scope): subject` of at most 100 characters, a body that says why,

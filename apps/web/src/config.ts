@@ -116,7 +116,7 @@ const PROVIDERS_EXPECTED =
 
 /**
  * VITE_POD_PROVIDERS: a JSON array of providers, held to what
- * POD_PROVIDERS keeps to (packages/domain/src/podProvider.test.ts):
+ * POD_PROVIDERS keeps to (packages/core/domain/src/podProvider.test.ts):
  * unique ids, https issuers and sign-up pages. An unknown key is refused,
  * so a misspelled one is not silently dropped.
  */

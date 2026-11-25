@@ -18,7 +18,8 @@ export default defineConfig({
     projects: [
       "apps/web",
       "apps/studio",
-      "packages/*",
+      "packages/*/vitest.config.ts",
+      "packages/*/*/vitest.config.ts",
       "e2e/pod/vitest.unit.config.ts",
       "e2e/journeys/vitest.unit.config.ts",
       "scripts/vitest.config.ts",

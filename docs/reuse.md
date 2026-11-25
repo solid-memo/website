@@ -118,10 +118,10 @@ other builds can't read each other's writes in a learner's Pod:
 
 | Name | Where | What it names |
 |---|---|---|
-| `https://solid-memo.com/` (`SITE`) | [ns.ts](../packages/vocab/src/ns.ts), [shacl_crosscheck.py](../scripts/shacl_crosscheck.py) | The vocabulary, the shapes and the library's decks, whose IRIs Pods store. A copy reads their documents from its own address (`siteFetch` in [appUseCases.ts](../packages/composition/src/appUseCases.ts)). |
-| `solid-memo/` | [guest.ts](../packages/domain/src/guest.ts), [trial.ts](../packages/domain/src/release/trial.ts) | The folder an instance gets in a Pod. |
-| `solid-memo:*` keys | `packages/browser/src/`, [solidSessionGateway.ts](../packages/solid/src/solidSessionGateway.ts), the first-paint script in index.html | What the browser keeps: the language, theme, palette, text size, update journal and the hash a login set off from. |
-| `solid-memo-guest-pod` | [indexedDbResourceStore.ts](../packages/browser/src/indexedDbResourceStore.ts) | The guest's Pod in the browser ([guest-mode.md](guest-mode.md)). |
+| `https://solid-memo.com/` (`SITE`) | [ns.ts](../packages/lib/vocab/src/ns.ts), [shacl_crosscheck.py](../scripts/shacl_crosscheck.py) | The vocabulary, the shapes and the library's decks, whose IRIs Pods store. A copy reads their documents from its own address (`siteFetch` in [appUseCases.ts](../packages/composition/src/appUseCases.ts)). |
+| `solid-memo/` | [guest.ts](../packages/core/domain/src/guest.ts), [trial.ts](../packages/core/domain/src/release/trial.ts) | The folder an instance gets in a Pod. |
+| `solid-memo:*` keys | `packages/adapters/browser/src/`, [solidSessionGateway.ts](../packages/adapters/solid/src/solidSessionGateway.ts), the first-paint script in index.html | What the browser keeps: the language, theme, palette, text size, update journal and the hash a login set off from. |
+| `solid-memo-guest-pod` | [indexedDbResourceStore.ts](../packages/adapters/browser/src/indexedDbResourceStore.ts) | The guest's Pod in the browser ([guest-mode.md](guest-mode.md)). |
 
 The browser keeps data per origin, so the last two never mix between
 your site and this one. They stay only so one codebase serves both.

@@ -199,7 +199,7 @@ jobs:
   # The growth tests (npm run test:growth): work that must take time
   # growing with its input, not its square, timed as the ratio of two
   # runs' CPU time on the same runner, which a busy runner leaves about
-  # the same (packages/domain/src/testing/growth.ts). A job of its own,
+  # the same (packages/core/domain/src/testing/growth.ts). A job of its own,
   # beside check, so that check's tests don't wait for theirs, and
   # without coverage, which slows them and which check's tests measure
   # whole. No Turbo cache: they run on every run, as a cache of their
@@ -514,7 +514,7 @@ jobs:
           path: e2e/pod/logs/
           retention-days: 7
 
-  # The second Solid client, solid-memo-client (packages/solid-memo-client),
+  # The second Solid client, solid-memo-client (packages/adapters/solid-memo-client),
   # put in place of inrupt-client by SOLID_CLIENT (scripts/solidClient.ts)
   # and run through the tests of the packages that use it: the seam's
   # (solid-client), solid's, its round trip included, shacl's,

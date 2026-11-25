@@ -1,0 +1,33 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": [
+    "//"
+  ],
+  "tasks": {
+    "test": {
+      "inputs": [
+        "$TURBO_EXTENDS$",
+        "$TURBO_ROOT$/ns/**",
+        "$TURBO_ROOT$/decks/greek-alphabet/v1.ttl",
+        "$TURBO_ROOT$/decks/git-commands/v1.ttl",
+        "$TURBO_ROOT$/decks/solid-fundamentals/v1.ttl",
+        "$TURBO_ROOT$/packages/adapters/inrupt-client/src/**",
+        "$TURBO_ROOT$/packages/adapters/inrupt-client/package.json",
+        "$TURBO_ROOT$/packages/adapters/solid-memo-client/src/**",
+        "$TURBO_ROOT$/packages/adapters/solid-memo-client/package.json"
+      ]
+    },
+    "library:check": {
+      "dependsOn": [
+        "transit"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/ns/**",
+        "$TURBO_ROOT$/decks/**"
+      ],
+      "outputs": [],
+      "outputLogs": "new-only"
+    }
+  }
+}

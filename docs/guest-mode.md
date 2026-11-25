@@ -9,10 +9,10 @@ studies by FSRS-6 ([srs.md](srs.md#which-scheduler-an-instance-is-on)).
 
 ## A pod in the browser
 
-[localPod.ts](../packages/solid/src/localPod.ts) serves each guest a
+[localPod.ts](../packages/adapters/solid/src/localPod.ts) serves each guest a
 small Solid pod as a `fetch`, which the app's Solid adapters use as they
 do a server. A router
-([routedFetch.ts](../packages/solid/src/routedFetch.ts)) sends each
+([routedFetch.ts](../packages/adapters/solid/src/routedFetch.ts)) sends each
 request to the guest's pod or to the network, by URL, after the pod
 fence and the write fence
 ([boundaries.md](boundaries.md#the-pod-fence)).
@@ -28,7 +28,7 @@ graph LR
 ```
 
 - **Origin:** `https://guest.solid-memo.invalid/` (`GUEST_ORIGIN` in
-  [domain/guest.ts](../packages/domain/src/guest.ts)). The reserved
+  [domain/guest.ts](../packages/core/domain/src/guest.ts)). The reserved
   `.invalid` domain never resolves: a guest URL slipping past the
   router fails instead of reaching anyone.
 - **WebID:** `…/profile/card#me`, written when the guest starts
@@ -45,10 +45,10 @@ graph LR
   catalog is in the guest's pod names documents only there, and a deck
   of any other instance that names one there can't be used
   (`isDeckInPlace` in
-  [domain/deckAddress.ts](../packages/domain/src/deckAddress.ts),
+  [domain/deckAddress.ts](../packages/core/domain/src/deckAddress.ts),
   `deckGone`). A read as no one never goes to the guest's pod.
 - **Storage:** the `ResourceStore` port. In the browser it's
-  [indexedDbResourceStore.ts](../packages/browser/src/indexedDbResourceStore.ts),
+  [indexedDbResourceStore.ts](../packages/adapters/browser/src/indexedDbResourceStore.ts),
   so the study survives the login redirect. Without IndexedDB, an
   in-memory store keeps it for the current page only. It's the one
   place pod data lives in browser storage, and only a guest's.

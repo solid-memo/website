@@ -23,11 +23,11 @@
       "**/*.jsonc",
       "**/*.css",
       // Written by tools, never by hand (.gitattributes).
-      "!packages/vocab/src/*.generated.ts",
+      "!packages/lib/vocab/src/*.generated.ts",
       "!**/package-lock.json",
       "!.devcontainer/devcontainer-lock.json",
       // Kept byte for byte as their authors publish them.
-      "!packages/vocab/vendor",
+      "!packages/lib/vocab/vendor",
       // Turtle and its published versions, formatted by `npm run format:turtle`.
       "!decks",
       "!ns",
@@ -246,13 +246,14 @@
     {
       // The packages' and apps' code reads lists as long as a pod or a file makes them, so it
       // never spreads one into push or unshift (docs/style.md#typescript); the site's build, the
-      // Turtle formatter and the code outside src/ (packages/shacl/node, packages/vocab/tooling,
+      // Turtle formatter and the code outside src/ (packages/adapters/shacl/node, packages/lib/vocab/tooling,
       // scripts/, e2e/) read only this repository's files.
       "includes": [
         "packages/*/src/**",
+        "packages/*/*/src/**",
         "apps/*/src/**",
         "!packages/build-tools/**",
-        "!packages/turtle/**",
+        "!packages/lib/turtle/**",
         "!**/*.test.ts",
         "!**/*.test.tsx",
       ],

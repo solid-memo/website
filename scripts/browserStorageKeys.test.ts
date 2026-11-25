@@ -4,6 +4,7 @@
 
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { packageFolders } from "./packageFolders.ts";
 import { expect, it } from "vitest";
 import { isTestFile, sourceFiles } from "./checkBoundaries.ts";
 
@@ -54,12 +55,11 @@ it("finds every browser storage name of the code in api/browser-storage", () => 
     .join("");
   const names = new Map<string, string>();
   for (const parent of ["apps", "packages"]) {
-    for (const pkg of readdirSync(join(ROOT, parent))) {
-      const src = join(ROOT, parent, pkg, "src");
+    for (const pkg of packageFolders(ROOT, parent)) {
+      const src = join(ROOT, pkg, "src");
       for (const file of sourceFiles(src).filter((path) => !isTestFile(path))) {
         const text = readFileSync(join(src, file), "utf8");
-        for (const [, name] of text.matchAll(NAME))
-          names.set(name!, `${parent}/${pkg}/src/${file}`);
+        for (const [, name] of text.matchAll(NAME)) names.set(name!, `${pkg}/src/${file}`);
       }
     }
   }

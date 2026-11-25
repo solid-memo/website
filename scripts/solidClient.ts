@@ -6,12 +6,12 @@
  * The Solid client the build and the tests use, chosen by SOLID_CLIENT
  * when a config loads (vitest.shared.ts, apps/web/vite.config.ts,
  * e2e/pod/vitest.config.ts). The modules a client gives are declared,
- * without a body, in packages/solid-client (DECLARED); every import of
+ * without a body, in packages/adapters/solid-client (DECLARED); every import of
  * one resolves to the module of the same name in the client chosen:
  *
- * - unset, empty or `inrupt`: packages/inrupt-client/src/, on Inrupt's
+ * - unset, empty or `inrupt`: packages/adapters/inrupt-client/src/, on Inrupt's
  *   libraries, the default;
- * - `solid-memo-client`: packages/solid-memo-client/src/, on no Inrupt
+ * - `solid-memo-client`: packages/adapters/solid-memo-client/src/, on no Inrupt
  *   library, which also takes the place of shacl's turtleDocument.ts;
  * - anything else: the config fails to load, naming the values above.
  *
@@ -26,10 +26,10 @@ const SOLID_CLIENTS = {
   "solid-memo-client": "solid-memo-client",
 } as const;
 
-/** A Solid client's package, under packages/. */
+/** A Solid client's package, under packages/adapters/. */
 type SolidClient = (typeof SOLID_CLIENTS)[keyof typeof SOLID_CLIENTS];
 
-/** The modules a client gives, declared in packages/solid-client/src/, by name. */
+/** The modules a client gives, declared in packages/adapters/solid-client/src/, by name. */
 const DECLARED = ["rdf", "resources", "session", "access"] as const;
 
 /**
@@ -40,11 +40,14 @@ const DECLARED = ["rdf", "resources", "session", "access"] as const;
  * is (scripts/checkExports.ts).
  */
 function replacementsOf(client: SolidClient): Record<string, string> {
-  const own = `packages/${client}/src/`;
+  const own = `packages/adapters/${client}/src/`;
   return Object.fromEntries([
-    ...DECLARED.map((name) => [`packages/solid-client/src/${name}.ts`, `${own}${name}.ts`]),
+    ...DECLARED.map((name) => [
+      `packages/adapters/solid-client/src/${name}.ts`,
+      `${own}${name}.ts`,
+    ]),
     ...(client === "solid-memo-client"
-      ? [["packages/shacl/src/turtleDocument.ts", `${own}turtleDocument.ts`]]
+      ? [["packages/adapters/shacl/src/turtleDocument.ts", `${own}turtleDocument.ts`]]
       : []),
   ]);
 }
@@ -77,7 +80,7 @@ function solidClientOf(choice: string | undefined): SolidClient {
 
 /**
  * The Vite plugin that puts the client SOLID_CLIENT (`choice`) names in
- * place of the modules packages/solid-client declares. `root` is the
+ * place of the modules packages/adapters/solid-client declares. `root` is the
  * repository's, with a trailing slash.
  */
 export function solidClientPlugin(choice = process.env.SOLID_CLIENT, root = ROOT): Plugin {
@@ -92,7 +95,8 @@ export function solidClientPlugin(choice = process.env.SOLID_CLIENT, root = ROOT
     name: "solid-memo:solid-client",
     enforce: "pre",
     async resolveId(source, importer, options) {
-      if (importer === undefined || importer.startsWith(`${root}packages/${client}/`)) return null;
+      if (importer === undefined || importer.startsWith(`${root}packages/adapters/${client}/`))
+        return null;
       const resolved = await this.resolve(source, importer, { ...options, skipSelf: true });
       return (resolved && replacements.get(resolved.id)) ?? null;
     },

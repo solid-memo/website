@@ -10,6 +10,8 @@ runs in `npm run check` and in CI. It reads every workspace package's
 imports and fails on:
 
 - a relative import that leaves its package;
+- an import the folders of `packages/` forbid
+  ([architecture.md](architecture.md#packages), `ROLE_FOLDERS`);
 - a workspace package the layer or the importing file may not use
   (the table below);
 - a static import of a package that may only be loaded lazily;
@@ -126,27 +128,27 @@ listed:
 ## The Solid client libraries
 
 The rest of the code reaches a Solid client only through the modules
-[packages/solid-client/](../packages/solid-client/README.md) declares
+[packages/adapters/solid-client/](../packages/adapters/solid-client/README.md) declares
 or holds, so either client takes the place of the other there alone
 ([vendor-code.md](vendor-code.md)). `solid-client`, the seam, imports
 no library:
 
 | Module | What it has |
 |---|---|
-| [interface.ts](../packages/solid-client/src/interface.ts) | the types the other modules take and give, `HttpError`, the sign-in client's interface and the grant's type |
+| [interface.ts](../packages/adapters/solid-client/src/interface.ts) | the types the other modules take and give, `HttpError`, the sign-in client's interface and the grant's type |
 | `rdf.ts`, `resources.ts`, `session.ts`, `access.ts` | what a client gives, declared with no body: the data model (datasets and their subjects, read and built, many subjects set or removed in one pass), reading and writing pods (conditional reads and writes among them, and the Turtle and JSON-LD parsers), the sign-in client, and the public-read grant ([below](#access-control)) |
-| [readLimits.ts](../packages/solid-client/src/readLimits.ts) | the limits a read of a release, or of an instance's documents outside the user's own pod, takes in, the bounds every read keeps on a Turtle text's base and prefix declarations, on the long IRIs the parser resolves, on how deep it nests and on the length of each term, the fetch that holds a body to them, the tally that holds its triples to them, and the parts a parser is given a text in, to be stopped between them |
-| [linkHeader.ts](../packages/solid-client/src/linkHeader.ts) | the bound on the `Link` and `WAC-Allow` headers of a response, dropped past it before any parser reads them |
-| [sparqlUpdate.ts](../packages/solid-client/src/sparqlUpdate.ts) | the SPARQL Update bodies of the app's PATCH requests |
-| [turtleWriter.ts](../packages/solid-client/src/turtleWriter.ts), [writableTerms.ts](../packages/solid-client/src/writableTerms.ts) | the Turtle a write sends, and the terms it can't write as they are |
-| [providerRedirect.ts](../packages/solid-client/src/providerRedirect.ts) | the sessionStorage key a sign-in client marks the tab under while it waits on the identity provider, the same whichever client is in place |
+| [readLimits.ts](../packages/adapters/solid-client/src/readLimits.ts) | the limits a read of a release, or of an instance's documents outside the user's own pod, takes in, the bounds every read keeps on a Turtle text's base and prefix declarations, on the long IRIs the parser resolves, on how deep it nests and on the length of each term, the fetch that holds a body to them, the tally that holds its triples to them, and the parts a parser is given a text in, to be stopped between them |
+| [linkHeader.ts](../packages/adapters/solid-client/src/linkHeader.ts) | the bound on the `Link` and `WAC-Allow` headers of a response, dropped past it before any parser reads them |
+| [sparqlUpdate.ts](../packages/adapters/solid-client/src/sparqlUpdate.ts) | the SPARQL Update bodies of the app's PATCH requests |
+| [turtleWriter.ts](../packages/adapters/solid-client/src/turtleWriter.ts), [writableTerms.ts](../packages/adapters/solid-client/src/writableTerms.ts) | the Turtle a write sends, and the terms it can't write as they are |
+| [providerRedirect.ts](../packages/adapters/solid-client/src/providerRedirect.ts) | the sessionStorage key a sign-in client marks the tab under while it waits on the identity provider, the same whichever client is in place |
 
 The Vite plugin in [scripts/solidClient.ts](../scripts/solidClient.ts)
 resolves every import of a declared module to the module of the same
 name in the client `SOLID_CLIENT` names: unset, empty or `inrupt`,
-[packages/inrupt-client/](../packages/inrupt-client/README.md), on
+[packages/adapters/inrupt-client/](../packages/adapters/inrupt-client/README.md), on
 Inrupt's libraries; `solid-memo-client`,
-[packages/solid-memo-client/](../packages/solid-memo-client/README.md),
+[packages/adapters/solid-memo-client/](../packages/adapters/solid-memo-client/README.md),
 on none ([solid-memo-client.md](solid-memo-client.md)). Each client
 checks that it gives every declaration with its type
 (`clientTypes.test.ts`), and no package imports either. Inrupt's
@@ -154,12 +156,12 @@ client also has these:
 
 | Module | What it has |
 |---|---|
-| [linearDataset.ts](../packages/inrupt-client/src/linearDataset.ts) | a document read into a dataset in one pass, where the library takes time in the square of its size, a dataset's quads made one by one, where the library spreads a subject's into one call, a property's literals and blank nodes as terms in one pass, where the library joins its list at each language and datatype, and the Turtle parser it and `parseQuads` read with, on `n3`, for `resources.ts` and `rdf.ts` alone |
-| [inrupt.ts](../packages/inrupt-client/src/inrupt.ts) | the library's objects behind the interface's types, for the other modules alone |
+| [linearDataset.ts](../packages/adapters/inrupt-client/src/linearDataset.ts) | a document read into a dataset in one pass, where the library takes time in the square of its size, a dataset's quads made one by one, where the library spreads a subject's into one call, a property's literals and blank nodes as terms in one pass, where the library joins its list at each language and datatype, and the Turtle parser it and `parseQuads` read with, on `n3`, for `resources.ts` and `rdf.ts` alone |
+| [inrupt.ts](../packages/adapters/inrupt-client/src/inrupt.ts) | the library's objects behind the interface's types, for the other modules alone |
 
 `shacl` may not import `solid`, so it reads a shape's Turtle with a
 module of its own,
-[turtleDocument.ts](../packages/shacl/src/turtleDocument.ts), as pod
+[turtleDocument.ts](../packages/adapters/shacl/src/turtleDocument.ts), as pod
 documents are read.
 
 With `SOLID_CLIENT=solid-memo-client`, the plugin puts that client's
@@ -177,7 +179,7 @@ import elsewhere is reported once, not again by the access-control
 rule. Tests mock the declared modules
 (`@solid-memo/solid-client/resources`), not the libraries, and both
 clients' own tests run the contract in
-[packages/solid/src/testing/contract/](../packages/solid/src/testing/contract/)
+[packages/adapters/solid/src/testing/contract/](../packages/adapters/solid/src/testing/contract/)
 ([vendor-code.md](vendor-code.md#cost-of-swapping-a-vendor)).
 
 ## Files without a vendor library
@@ -186,19 +188,19 @@ A deck saved as a file, or read from one ([studio.md](studio.md#import-and-expor
 needs no library of its own:
 
 - `solid` writes Turtle with the seam's writer,
-  [turtleWriter.ts](../packages/solid-client/src/turtleWriter.ts), with the
+  [turtleWriter.ts](../packages/adapters/solid-client/src/turtleWriter.ts), with the
   deck file's prefixes, and JSON-LD with
-  [jsonLd.ts](../packages/solid/src/jsonLd.ts), a few lines over the
+  [jsonLd.ts](../packages/adapters/solid/src/jsonLd.ts), a few lines over the
   triples. It reads both with `parseQuads`. Turtle is read with the
   parser pod documents are read with: the library's, on `n3`, but with
   no triple terms; so are the profile documents a WebID names. With
   `inrupt-client`, the parser is in its
-  [linearDataset.ts](../packages/inrupt-client/src/linearDataset.ts),
+  [linearDataset.ts](../packages/adapters/inrupt-client/src/linearDataset.ts),
   its only file that may import `n3`. JSON-LD is read with
   `jsonld-streaming-parser`, the parser the library uses, given a
   document loader that loads nothing, so that reading a file never
   fetches a context. `parseQuads` is in its
-  [resources.ts](../packages/inrupt-client/src/resources.ts), its only
+  [resources.ts](../packages/adapters/inrupt-client/src/resources.ts), its only
   file that may import `jsonld-streaming-parser` (`VENDOR_ONLY_IN`).
   With `SOLID_CLIENT=solid-memo-client`, that
   package's `resources.ts` reads Turtle with `n3`, writes it with the
@@ -211,7 +213,7 @@ needs no library of its own:
   the option lets through. `jsonLd.ts` writes JSON-LD on either
   client.
 - `browser`'s `FileExchange` port saves and opens files with what the
-  browser has ([fileExchange.ts](../packages/browser/src/fileExchange.ts)):
+  browser has ([fileExchange.ts](../packages/adapters/browser/src/fileExchange.ts)):
   a `Blob` behind a link with `download`, and a hidden
   `<input type="file">`. The UI never touches a file.
 
@@ -222,13 +224,13 @@ readable by everyone ([studio.md](studio.md#publishing-a-release)), and
 so does a public type index the app creates, never one already there
 that it adopts ([data-model.md](data-model.md#discovery-chain)). Only two adapters
 make that write: the `ReleasePublisher` port's,
-[solidReleasePublisher.ts](../packages/solid/src/solidReleasePublisher.ts),
+[solidReleasePublisher.ts](../packages/adapters/solid/src/solidReleasePublisher.ts),
 and the `InstanceRepository` port's,
-[solidInstanceRepository.ts](../packages/solid/src/solidInstanceRepository.ts).
+[solidInstanceRepository.ts](../packages/adapters/solid/src/solidInstanceRepository.ts).
 Each makes it with the grant it's given, through
-[accessControlFetch.ts](../packages/solid/src/accessControlFetch.ts),
+[accessControlFetch.ts](../packages/adapters/solid/src/accessControlFetch.ts),
 which lets the grant write only that document's own ACL or ACR.
-[client/access.ts](../packages/inrupt-client/src/access.ts) has
+[client/access.ts](../packages/adapters/inrupt-client/src/access.ts) has
 `@inrupt/solid-client`'s `universalAccess.setPublicAccess`, read only,
 for the document, writing its own ACL (Web Access Control) or ACR
 (Access Control Policies). That fetch refuses another origin, or a
@@ -254,7 +256,7 @@ write.
 What the app reads of a pod or a release is data anyone may have
 written, so it's read within bounds: how many values of a property,
 how long a text, which IRIs ([shapes.md](shapes.md#bounds)). The raw
-getters of [client/rdf.ts](../packages/inrupt-client/src/rdf.ts) read
+getters of [client/rdf.ts](../packages/adapters/inrupt-client/src/rdf.ts) read
 every value of a property, with no bound. They're `getUrlAll`,
 `getStringNoLocale`, `getLiteralAll`, `getTermAll`, `getInteger` and
 the other `get…` readers of a property, `getPropertyAll` and
@@ -264,10 +266,10 @@ the other `get…` readers of a property, `getPropertyAll` and
 `npm run check:boundaries` (`RAW_GETTERS` and `RAW_GETTERS_ONLY_IN`)
 lets only these files import them, tests and test helpers aside:
 
-- [records.ts](../packages/solid/src/records.ts), which reads every
+- [records.ts](../packages/adapters/solid/src/records.ts), which reads every
   record and every term beside one within its bounds;
 - the shape check,
-  [shaclShapeValidator.ts](../packages/solid/src/shaclShapeValidator.ts),
+  [shaclShapeValidator.ts](../packages/adapters/solid/src/shaclShapeValidator.ts),
   which judges a whole document as SHACL does and reads nothing into
   the app's models.
 
@@ -282,11 +284,11 @@ Every pod adapter's one fetch
 two fences before the guest's pod or the network:
 
 - **The pod fence**
-  ([podFence.ts](../packages/solid/src/podFence.ts), `createPodFence`)
+  ([podFence.ts](../packages/adapters/solid/src/podFence.ts), `createPodFence`)
   lets reads (GET, HEAD, OPTIONS) through and refuses other methods
   before they're sent (`writeRefused`), unless the address is safe to
   write (`isSafeWriteUrl` in
-  [instanceLayout.ts](../packages/domain/src/instanceLayout.ts)). Such
+  [instanceLayout.ts](../packages/core/domain/src/instanceLayout.ts)). Such
   an address, as sent:
   - is http(s), with no query, fragment, dot segment or empty segment
     (`//`), and no two dots in a row anywhere in its path, which some
@@ -308,7 +310,7 @@ two fences before the guest's pod or the network:
   the type index, the profile link, registrations, releases and copies
   are written outside instances.
 - **The write fence**
-  ([writeFence.ts](../packages/solid/src/writeFence.ts)) keeps an
+  ([writeFence.ts](../packages/adapters/solid/src/writeFence.ts)) keeps an
   instance being moved or copied read-only
   ([guest-mode.md](guest-mode.md)).
 
@@ -322,7 +324,7 @@ fetch also refuses any address, read or write, that the proof of the
 user's login would name another server for (`credentialsRefused`).
 
 A read of another server, as the user or as no one, has deadlines
-([readDeadline.ts](../packages/solid/src/readDeadline.ts),
+([readDeadline.ts](../packages/adapters/solid/src/readDeadline.ts),
 `withReadDeadline`). The server has 10 seconds to start to answer, and
 10 seconds for each next part of the body. A read of a server that isn't
 the user's pod has two minutes for the whole read as well, its body
@@ -372,7 +374,7 @@ the decks, cards, review states, answers, preferences, palettes, the
 digest, the drafts, the instance check, the graph, a
 deck's export, a Studio trial, and deleting an instance's data. Behind
 the [pod fence](#the-pod-fence) that fetch passes the credential gate
-([ownPodGate.ts](../packages/solid/src/ownPodGate.ts),
+([ownPodGate.ts](../packages/adapters/solid/src/ownPodGate.ts),
 `createOwnPodGate`):
 
 - **In the user's own pod** a request goes on as the user, a read or a
@@ -421,7 +423,7 @@ the [pod fence](#the-pod-fence) that fetch passes the credential gate
   read is held to `FOREIGN_LIMITS` too.
 - **Outside the user's storages**, the reads share a budget in a page
   session (`FOREIGN_READS_BUDGET`, `sharedReadBudget` in
-  [readLimits.ts](../packages/solid-client/src/readLimits.ts)): four
+  [readLimits.ts](../packages/adapters/solid-client/src/readLimits.ts)): four
   times `FOREIGN_LIMITS` in total, on top of the limits on each read.
   A catalog may list a thousand decks, each with two documents as
   large as a release. The reads as no one share one budget; the reads
@@ -493,7 +495,7 @@ of the user's that holds it.
 
 For the profile and the type indexes, the profile's own places stand
 in for the gate
-([profilePlaces.ts](../packages/solid/src/profilePlaces.ts)): the
+([profilePlaces.ts](../packages/adapters/solid/src/profilePlaces.ts)): the
 WebID's origin, its document's, and the storages the WebID document
 names. A document the profile links (`rdfs:seeAlso`,
 `foaf:isPrimaryTopicOf`, `pim:preferencesFile`) is read as the user
@@ -529,15 +531,15 @@ off the page, in a worker
 link, a deck file, a release file, the documents an instance's check
 reads, and every document outside the user's storages that the app
 reads to show or study. The worker's code is `solid`'s own: its entry,
-[offPageWorker.ts](../packages/solid/src/offPageWorker.ts), runs the
-adapters' code ([offPageJobs.ts](../packages/solid/src/offPageJobs.ts))
+[offPageWorker.ts](../packages/adapters/solid/src/offPageWorker.ts), runs the
+adapters' code ([offPageJobs.ts](../packages/adapters/solid/src/offPageJobs.ts))
 behind a message interface
-([offPageProtocol.ts](../packages/solid/src/offPageProtocol.ts)).
+([offPageProtocol.ts](../packages/adapters/solid/src/offPageProtocol.ts)).
 `composition` starts the worker
 ([offPageWorker.ts](../packages/composition/src/offPageWorker.ts), the
 one module that imports it, with Vite's `?worker`) and puts the ports'
 side in the page in place of the adapters'
-([offPageAdapters.ts](../packages/solid/src/offPageAdapters.ts)).
+([offPageAdapters.ts](../packages/adapters/solid/src/offPageAdapters.ts)).
 
 - The worker makes no request of its own. Each request goes to the
   page, which makes it through the fences and the credential gate
@@ -565,15 +567,15 @@ side in the page in place of the adapters'
   the device, such as how the deck list is folded, the languages chosen
   lately, the WebID to remember or the Studio's layout, goes through
   `DeviceValueUseCases`
-  ([deviceValues.ts](../packages/application/src/deviceValues.ts)),
+  ([deviceValues.ts](../packages/core/application/src/deviceValues.ts)),
   which `App` gives the screens as the `DeviceValues` context
   ([deviceValues.ts](../packages/ui/src/ui/deviceValues.ts)). The screen
   says what a value looks like; the `DeviceStore` adapter
-  ([webStorageDeviceStore.ts](../packages/browser/src/webStorageDeviceStore.ts))
+  ([webStorageDeviceStore.ts](../packages/adapters/browser/src/webStorageDeviceStore.ts))
   keeps it, with one guard and one bound for every value. The keys
   `index.html` reads before the first paint keep adapters of their own,
   as does the update journal.
-- Generated files (`packages/vocab/src/*.generated.ts`) are never edited
+- Generated files (`packages/lib/vocab/src/*.generated.ts`) are never edited
   by hand: change the vocabulary or the shapes in `ns/` and run
   `npm run generate` ([shapes.md](shapes.md), [vocab.md](vocab.md)).
 - Modules reachable from `vite.config.ts` spell out `.ts` on relative
@@ -603,6 +605,6 @@ side in the page in place of the adapters'
 1. Add it to the one package it belongs to
    (`npm install <lib> -w @solid-memo/<package>`).
 2. If it performs I/O, put it behind a port in the module of
-   `packages/application/src/ports/` for what is behind it,
+   `packages/core/application/src/ports/` for what is behind it,
    implemented in an adapter package.
 3. Add it to the vendor table above.

@@ -113,7 +113,7 @@ device:
 
 ## Pod providers
 
-[packages/domain/src/podProvider.ts](../packages/domain/src/podProvider.ts)
+[packages/core/domain/src/podProvider.ts](../packages/core/domain/src/podProvider.ts)
 lists the suggested providers (`POD_PROVIDERS`), each a list entry: a
 name, its Solid-OIDC issuer and an optional sign-up link. A build can
 set its own list in `VITE_POD_PROVIDERS`
@@ -160,7 +160,7 @@ Every URL that steers authentication passes `isSecureUrl` in its use
 case: a chosen provider's issuer, and the discovered OIDC issuer before
 the browser is sent there.
 
-`validateWebId` ([packages/domain/src/webId.ts](../packages/domain/src/webId.ts))
+`validateWebId` ([packages/core/domain/src/webId.ts](../packages/core/domain/src/webId.ts))
 accepts only absolute `https:` URLs without embedded credentials. It
 runs in the form (for the message) and in the `loginWithWebId` use
 case (no caller skips it).
@@ -181,7 +181,7 @@ browser to a server on the learner's device.
 ## Pod discovery
 
 `discoverAccount(session)` returns a
-[SolidAccount](../packages/domain/src/account.ts) `{ webId, name?, podUrl?, oidcIssuer? }`:
+[SolidAccount](../packages/core/domain/src/account.ts) `{ webId, name?, podUrl?, oidcIssuer? }`:
 
 - `podUrl`: the first result of `StorageGateway.discoverStorages`, from
   the WebID document's `pim:storage`

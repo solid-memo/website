@@ -5,7 +5,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
+import { REPOSITORY_ROOT } from "@solid-memo/vocab/tooling/root";
 
 const execFileSync = vi.hoisted(() => vi.fn());
 vi.mock("node:child_process", () => ({ execFileSync }));
@@ -45,7 +45,7 @@ describe("shapesRuleset", () => {
 describe("appVersion", () => {
   it("is the repository's version, from its root package.json", () => {
     expect(appVersion()).toBe(
-      JSON.parse(readFileSync(join(VOCAB_ROOT, "../../package.json"), "utf8")).version,
+      JSON.parse(readFileSync(join(REPOSITORY_ROOT, "package.json"), "utf8")).version,
     );
     expect(appVersion()).toMatch(/^\d+\.\d+\.\d+/);
   });

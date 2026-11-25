@@ -314,7 +314,7 @@ describe("the repository's exports", () => {
 
   it("are read from the workspace packages and scripts/", () => {
     const packages = defaultIo(`${import.meta.dirname}/..`).packages();
-    expect(packages.map(({ dir }) => dir)).toContain("packages/domain");
+    expect(packages.map(({ dir }) => dir)).toContain("packages/core/domain");
     expect(packages.at(-1)!.dir).toBe(".");
     expect(Object.keys(packages.at(-1)!.files)).toContain("scripts/checkExports.ts");
   });

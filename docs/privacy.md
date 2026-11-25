@@ -18,7 +18,7 @@ straight to the pod's server, and keeps no other copy.
 The [Studio](studio.md)'s graph of an instance reads those documents
 and, as logging in does, the WebID profile, whose storages tell which
 addresses are in the pod
-([`instanceGraph.ts`](../packages/application/src/instanceGraph.ts)).
+([`instanceGraph.ts`](../packages/core/application/src/instanceGraph.ts)).
 It draws addresses the documents name, such as the WebID, a library
 release or a card's picture, as they are, and never fetches them, in
 the pod or not.
@@ -54,7 +54,7 @@ instance's `digest.ttl`, beside the log.
 
 Before logging in, the learner studies as a guest, in a pod kept in the
 browser's IndexedDB (database `solid-memo-guest-pod`,
-[`indexedDbResourceStore.ts`](../packages/browser/src/indexedDbResourceStore.ts),
+[`indexedDbResourceStore.ts`](../packages/adapters/browser/src/indexedDbResourceStore.ts),
 [guest-mode.md](guest-mode.md)). It stays on that device until the
 learner moves it into their own pod.
 
@@ -63,17 +63,17 @@ before any pod is reached:
 
 | Key | What | Written by |
 |---|---|---|
-| `solid-memo:language` | the chosen language | [`localStorageLanguagePreference.ts`](../packages/browser/src/localStorageLanguagePreference.ts) |
-| `solid-memo:theme` | light, dark or the browser's; copied from the preferences once saved | [`localStorageSetting.ts`](../packages/browser/src/localStorageSetting.ts) |
+| `solid-memo:language` | the chosen language | [`localStorageLanguagePreference.ts`](../packages/adapters/browser/src/localStorageLanguagePreference.ts) |
+| `solid-memo:theme` | light, dark or the browser's; copied from the preferences once saved | [`localStorageSetting.ts`](../packages/adapters/browser/src/localStorageSetting.ts) |
 | `solid-memo:palette` | the chosen colors (none for Standard); copied from the preferences | `localStorageSetting.ts` |
-| `solid-memo:palette-colors` | a chosen custom palette's address, base and colors, for the first paint; copied from the pod (none for a built-in palette) | [`localStorageCustomPalettePreference.ts`](../packages/browser/src/localStorageCustomPalettePreference.ts) |
+| `solid-memo:palette-colors` | a chosen custom palette's address, base and colors, for the first paint; copied from the pod (none for a built-in palette) | [`localStorageCustomPalettePreference.ts`](../packages/adapters/browser/src/localStorageCustomPalettePreference.ts) |
 | `solid-memo:textSize` | the chosen text size (none for Default); copied from the preferences | `localStorageSetting.ts` |
-| `solid-memo:seenHighlights` | the new-version highlights this browser has shown | [`localStorageSeenHighlights.ts`](../packages/browser/src/localStorageSeenHighlights.ts) |
-| `solid-memo:recentLanguages.deck`, `solid-memo:recentLanguages.own` | languages picked lately for text | [`remembered.ts`](../packages/ui/src/ui/remembered.ts), through [`webStorageDeviceStore.ts`](../packages/browser/src/webStorageDeviceStore.ts) |
+| `solid-memo:seenHighlights` | the new-version highlights this browser has shown | [`localStorageSeenHighlights.ts`](../packages/adapters/browser/src/localStorageSeenHighlights.ts) |
+| `solid-memo:recentLanguages.deck`, `solid-memo:recentLanguages.own` | languages picked lately for text | [`remembered.ts`](../packages/ui/src/ui/remembered.ts), through [`webStorageDeviceStore.ts`](../packages/adapters/browser/src/webStorageDeviceStore.ts) |
 | `solid-memo:webId` | the WebID last logged in with, only if the learner checked the box to remember it | `remembered.ts`, through `webStorageDeviceStore.ts` |
 | `solid-memo:collapsedGroups` | by instance URL, which deck groups the learner folded, for the 20 instances folded last; an older `solid-memo:collapsedGroups.<instance URL>` is moved into it once read | `remembered.ts`, through `webStorageDeviceStore.ts` |
-| `solid-memo:update:<…>` | a guest's study being moved or added, so another tab knows | [`localStorageUpdateJournal.ts`](../packages/browser/src/localStorageUpdateJournal.ts) |
-| `solid-memo:logout` | set and taken off at once to tell other tabs of a logout, only where the browser has no `BroadcastChannel`; holds nothing | [`logoutChannel.ts`](../packages/browser/src/logoutChannel.ts) |
+| `solid-memo:update:<…>` | a guest's study being moved or added, so another tab knows | [`localStorageUpdateJournal.ts`](../packages/adapters/browser/src/localStorageUpdateJournal.ts) |
+| `solid-memo:logout` | set and taken off at once to tell other tabs of a logout, only where the browser has no `BroadcastChannel`; holds nothing | [`logoutChannel.ts`](../packages/adapters/browser/src/logoutChannel.ts) |
 | `solid-memo:studioLayout.v1`, `solid-memo:studioRecent.v1`, `solid-memo:studioInstances.v1` | the Studio's layout; its palette's last commands; and, by instance URL, saved views, pins and the decks and drafts opened last, for the 20 instances noted last | [`prefs.ts`](../apps/studio/src/ui/shell/prefs.ts), through `webStorageDeviceStore.ts` |
 
 A logout leaves these keys in place, `solid-memo:palette-colors`,
@@ -93,7 +93,7 @@ During a login, `sessionStorage` holds the page the learner was on
 page load, it holds the address of the identity provider a login or a
 silent restore went to, which the provider's answer is checked against
 (`solid-memo:login-issuer`)
-([`solidSessionGateway.ts`](../packages/solid/src/solidSessionGateway.ts)).
+([`solidSessionGateway.ts`](../packages/adapters/solid/src/solidSessionGateway.ts)).
 While a login or a session restore is under way, it also holds the
 sign-in client's mark that this tab may have sent the learner to the
 identity provider (`solid-memo:provider-redirect`). The mark stays
@@ -105,7 +105,7 @@ A login with the box to remember the WebID checked holds that WebID
 until the next page load, which keeps it as `solid-memo:webId` if the
 login succeeded with it.
 The authentication library under the sign-in client
-([`client/session.ts`](../packages/inrupt-client/src/session.ts),
+([`client/session.ts`](../packages/adapters/inrupt-client/src/session.ts),
 `@inrupt/solid-client-authn-browser`) stores in the browser what it needs to restore the session, such as
 the identity provider and the app's registration with it.
 A build with the other sign-in client, `solid-memo-client`, keeps it in
@@ -144,7 +144,7 @@ The browser contacts these, each when it's needed:
   who the app is
   ([authentication.md](authentication.md#the-client-id-document)). A
   provider picked from the suggestions ([onboarding.md](onboarding.md))
-  is one in [`podProvider.ts`](../packages/domain/src/podProvider.ts);
+  is one in [`podProvider.ts`](../packages/core/domain/src/podProvider.ts);
   the project runs none of them.
 - **The pod's server**, for everything the learner studies.
 - **The server of a deck's document outside the learner's pod**, when
@@ -272,7 +272,7 @@ only if the learner takes it out:
 
 The app first strips every address from the details, except the
 paths of the site's own scripts, which show where the code broke
-([`errorReport.ts`](../packages/domain/src/errorReport.ts)). It strips
+([`errorReport.ts`](../packages/core/domain/src/errorReport.ts)). It strips
 web addresses, such as a pod's, a WebID's, a deck's or a card's, with
 any token in their query. An `http:` or `https:` address goes to the
 end of its word, also when its host is an IPv6 one, its path holds

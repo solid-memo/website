@@ -41,7 +41,7 @@ describe("isApiFile", () => {
     expect(isApiFile(ROUTES)).toBe(true);
     expect(isApiFile(PUBLISHED)).toBe(true);
     expect(isApiFile("api/README.md")).toBe(false);
-    expect(isApiFile("packages/shacl/node/deckLibrary.golden.txt")).toBe(false);
+    expect(isApiFile("packages/adapters/shacl/node/deckLibrary.golden.txt")).toBe(false);
     expect(isApiFile("docs/api/x.txt")).toBe(false);
   });
 });

@@ -9,7 +9,7 @@ drive the code that reads and writes the data. Each class has one shape
 file per format version under
 [`ns/shapes/`](../ns/shapes/), published with the site at
 `https://solid-memo.com/ns/shapes/`
-([ns.ts](../packages/vocab/src/ns.ts), [deployment.md](deployment.md)).
+([ns.ts](../packages/lib/vocab/src/ns.ts), [deployment.md](deployment.md)).
 
 ## Files and IRIs
 
@@ -40,7 +40,7 @@ Each file's address is its IRI and its `@base`. The IRIs keep `.ttl`:
 GitHub Pages serves the file as `text/turtle` but negotiates no
 content, so an address without it is a 404. `npm run generate` finds
 every version by reading the folders
-([sources.ts](../packages/vocab/tooling/sources.ts)).
+([sources.ts](../packages/lib/vocab/tooling/sources.ts)).
 
 A deck lives in two places, so it has two shapes: `<#inPod>` (a
 catalog entry, with the links to its two documents) and `<#inLibrary>`
@@ -61,13 +61,13 @@ check a draft's cards, distractors, agents and distributions.
 
 - **No `sh:targetClass`.** Formats 1 and 2 of a class target the same
   class, so every subject would fail one of them. `pickShapes` in
-  [registry.ts](../packages/shacl/src/registry.ts) chooses the shapes by
+  [registry.ts](../packages/adapters/shacl/src/registry.ts) chooses the shapes by
   `(rdf:type, sm:formatVersion)` — absent = 1 — and by the context
   (pod, library or draft), at build time, in tests and in the browser.
   Every node shape carries `sh:class` and `sh:nodeKind sh:IRI` instead.
   The class is Solid Memo's own or, for the standard classes it writes,
   DCAT's or FOAF's (`CLASS_NAMESPACES` in
-  [packages/vocab/tooling/shapes.ts](../packages/vocab/tooling/shapes.ts)).
+  [packages/lib/vocab/tooling/shapes.ts](../packages/lib/vocab/tooling/shapes.ts)).
   A subject with two classes is checked against the shape of each at
   its version, as the reader of each reads it, a standard class's as
   well as a Solid Memo one's; the report names the Solid Memo class's
@@ -106,7 +106,7 @@ check a draft's cards, distractors, agents and distributions.
   ([theme.md](theme.md#how-a-palette-of-ones-own-is-held-safe)); a new
   color needs a new class, as no format moves
   ([vocab.md](vocab.md#versioning-policy)).
-  [published.api.test.ts](../packages/vocab/tooling/published.api.test.ts)
+  [published.api.test.ts](../packages/lib/vocab/tooling/published.api.test.ts)
   fails on any other closed shape.
 - **A subject keeps only its own shaped classes.** The write check holds
   a subject to the shape of every class it has, and to DCAT-AP where it
@@ -118,7 +118,7 @@ check a draft's cards, distractors, agents and distributions.
   otherwise pass. Such a class is the target class of a Solid Memo
   shape, or of a DCAT-AP shape that holds it to properties
   (`DCAT_AP_SHAPED_CLASSES` in
-  [profiles.ts](../packages/shacl/src/profiles.ts), which a test holds to
+  [profiles.ts](../packages/adapters/shacl/src/profiles.ts), which a test holds to
   the vendored profile). A class no shape asks anything of, such as
   `foaf:Document`, stays, but only a limited number of them. The check
   reads a subject with more than 32 classes as having none, so the
@@ -131,12 +131,12 @@ check a draft's cards, distractors, agents and distributions.
   app's statements of its subjects as they are. So it reads and writes
   the classes of its deck, chapters, steps, cards, distractors, agents
   and distributions by the same rule (`keptClasses` in
-  [records.ts](../packages/solid/src/records.ts)). Publishing leaves
+  [records.ts](../packages/adapters/solid/src/records.ts)). Publishing leaves
   out of the release each class the draft doesn't keep.
 - **Property shapes are named** (`<#front>`, never blank nodes) for the
   generator and the results. `sh:message` replaces cryptic engine
   text, always in exactly English and Swedish (`"…"@en`, `"…"@sv`),
-  which [messages.test.ts](../packages/vocab/tooling/messages.test.ts)
+  which [messages.test.ts](../packages/lib/vocab/tooling/messages.test.ts)
   checks. The app shows a message in the reader's language, else in
   English marked so (a Korean reader sees English). Without one, the
   validator's English text stands, beside a general message in the
@@ -227,7 +227,7 @@ flowchart LR
     shapes -->|build, tests, browser| shacl["rdf-validate-shacl"]
 ```
 
-[packages/vocab/tooling/shapes.ts](../packages/vocab/tooling/shapes.ts)
+[packages/lib/vocab/tooling/shapes.ts](../packages/lib/vocab/tooling/shapes.ts)
 reads the properties that every node shape with an `sh:name`
 (`"CardV2"`, `"LibraryDeckV1"`) lists: `sh:path`, `sh:datatype` or
 `sh:nodeKind sh:IRI`, `sh:minCount`, `sh:maxCount`, `sh:in` and an
@@ -255,7 +255,7 @@ optional `sh:name` for the field. Anything else (`sh:or`, `sh:xone`,
 types) are the envelope, not fields: the generic writer stamps them from
 the descriptor. Generated files, only types and `as const` data, are
 committed; CI (`npm run generate:check`) and
-`packages/vocab/tooling/generate.test.ts` check them for drift.
+`packages/lib/vocab/tooling/generate.test.ts` check them for drift.
 
 ## Bounds
 
@@ -281,10 +281,10 @@ of a known form, and needs no further bound.
 `npm run generate` fails, naming the document and the shape, on a
 field without a bound it needs, on a bound of a property no version
 of the kind has, and on a kind without a `<#bounds>` shape
-([bounds.ts](../packages/vocab/tooling/bounds.ts)). It puts each
+([bounds.ts](../packages/lib/vocab/tooling/bounds.ts)). It puts each
 field's bounds in its descriptor (`maxCount`, `maxLength`, `iri`).
 
-The reader ([records.ts](../packages/solid/src/records.ts)) reads a
+The reader ([records.ts](../packages/adapters/solid/src/records.ts)) reads a
 subject within them. It takes a field's values in stored order and
 stops at `maxCount`, so it never builds a longer list. It reads no
 value longer than `maxLength`: an optional value is absent, a required
@@ -351,7 +351,7 @@ writer of the app holds, and the comment above it says why:
 ## Reading and writing
 
 Every mapper takes three steps
-([records.ts](../packages/solid/src/records.ts)):
+([records.ts](../packages/adapters/solid/src/records.ts)):
 
 1. `readVersioned(thing, "card")` checks the class, reads the stored
    version (absent = 1), and reads the subject with that version's
@@ -385,12 +385,12 @@ Writing is the reverse: `cardToRecord(content)`, then
 place, replacing only the shape's predicates (foreign triples survive),
 adds the class once and stamps the version. Every
 subject this app writes conforms to the latest shape, which
-[conformance.test.ts](../packages/solid/src/conformance.test.ts)
+[conformance.test.ts](../packages/adapters/solid/src/conformance.test.ts)
 proves for every version and migration step.
 
 ## Where the shapes are checked
 
-- **Tests**: the fixtures in `packages/vocab/fixtures/<class>/v<N>/{valid,invalid}/`
+- **Tests**: the fixtures in `packages/lib/vocab/fixtures/<class>/v<N>/{valid,invalid}/`
   pass and fail as expected against `ns/shapes/`, and the conformance
   test runs, all offline.
 - **The deck library**: every version and the index, by `npm run

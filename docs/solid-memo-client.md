@@ -11,22 +11,22 @@ differs from Inrupt's, and how it's tested.
 ## What it replaces
 
 The app reaches a Solid client only through the modules
-[packages/solid-client/](../packages/solid-client/README.md) declares,
+[packages/adapters/solid-client/](../packages/adapters/solid-client/README.md) declares,
 with no body, of the types in its `interface.ts`, which names no library
 ([boundaries.md](boundaries.md#the-solid-client-libraries),
 [vendor-code.md](vendor-code.md#cost-of-swapping-a-vendor)). Each
 client has a module of the same name for each, with the same exports
 and types, which `clientTypes.test.ts` checks:
-[packages/inrupt-client/](../packages/inrupt-client/README.md) and this
-package, [packages/solid-memo-client/](../packages/solid-memo-client/README.md):
+[packages/adapters/inrupt-client/](../packages/adapters/inrupt-client/README.md) and this
+package, [packages/adapters/solid-memo-client/](../packages/adapters/solid-memo-client/README.md):
 
 | Module | Beside | Built on |
 |---|---|---|
-| [rdf.ts](../packages/solid-memo-client/src/rdf.ts), with [dataset.ts](../packages/solid-memo-client/src/dataset.ts) | `packages/inrupt-client/src/rdf.ts`: datasets and their subjects | `n3`'s RDF/JS terms. Datasets and subjects are the package's own frozen objects; a dataset's edits are a chain of steps that `changesOf` replays. |
-| [resources.ts](../packages/solid-memo-client/src/resources.ts) | `packages/inrupt-client/src/resources.ts`: documents, containers and files, the profile lookup, and the Turtle and JSON-LD parsers | `fetch`; `n3` to parse Turtle; `jsonld-streaming-parser` to parse JSON-LD |
-| [session.ts](../packages/solid-memo-client/src/session.ts), with `oidcLogin.ts`, `oidcSession.ts`, `oidcStore.ts` and `oidcBrowser.ts` | `packages/inrupt-client/src/session.ts`: the sign-in client | `oauth4webapi` for Solid-OIDC, WebCrypto for the DPoP keys, IndexedDB for the session, Web Locks between tabs |
-| [access.ts](../packages/solid-memo-client/src/access.ts) | `packages/inrupt-client/src/access.ts`: the public-read grant | `fetch` and `n3` |
-| [turtleDocument.ts](../packages/solid-memo-client/src/turtleDocument.ts) | `packages/shacl/src/turtleDocument.ts`: a shape's Turtle, read | `fetch` and `n3` |
+| [rdf.ts](../packages/adapters/solid-memo-client/src/rdf.ts), with [dataset.ts](../packages/adapters/solid-memo-client/src/dataset.ts) | `packages/adapters/inrupt-client/src/rdf.ts`: datasets and their subjects | `n3`'s RDF/JS terms. Datasets and subjects are the package's own frozen objects; a dataset's edits are a chain of steps that `changesOf` replays. |
+| [resources.ts](../packages/adapters/solid-memo-client/src/resources.ts) | `packages/adapters/inrupt-client/src/resources.ts`: documents, containers and files, the profile lookup, and the Turtle and JSON-LD parsers | `fetch`; `n3` to parse Turtle; `jsonld-streaming-parser` to parse JSON-LD |
+| [session.ts](../packages/adapters/solid-memo-client/src/session.ts), with `oidcLogin.ts`, `oidcSession.ts`, `oidcStore.ts` and `oidcBrowser.ts` | `packages/adapters/inrupt-client/src/session.ts`: the sign-in client | `oauth4webapi` for Solid-OIDC, WebCrypto for the DPoP keys, IndexedDB for the session, Web Locks between tabs |
+| [access.ts](../packages/adapters/solid-memo-client/src/access.ts) | `packages/adapters/inrupt-client/src/access.ts`: the public-read grant | `fetch` and `n3` |
+| [turtleDocument.ts](../packages/adapters/solid-memo-client/src/turtleDocument.ts) | `packages/adapters/shacl/src/turtleDocument.ts`: a shape's Turtle, read | `fetch` and `n3` |
 
 The bodies of its PATCH requests come from `solid-client`'s
 `sparqlUpdate.ts`, and those of its PUT requests from its
@@ -95,7 +95,7 @@ app's ([vendor-code.md](vendor-code.md#maturity)).
 
 The sign-in client ([authentication.md](authentication.md)) runs
 Solid-OIDC's authorization-code flow on `oauth4webapi`
-([oidcLogin.ts](../packages/solid-memo-client/src/oidcLogin.ts)):
+([oidcLogin.ts](../packages/adapters/solid-memo-client/src/oidcLogin.ts)):
 
 - **Discovery** reads the provider's
   `/.well-known/openid-configuration`. A provider whose authorization,
@@ -125,7 +125,7 @@ Solid-OIDC's authorization-code flow on `oauth4webapi`
 
 Each login makes a new ES256 key pair with WebCrypto, its private key
 not extractable, and binds the tokens to it. The browser keeps
-([oidcStore.ts](../packages/solid-memo-client/src/oidcStore.ts)):
+([oidcStore.ts](../packages/adapters/solid-memo-client/src/oidcStore.ts)):
 
 | Where | What |
 |---|---|
@@ -141,7 +141,7 @@ logout, or a new login, drops them with the session they belong to. IndexedDB ke
 ### Restore, refresh and logout
 
 The session's requests are in
-[oidcSession.ts](../packages/solid-memo-client/src/oidcSession.ts):
+[oidcSession.ts](../packages/adapters/solid-memo-client/src/oidcSession.ts):
 
 - **`restore()`** completes the redirect back from the provider when
   the page is one: a `state` on its address and a request under way in
@@ -210,7 +210,7 @@ neither the DPoP-bound access token nor a DPoP proof. It takes a
 Bearer token its authorization server issues for the session's ID
 token, in an OAuth 2.0 Token Exchange
 ([RFC 8693](https://www.rfc-editor.org/rfc/rfc8693)). The session gets
-one in [lwsAuth.ts](../packages/solid-memo-client/src/lwsAuth.ts),
+one in [lwsAuth.ts](../packages/adapters/solid-memo-client/src/lwsAuth.ts),
 under its fetch in `oidcSession.ts`, so authFetch sees only the final
 answer. The flow follows the
 [LWS Protocol 1.0](https://www.w3.org/TR/lws10-core/)
@@ -310,7 +310,7 @@ provider isn't supported yet: its storages answer 401, as to no one.
 ## The public-read grant
 
 `grantPublicRead`
-([access.ts](../packages/solid-memo-client/src/access.ts)) makes a
+([access.ts](../packages/adapters/solid-memo-client/src/access.ts)) makes a
 published release, or a public type index the app creates, readable by
 everyone, on Web Access Control (WAC) or
 Access Control Policies (ACP), as Inrupt's universal access does
@@ -373,7 +373,7 @@ Both pass the same contract. Beyond it, this client differs:
 ## Tests
 
 - **The contract.** Each module's test file runs the contract suite in
-  `packages/solid/src/testing/contract/` that `inrupt-client`'s runs: `rdf.test.ts`, `resources.test.ts`, `session.test.ts` and
+  `packages/adapters/solid/src/testing/contract/` that `inrupt-client`'s runs: `rdf.test.ts`, `resources.test.ts`, `session.test.ts` and
   `access.test.ts`. Beside it they test what is this client's alone:
   the sign-in flow against a fake provider, the session's store on
   `fake-indexeddb`'s IndexedDB, the grant's policies and inherited

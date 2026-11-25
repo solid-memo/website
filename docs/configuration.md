@@ -9,7 +9,7 @@ build without Chromium skip the docs' diagrams.
 |---|---|---|
 | [`VITE_APP_NAME`](#vite_app_name) | `Solid Memo` | What the site calls itself. |
 | [`VITE_REPO_URL`](#vite_repo_url) | `https://github.com/solid-memo/website` | The repository the footer, the page and the docs link to. |
-| [`VITE_POD_PROVIDERS`](#vite_pod_providers) | the list in [podProvider.ts](../packages/domain/src/podProvider.ts) | The Pod providers suggested at login and for creating a Pod. |
+| [`VITE_POD_PROVIDERS`](#vite_pod_providers) | the list in [podProvider.ts](../packages/core/domain/src/podProvider.ts) | The Pod providers suggested at login and for creating a Pod. |
 | [`VITE_LIBRARY_INDEX_URL`](#vite_library_index_url) | the site's own `decks/index.ttl` | The deck library the app lists. |
 | [`DOCS_DIAGRAMS`](#docs_diagrams) | unset: every diagram drawn | `skip`: the docs built without their diagrams. |
 
@@ -104,7 +104,7 @@ The name doesn't reach:
 - the Studio's own name, "Solid Memo Studio", and its "Back to Solid
   Memo";
 - the English error texts in
-  [appError.ts](../packages/domain/src/appError.ts);
+  [appError.ts](../packages/core/domain/src/appError.ts);
 - the page's description, link preview image
   ([social-preview.png](../apps/web/public/social-preview.png)) and its
   alt text, the screenshots

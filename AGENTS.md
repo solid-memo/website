@@ -30,7 +30,7 @@ This repository's docs are indexed in [docs/docs.ttl](docs/docs.ttl); start with
 - **On a shared machine**, run it with `TURBO_CONCURRENCY=4`, and share
   Turbo's cache between checkouts with `TURBO_CACHE_DIR`
   ([docs/testing.md](docs/testing.md#on-your-own-machine)).
-- **Generated files** (`packages/vocab/src/*.generated.ts`) are never
+- **Generated files** (`packages/lib/vocab/src/*.generated.ts`) are never
   edited by hand: change `ns/` and run `npm run generate`.
 - **Turtle**: after editing a `.ttl` file, run `npm run format:turtle`; after
   changing `decks/`, `npm run library` ([docs/deck-library.md](docs/deck-library.md)).

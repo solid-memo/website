@@ -63,7 +63,7 @@ a code-only back may be `@zxx`.
 
 ## The package
 
-`@solid-memo/markdown` (`packages/markdown/`) is the only code that
+`@solid-memo/markdown` (`packages/lib/markdown/`) is the only code that
 touches the parser, and only in `src/parse.ts`. The parser is
 `markdown-it`, its `commonmark` preset with its `table` rule, and
 `markdown-it-cjk-friendly`. It keeps a link's URL as written: it

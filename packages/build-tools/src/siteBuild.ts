@@ -6,7 +6,7 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { NS_ROOT, VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
+import { NS_ROOT, REPOSITORY_ROOT, VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 import { clientIdUrl } from "./clientId.ts";
 
 /**
@@ -34,7 +34,7 @@ export function commitSha(): string | null {
 /** The site's version, which its page states for the footer: the repository's, from its root package.json. */
 export function appVersion(): string {
   return (
-    JSON.parse(readFileSync(join(VOCAB_ROOT, "../../package.json"), "utf8")) as { version: string }
+    JSON.parse(readFileSync(join(REPOSITORY_ROOT, "package.json"), "utf8")) as { version: string }
   ).version;
 }
 

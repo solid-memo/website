@@ -22,8 +22,9 @@
  * config's, a lazily loaded module's) and the generated files, which
  * describe the vocabulary whole, are not checked.
  */
-import { readdirSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { dirname, join, normalize, resolve } from "node:path";
+import { packageFolders } from "./packageFolders.ts";
 import { parseSync } from "vite";
 import { isTestFile, sourceFiles } from "./checkBoundaries.ts";
 import { REPLACEMENTS } from "./solidClient.ts";
@@ -279,10 +280,7 @@ export function defaultIo(root: string): ExportsIo {
         ),
       });
       const workspaces = ["apps", "packages", "e2e"].flatMap((group) =>
-        readdirSync(join(root, group)).map((folder) => {
-          const dir = join(group, folder);
-          return read(dir, sourceFiles(join(root, dir)));
-        }),
+        packageFolders(root, group).map((dir) => read(dir, sourceFiles(join(root, dir)))),
       );
       // The repository's own checks, which the root package.json runs.
       const scripts = sourceFiles(join(root, "scripts")).map((file) => join("scripts", file));

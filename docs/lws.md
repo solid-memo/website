@@ -35,12 +35,12 @@ Without one, it walks from the WebID's document up its folders and
 asks each with a HEAD. A Solid folder typed `pim:Storage` is the storage. An LWS answer
 links its storage instead; the app reads that storage's description
 and takes the root container it names, if the WebID's document is in
-it ([lwsStorage.ts](../packages/solid/src/lwsStorage.ts),
+it ([lwsStorage.ts](../packages/adapters/solid/src/lwsStorage.ts),
 `solidStorageGateway.ts`).
 
 A deck's folder that's a storage's root holds the user's other data
 too, so the app claims none of its documents
-([deckPlace.ts](../packages/solid/src/deckPlace.ts)). On LWS, a folder
+([deckPlace.ts](../packages/adapters/solid/src/deckPlace.ts)). On LWS, a folder
 is a root when the storage description names it as one: the storage
 link alone doesn't say so, since every resource in the storage carries
 it.

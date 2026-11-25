@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import { POD_PROVIDERS } from "../packages/domain/src/podProvider.ts";
+import { POD_PROVIDERS } from "../packages/core/domain/src/podProvider.ts";
 import { configurationUrl, main, providerProblems, run } from "./checkProviders.ts";
 
 const PROVIDER = {

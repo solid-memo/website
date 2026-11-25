@@ -29,6 +29,7 @@
   "workspaces": [
     "apps/*",
     "packages/*",
+    "packages/*/*",
     "e2e/*"
   ],
   "packageManager": "npm@12.2.3",

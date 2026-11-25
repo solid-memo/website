@@ -32,7 +32,7 @@ flowchart LR
   device alone. So it is while the stored preferences don't fit their
   shape ([validation.md](validation.md#the-invalid-data-policy)).
 - **On the device**, by a `DeviceSetting` port for each
-  ([localStorageSetting.ts](../packages/browser/src/localStorageSetting.ts),
+  ([localStorageSetting.ts](../packages/adapters/browser/src/localStorageSetting.ts),
   key `solid-memo:theme`, "As my browser" no key; the palette's and
   the text size's below). The sign-in screens and the first paint
   read these before any pod is reached. Opening an instance whose
@@ -50,7 +50,7 @@ undone: the app reads the preferences back and shows what they hold. A
 read of an instance's preferences begun before a choice, or while it
 was still being written, may be out of date. It is neither shown nor
 copied to the device (`shown` and `appearanceSettled` in
-[preferenceStore.ts](../packages/application/src/preferenceStore.ts)),
+[preferenceStore.ts](../packages/core/application/src/preferenceStore.ts)),
 and the read after the choice's write shows what the pod holds. A
 reload before a write is done opens the instance with the choice its
 preferences held before and shows it: the newer choice is lost.
@@ -93,7 +93,7 @@ preferences suggest High contrast. A choice takes effect at once:
 The choice is kept in the instance's preferences and on the device, as
 the theme is ([Where the choice is kept](#where-the-choice-is-kept)),
 on the device by its `DeviceSetting` port
-([localStorageSetting.ts](../packages/browser/src/localStorageSetting.ts),
+([localStorageSetting.ts](../packages/adapters/browser/src/localStorageSetting.ts),
 key `solid-memo:palette`; Standard is no key). It's shown as
 `<html data-palette>` (none for Standard), set as `data-theme` is
 ([Showing it](#showing-it)); `theme.tsx` sets it before setting the
@@ -161,9 +161,9 @@ with Machado, Oliveira and Fernandes' model (2009), and needs each
 grade at least 0.08 from the next in OKLab, four times the smallest
 noticeable difference. In every palette the buttons' names, not their
 colors, say which grade is which. The tests read the blocks with
-[`testing/contrast.ts`](../packages/domain/src/testing/contrast.ts);
+[`testing/contrast.ts`](../packages/core/domain/src/testing/contrast.ts);
 WCAG's contrast ratio and color mixing are the app's own
-[`contrast.ts`](../packages/domain/src/contrast.ts), which the palette
+[`contrast.ts`](../packages/core/domain/src/contrast.ts), which the palette
 editor's check (`checkPalette`) uses too.
 
 Some colors stay fixed whatever the palette:
@@ -228,7 +228,7 @@ below, starting at the base's:
 
 Every other role is the base's, except a few mixed from a role the
 palette changes (`DERIVED` in
-[customPalette.ts](../packages/domain/src/customPalette.ts)). A hovered
+[customPalette.ts](../packages/core/domain/src/customPalette.ts)). A hovered
 surface is 6% of the text over the surface; a strong border, 20% of
 the text over the border; a hovered button, 20% of the text over its
 fill. The tints of the primary color, a link, danger and warning, and
@@ -278,7 +278,7 @@ the page.
 - **On the device**, `solid-memo:palette` holds its base. For the first
   paint, `solid-memo:palette-colors` holds the palette's address, its
   base and the colors to paint in each theme, but not its name
-  ([localStorageCustomPalettePreference.ts](../packages/browser/src/localStorageCustomPalettePreference.ts),
+  ([localStorageCustomPalettePreference.ts](../packages/adapters/browser/src/localStorageCustomPalettePreference.ts),
   the `CustomPalettePreference` port). Opening the instance copies the
   pod's palette there; choosing a built-in palette removes it.
 
@@ -309,7 +309,7 @@ it's read and painted:
 - **Only so many palettes are read.** The app reads the first 100
   palettes of the document it can read, in the order written
   (`MAX_PALETTES` in
-  [customPalette.ts](../packages/domain/src/customPalette.ts)), and
+  [customPalette.ts](../packages/core/domain/src/customPalette.ts)), and
   leaves the rest out, so Colors and the editor list no more than
   that. A palette past them that the preferences name shows as
   Standard. The editor saves no new palette once the instance has 100
@@ -339,7 +339,7 @@ it's read and painted:
   version of the app wrote isn't free. So a save never turns the
   palette or another subject into a color set, nor changes another
   palette's colors (`withPalette` in
-  [paletteMapper.ts](../packages/solid/src/mappers/paletteMapper.ts)).
+  [paletteMapper.ts](../packages/adapters/solid/src/mappers/paletteMapper.ts)).
   Each address is told free or taken in one step, however many color
   sets other palettes name, so the search takes time that grows with
   the document, not with its square.
@@ -370,7 +370,7 @@ under Text size in the study preferences, each size with a sample line
 at that size, and the choice takes effect at once. It's kept in the
 instance's preferences and on the device, as the theme is: on the
 device by its `DeviceSetting` port
-([localStorageSetting.ts](../packages/browser/src/localStorageSetting.ts),
+([localStorageSetting.ts](../packages/adapters/browser/src/localStorageSetting.ts),
 key `solid-memo:textSize`; Default is no key). It's shown as
 `<html data-text-size>` (none for Default), set as `data-palette` is.
 Each size sets the root's font size as a percentage, which the

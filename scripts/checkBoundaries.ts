@@ -35,6 +35,7 @@
  */
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
+import { packageFolders } from "./packageFolders.ts";
 
 /** Which workspace packages each may import. */
 export const LAYERS: Record<string, string[]> = {
@@ -111,7 +112,7 @@ export const ONLY_ENTRIES: Record<string, Record<string, RegExp>> = {
  * Vendor packages that only certain files may import, tests aside, by
  * package (`files`), with any import. The Solid client libraries, any
  * `@inrupt/` package, are inrupt-client's alone, the modules
- * packages/solid-client declares, so another client takes their place
+ * packages/adapters/solid-client declares, so another client takes their place
  * (docs/vendor-code.md); shacl, which may not import solid, reads Turtle
  * through one module of its own. The JSON-LD parser, which must be
  * given a document loader that fetches nothing, is one module's alone in
@@ -160,7 +161,7 @@ export const VENDOR_ONLY_FROM: {
 ];
 
 /**
- * The raw getters of the app's RDF module (packages/solid-client/src/rdf.ts):
+ * The raw getters of the app's RDF module (packages/adapters/solid-client/src/rdf.ts):
  * each reads a property's values, every one of them, with no bound
  * (getUrlAll, getStringNoLocale, getTermAll, getPropertyAll,
  * propertiesOf, and the readers one at a time, eachUrl and its
@@ -244,9 +245,10 @@ export const NODE_ONLY = [
 
 /**
  * The root's shared setup, which a package's Vite and Vitest configs may
- * import from its folder: the test setup and the Solid client switch.
+ * import, as paths from the root: the test setup and the Solid client
+ * switch.
  */
-const SHARED_SETUP = /^\.\.\/\.\.\/(vitest\.shared|scripts\/solidClient)\.ts$/;
+const SHARED_SETUP = new Set(["vitest.shared.ts", "scripts/solidClient.ts"]);
 
 /** A test file, test helper or config, which may also use the shared test tooling. */
 export const isTestFile = (path: string) =>
@@ -414,7 +416,9 @@ function fileProblems(
     if (specifier!.startsWith(".")) {
       const target = join(dirname(file), specifier!);
       // Every package's configs (vite.config.ts, vitest.config.ts, one of a task of its own) share the root's setup.
-      const shared = /^vite(st(\.\w+)?)?\.config\.ts$/.test(file) && SHARED_SETUP.test(specifier!);
+      const shared =
+        /^vite(st(\.\w+)?)?\.config\.ts$/.test(file) &&
+        SHARED_SETUP.has(join(dir, dirname(file), specifier!));
       if (target.startsWith("..") && !shared)
         problems.push(`${where}: "${specifier}" reaches outside the package.`);
       continue;
@@ -465,14 +469,71 @@ export function boundaryProblems(
   workspaces: readonly Workspace[],
   sharedTooling: ReadonlySet<string>,
 ): string[] {
+  const dirs = new Map(
+    workspaces.map((workspace) => [
+      workspace.manifest.name.replace("@solid-memo/", ""),
+      workspace.dir,
+    ]),
+  );
   return workspaces.flatMap((workspace) => {
     const short = workspace.manifest.name.replace("@solid-memo/", "");
     if (LAYERS[short] === undefined) {
       return [`${workspace.manifest.name}: not in the layer table of scripts/checkBoundaries.ts.`];
     }
-    return Object.entries(workspace.files).flatMap(([file, text]) =>
-      fileProblems(workspace, file, text, sharedTooling),
-    );
+    return [
+      ...folderProblems(workspace.dir, LAYERS[short], dirs),
+      ...Object.entries(workspace.files).flatMap(([file, text]) =>
+        fileProblems(workspace, file, text, sharedTooling),
+      ),
+    ];
+  });
+}
+
+/**
+ * The folders that group packages by their role, each with the folders
+ * its packages may import from (docs/architecture.md): the core, the
+ * rules and the use cases with their ports, builds on the libraries
+ * alone, and a library on other libraries alone.
+ */
+export const ROLE_FOLDERS: Record<string, string[]> = {
+  core: ["core", "lib"],
+  lib: ["lib"],
+};
+
+/** The packages that may import an adapter: the adapters, the composition root, and the end-to-end tests. */
+const ADAPTER_IMPORTERS = /^(packages\/adapters\/|packages\/composition$|e2e\/)/;
+
+/** The folder that groups the package in `dir` by its role; none for one at the top of its group. */
+const roleOf = (dir: string) => /^packages\/(core|adapters|lib)\//.exec(dir)?.[1];
+
+/**
+ * What the layer table lets the package in `dir` import against the
+ * folders it and they are in: a package of a role folder only what that
+ * folder's packages may, and an adapter only from the adapters, the
+ * composition root and the end-to-end tests.
+ */
+function folderProblems(
+  dir: string,
+  allowed: readonly string[],
+  dirs: Map<string, string>,
+): string[] {
+  const own = roleOf(dir);
+  return allowed.flatMap((other) => {
+    const otherDir = dirs.get(other);
+    if (otherDir === undefined) return [];
+    const theirs = roleOf(otherDir);
+    const may = own === undefined ? undefined : ROLE_FOLDERS[own];
+    if (may !== undefined && (theirs === undefined || !may.includes(theirs))) {
+      return [
+        `${dir}: a package in packages/${own}/ may import only packages in ${may.map((folder) => `packages/${folder}/`).join(", ")}, not @solid-memo/${other} (${otherDir}).`,
+      ];
+    }
+    if (theirs === "adapters" && !ADAPTER_IMPORTERS.test(dir)) {
+      return [
+        `${dir}: only the adapters, the composition root and the end-to-end tests may import an adapter, not @solid-memo/${other} (${otherDir}).`,
+      ];
+    }
+    return [];
   });
 }
 
@@ -501,14 +562,14 @@ export function defaultIo(root: string): BoundariesIo {
   return {
     workspaces: () =>
       ["apps", "packages", "e2e"].flatMap((group) =>
-        readdirSync(join(root, group)).map((folder) => {
-          const dir = join(root, group, folder);
+        packageFolders(root, group).map((folder) => {
+          const dir = join(root, folder);
           const files = sourceFiles(dir).map((file) => [
             file,
             readFileSync(join(dir, file), "utf8"),
           ]);
           return {
-            dir: `${group}/${folder}`,
+            dir: folder,
             manifest: json(join(dir, "package.json")) as Manifest,
             files: Object.fromEntries(files),
           };

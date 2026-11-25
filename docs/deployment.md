@@ -177,7 +177,7 @@ data it reads:
 | `/studio/index.html` | `apps/web/public/studio/` | The Studio's old address: a page that sends `/studio/#/x` on to `/#/studio/x` ([studio.md](studio.md#routes)). |
 | `/ns/vocab/*.ttl`, `/ns/shapes/<class>/v<N>.ttl`, `/ns/bounds/<kind>.ttl` | [`ns/`](../ns/) | The vocabulary, the shapes and the bounds on what the app reads of them ([vocab.md](vocab.md), [shapes.md](shapes.md#bounds)). |
 | `/decks/index.ttl`, `/decks/<name>/v<N>.ttl` | [`decks/`](../decks/) | The deck library ([deck-library.md](deck-library.md)). |
-| `/vendor/…` | [`packages/vocab/vendor/`](../packages/vocab/vendor/) | The vendored DCAT-AP and SKOS shapes. |
+| `/vendor/…` | [`packages/lib/vocab/vendor/`](../packages/lib/vocab/vendor/) | The vendored DCAT-AP and SKOS shapes. |
 | `/journeys/index.html` | `apps/web/public/journeys/` | The user journeys' report's old address: a page that sends `/journeys/#x` on to `https://journeys.solid-memo.com/#x`, where the report now lives ([below](#the-journeys-report)). |
 | `/journeys/trace/sw.bundle.js` | `apps/web/public/journeys/trace/` | A service worker at the address of the old report's trace viewer's, which unregisters itself. |
 

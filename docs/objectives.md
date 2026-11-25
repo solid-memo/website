@@ -15,9 +15,9 @@ right before they'd be forgotten. A learner's study stays in a
    a new instance starts on, or by SM-2, spaced repetition's
    best-known algorithm, if the learner picks it. The better a card is
    known, the longer it waits.
-   [srs.md](srs.md), [`sm2.ts`](../packages/domain/src/sm2.ts),
-   [`fsrs.ts`](../packages/domain/src/fsrs.ts),
-   [`scheduling.ts`](../packages/domain/src/scheduling.ts).
+   [srs.md](srs.md), [`sm2.ts`](../packages/core/domain/src/sm2.ts),
+   [`fsrs.ts`](../packages/core/domain/src/fsrs.ts),
+   [`scheduling.ts`](../packages/core/domain/src/scheduling.ts).
 2. **Keep the learner's data in their own pod**, read and written from
    their browser.
    [data-model.md](data-model.md), [authentication.md](authentication.md),
@@ -84,12 +84,12 @@ its own principles, each checked by code:
 | Every line of code is tested | [testing.md](testing.md) | 100% coverage per package ([`vitest.shared.ts`](../vitest.shared.ts)), in `npm run check` |
 | Each layer depends only on the layers it may | [boundaries.md](boundaries.md), [architecture.md](architecture.md) | [`checkBoundaries.ts`](../scripts/checkBoundaries.ts), `npm run check:boundaries` |
 | Data has its stated shape | [shapes.md](shapes.md), [validation.md](validation.md) | shapes, checked in the app and by `npm run library:check`; pySHACL in CI ([`shacl_crosscheck.py`](../scripts/shacl_crosscheck.py)) |
-| A published deck version never changes | [deck-library.md](deck-library.md) | `npm run library:check -- --base <ref>` in CI's `library` job ([ci.yml](../.github/workflows/ci.yml)) fails on an edited or removed published version (`baseProblems` in [`deckLibrary.ts`](../packages/shacl/node/deckLibrary.ts)); continuity rules fail on a dropped card |
+| A published deck version never changes | [deck-library.md](deck-library.md) | `npm run library:check -- --base <ref>` in CI's `library` job ([ci.yml](../.github/workflows/ci.yml)) fails on an edited or removed published version (`baseProblems` in [`deckLibrary.ts`](../packages/adapters/shacl/node/deckLibrary.ts)); continuity rules fail on a dropped card |
 | A newer version never shuts an older one out of the data | [releasing.md](releasing.md#what-never-changes), [vocab.md](vocab.md#versioning-policy) | [`api/frozen/`](../api/README.md): a format written, the data's place in a pod or a database's version that moves fails `npm run check:breaking` in CI's `library` job, whatever the commit says |
-| Every library deck has a license | [deck-library.md](deck-library.md#checks) | `noLicense` in [`libraryRules.ts`](../packages/domain/src/release/libraryRules.ts), run by `npm run library:check` |
+| Every library deck has a license | [deck-library.md](deck-library.md#checks) | `noLicense` in [`libraryRules.ts`](../packages/core/domain/src/release/libraryRules.ts), run by `npm run library:check` |
 | Data from a pod can't run code | [markdown.md](markdown.md#safety) | the Content Security Policy, checked by [`build.test.ts`](../apps/web/src/build.test.ts) |
 | Every language has every message | [i18n.md](i18n.md) | [`i18n.test.tsx`](../packages/ui/src/ui/i18n.test.tsx) |
-| The schedulers match their guide | [srs.md](srs.md#worked-examples) (SM-2 and [FSRS-6](srs.md#fsrs-6-worked-examples)) | [`sm2.test.ts`](../packages/domain/src/sm2.test.ts), [`fsrs.test.ts`](../packages/domain/src/fsrs.test.ts) |
+| The schedulers match their guide | [srs.md](srs.md#worked-examples) (SM-2 and [FSRS-6](srs.md#fsrs-6-worked-examples)) | [`sm2.test.ts`](../packages/core/domain/src/sm2.test.ts), [`fsrs.test.ts`](../packages/core/domain/src/fsrs.test.ts) |
 | It works with real Solid servers | `testing.md` | end-to-end tests against several servers, in CI |
 | Turtle is written one way | `architecture.md` | `npm run format:turtle:check` |
 | The docs and English messages use American spelling | [style.md](style.md#language) | [`cspell.config.yaml`](../cspell.config.yaml), `npm run lint:spelling`, in `npm run check` |

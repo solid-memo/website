@@ -12,7 +12,7 @@ import { join, resolve } from "node:path";
  * (docs/releasing.md#what-never-changes): for this checkout itself, the
  * first release that can take part, and the first release of each major
  * version after it, a pod is exchanged with this checkout
- * (packages/solid/src/testing/podExchange.ts):
+ * (packages/adapters/solid/src/testing/podExchange.ts):
  *
  * 1. the release writes a pod, with its own scenario;
  * 2. this checkout uses it, and loses nothing it said;
@@ -28,7 +28,7 @@ import { join, resolve } from "node:path";
  */
 
 /** The runner a release has to have to take part, by its path in the repository. */
-export const RUNNER = "packages/solid/src/testing/podExchange.ts";
+export const RUNNER = "packages/adapters/solid/src/testing/podExchange.ts";
 
 /** The steps of one exchange, each with the side that takes it. */
 const STEPS = [

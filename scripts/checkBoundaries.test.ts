@@ -8,6 +8,7 @@ import { dirname, join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import {
   boundaryProblems,
+  LAYERS,
   defaultIo,
   isTestFile,
   main,
@@ -20,13 +21,28 @@ import {
 const TOOLING = new Set(["vitest"]);
 
 /** A workspace package of the given name, with the given sources and dependencies. */
+/** The folder that groups each package by its role, for a package in one (docs/architecture.md). */
+const ROLE: Record<string, string> = {
+  domain: "core",
+  application: "core",
+  browser: "adapters",
+  "inrupt-client": "adapters",
+  shacl: "adapters",
+  solid: "adapters",
+  "solid-client": "adapters",
+  "solid-memo-client": "adapters",
+  markdown: "lib",
+  turtle: "lib",
+  vocab: "lib",
+};
+
 function workspace(
   name: string,
   files: Record<string, string>,
   dependencies: Record<string, string> = {},
 ): Workspace {
   return {
-    dir: `packages/${name}`,
+    dir: ROLE[name] === undefined ? `packages/${name}` : `packages/${ROLE[name]}/${name}`,
     manifest: { name: `@solid-memo/${name}`, dependencies },
     files,
   };
@@ -88,19 +104,20 @@ describe("boundaryProblems", () => {
         workspace("turtle", {
           "src/a.ts": 'import { b } from "../../domain/src/b.ts";\nimport { c } from "./c.ts";',
           "src/deep/d.ts": 'import { e } from "../e.ts";',
-          "vitest.config.ts": 'import { packageConfig } from "../../vitest.shared.ts";',
-          "vitest.roundtrip.config.ts": 'import { packageConfig } from "../../vitest.shared.ts";',
-          "vite.config.ts": 'import { solidClientPlugin } from "../../scripts/solidClient.ts";',
-          "tooling/x.ts": 'import { y } from "../../vitest.shared.ts";',
-          "tooling/y.ts": 'import { z } from "../../scripts/solidClient.ts";',
-          "vite.other.config.ts": 'import { z } from "../../scripts/checkBoundaries.ts";',
+          "vitest.config.ts": 'import { packageConfig } from "../../../vitest.shared.ts";',
+          "vitest.roundtrip.config.ts":
+            'import { packageConfig } from "../../../vitest.shared.ts";',
+          "vite.config.ts": 'import { solidClientPlugin } from "../../../scripts/solidClient.ts";',
+          "tooling/x.ts": 'import { y } from "../../../vitest.shared.ts";',
+          "tooling/y.ts": 'import { z } from "../../../scripts/solidClient.ts";',
+          "vite.other.config.ts": 'import { z } from "../../../scripts/checkBoundaries.ts";',
         }),
       ),
     ).toEqual([
-      'packages/turtle/src/a.ts: "../../domain/src/b.ts" reaches outside the package.',
-      'packages/turtle/tooling/x.ts: "../../vitest.shared.ts" reaches outside the package.',
-      'packages/turtle/tooling/y.ts: "../../scripts/solidClient.ts" reaches outside the package.',
-      'packages/turtle/vite.other.config.ts: "../../scripts/checkBoundaries.ts" reaches outside the package.',
+      'packages/lib/turtle/src/a.ts: "../../domain/src/b.ts" reaches outside the package.',
+      'packages/lib/turtle/tooling/x.ts: "../../../vitest.shared.ts" reaches outside the package.',
+      'packages/lib/turtle/tooling/y.ts: "../../../scripts/solidClient.ts" reaches outside the package.',
+      'packages/lib/turtle/vite.other.config.ts: "../../../scripts/checkBoundaries.ts" reaches outside the package.',
     ]);
   });
 
@@ -120,8 +137,8 @@ describe("boundaryProblems", () => {
         ),
       ),
     ).toEqual([
-      "packages/domain/src/a.ts: @solid-memo/domain may not import @solid-memo/solid.",
-      "packages/domain/src/a.ts: imports @solid-memo/vocab, which package.json does not declare.",
+      "packages/core/domain/src/a.ts: @solid-memo/domain may not import @solid-memo/solid.",
+      "packages/core/domain/src/a.ts: imports @solid-memo/vocab, which package.json does not declare.",
     ]);
   });
 
@@ -138,8 +155,8 @@ describe("boundaryProblems", () => {
         ),
       ),
     ).toEqual([
-      "packages/vocab/src/index.ts: only files matching /^tooling\\// may import @solid-memo/turtle.",
-      'packages/vocab/src/index.ts: runs in the browser, so may not import "@solid-memo/turtle".',
+      "packages/lib/vocab/src/index.ts: only files matching /^tooling\\// may import @solid-memo/turtle.",
+      'packages/lib/vocab/src/index.ts: runs in the browser, so may not import "@solid-memo/turtle".',
     ]);
   });
 
@@ -180,6 +197,57 @@ describe("boundaryProblems", () => {
     ]);
   });
 
+  it("holds the layer table to the folders that group packages by role", () => {
+    const at = (name: string, dir: string): Workspace => ({ ...workspace(name, {}), dir });
+    const table = (name: string, imports: string[]) => {
+      const before = LAYERS[name];
+      LAYERS[name] = imports;
+      return () => {
+        if (before === undefined) delete LAYERS[name];
+        else LAYERS[name] = before;
+      };
+    };
+    const restore = [
+      table("domain", ["vocab", "ui"]),
+      table("vocab", ["domain"]),
+      table("ui", ["solid"]),
+      table("composition", ["solid"]),
+    ];
+    try {
+      expect(
+        boundaryProblems(
+          [
+            at("domain", "packages/core/domain"),
+            at("vocab", "packages/lib/vocab"),
+            at("ui", "packages/ui"),
+            at("composition", "packages/composition"),
+            at("solid", "packages/adapters/solid"),
+          ],
+          TOOLING,
+        ),
+      ).toEqual([
+        "packages/core/domain: a package in packages/core/ may import only packages in packages/core/, packages/lib/, not @solid-memo/ui (packages/ui).",
+        "packages/lib/vocab: a package in packages/lib/ may import only packages in packages/lib/, not @solid-memo/domain (packages/core/domain).",
+        "packages/ui: only the adapters, the composition root and the end-to-end tests may import an adapter, not @solid-memo/solid (packages/adapters/solid).",
+      ]);
+    } finally {
+      for (const undo of restore) undo();
+    }
+  });
+
+  it("lets a package's configs import the root's shared setup, however deep its folder", () => {
+    const deep = {
+      ...workspace("domain", {
+        "vitest.config.ts": 'import { packageConfig } from "../../../vitest.shared.ts";',
+        "src/a.ts": 'import { packageConfig } from "../../../vitest.shared.ts";',
+      }),
+      dir: "packages/core/domain",
+    };
+    expect(problems(deep)).toEqual([
+      'packages/core/domain/src/a.ts: "../../../vitest.shared.ts" reaches outside the package.',
+    ]);
+  });
+
   it("holds an adapter to its own ports, and a screen to none", () => {
     expect(
       problems(
@@ -195,7 +263,7 @@ describe("boundaryProblems", () => {
         ),
       ),
     ).toEqual([
-      'packages/browser/src/fileExchange.ts: may import only /^@solid-memo\\/application\\/ports\\/device$/ of @solid-memo/application, not "@solid-memo/application/ports/pod".',
+      'packages/adapters/browser/src/fileExchange.ts: may import only /^@solid-memo\\/application\\/ports\\/device$/ of @solid-memo/application, not "@solid-memo/application/ports/pod".',
     ]);
     expect(
       problems(
@@ -252,9 +320,9 @@ describe("boundaryProblems", () => {
         ),
       ),
     ).toEqual([
-      "packages/turtle/src/a.ts: imports zod, which package.json does not declare.",
-      "packages/turtle/src/a.ts: imports vitest, which package.json does not declare.",
-      "packages/turtle/src/a.test.ts: imports zod, which package.json does not declare.",
+      "packages/lib/turtle/src/a.ts: imports zod, which package.json does not declare.",
+      "packages/lib/turtle/src/a.ts: imports vitest, which package.json does not declare.",
+      "packages/lib/turtle/src/a.test.ts: imports zod, which package.json does not declare.",
     ]);
   });
 
@@ -284,11 +352,11 @@ describe("boundaryProblems", () => {
         ),
       ),
     ).toEqual([
-      'packages/shacl/src/a.ts: runs in the browser, so may not import "node:fs".',
-      'packages/shacl/src/a.ts: runs in the browser, so may not import "n3".',
-      'packages/shacl/src/a.ts: runs in the browser, so may not import "@solid-memo/vocab/tooling/load".',
-      'packages/shacl/src/a.ts: runs in the browser, so may not import "playwright".',
-      'packages/shacl/src/a.ts: runs in the browser, so may not import "mermaid/dist/mermaid.core.mjs".',
+      'packages/adapters/shacl/src/a.ts: runs in the browser, so may not import "node:fs".',
+      'packages/adapters/shacl/src/a.ts: runs in the browser, so may not import "n3".',
+      'packages/adapters/shacl/src/a.ts: runs in the browser, so may not import "@solid-memo/vocab/tooling/load".',
+      'packages/adapters/shacl/src/a.ts: runs in the browser, so may not import "playwright".',
+      'packages/adapters/shacl/src/a.ts: runs in the browser, so may not import "mermaid/dist/mermaid.core.mjs".',
     ]);
   });
 
@@ -338,14 +406,14 @@ describe("boundaryProblems", () => {
     const only =
       "only inrupt-client files matching /^src\\//, shacl files matching /^src\\/turtleDocument\\.ts$/ may.";
     expect(boundaryProblems([client, solid, shacl, ui], TOOLING)).toEqual([
-      `packages/solid/src/datasets.ts: may not import "@inrupt/solid-client": ${only}`,
-      `packages/solid/src/datasets.ts: may not import "@inrupt/solid-client-authn-browser": ${only}`,
-      `packages/solid/src/datasets.ts: may not import "@inrupt/solid-client/universal": ${only}`,
-      `packages/solid/src/datasets.ts: may not import "@inrupt/solid-client": ${only}`,
-      `packages/solid/src/datasets.ts: may not import "@inrupt/solid-client-vocab": ${only}`,
-      `packages/solid/src/datasets.ts: may not import "@inrupt/solid-client": ${only}`,
-      `packages/solid/src/datasets.ts: may not import "@inrupt/solid-client": ${only}`,
-      `packages/shacl/src/shapeLoader.ts: may not import "@inrupt/solid-client": ${only}`,
+      `packages/adapters/solid/src/datasets.ts: may not import "@inrupt/solid-client": ${only}`,
+      `packages/adapters/solid/src/datasets.ts: may not import "@inrupt/solid-client-authn-browser": ${only}`,
+      `packages/adapters/solid/src/datasets.ts: may not import "@inrupt/solid-client/universal": ${only}`,
+      `packages/adapters/solid/src/datasets.ts: may not import "@inrupt/solid-client": ${only}`,
+      `packages/adapters/solid/src/datasets.ts: may not import "@inrupt/solid-client-vocab": ${only}`,
+      `packages/adapters/solid/src/datasets.ts: may not import "@inrupt/solid-client": ${only}`,
+      `packages/adapters/solid/src/datasets.ts: may not import "@inrupt/solid-client": ${only}`,
+      `packages/adapters/shacl/src/shapeLoader.ts: may not import "@inrupt/solid-client": ${only}`,
       `packages/ui/src/ui/App.tsx: may not import "@inrupt/solid-client-authn-browser": ${only}`,
     ]);
   });
@@ -373,8 +441,8 @@ describe("boundaryProblems", () => {
       { "@solid-memo/solid-memo-client": "*", "@solid-memo/inrupt-client": "*" },
     );
     expect(boundaryProblems([client, composition], TOOLING)).toEqual([
-      "packages/solid-memo-client/src/resources.ts: only files matching /\\.test\\.ts$/ may import @solid-memo/solid.",
-      'packages/solid-memo-client/src/oidcStore.ts: runs in the browser, so may not import "node:fs".',
+      "packages/adapters/solid-memo-client/src/resources.ts: only files matching /\\.test\\.ts$/ may import @solid-memo/solid.",
+      'packages/adapters/solid-memo-client/src/oidcStore.ts: runs in the browser, so may not import "node:fs".',
       "packages/composition/src/a.ts: @solid-memo/composition may not import @solid-memo/solid-memo-client.",
       "packages/composition/src/b.ts: @solid-memo/composition may not import @solid-memo/inrupt-client.",
     ]);
@@ -391,7 +459,7 @@ describe("boundaryProblems", () => {
       { n3: "*" },
     );
     expect(boundaryProblems([client], TOOLING)).toEqual([
-      'packages/inrupt-client/src/resources.ts: runs in the browser, so may not import "n3".',
+      'packages/adapters/inrupt-client/src/resources.ts: runs in the browser, so may not import "n3".',
     ]);
   });
 
@@ -411,10 +479,10 @@ describe("boundaryProblems", () => {
       { "@inrupt/solid-client": "*" },
     );
     expect([...problems(client), ...problems(seam)]).toEqual([
-      'packages/solid-memo-client/src/rdf.ts: @solid-memo/solid-memo-client may not import "@inrupt/solid-client".',
-      'packages/solid-memo-client/src/rdf.test.ts: @solid-memo/solid-memo-client may not import "@inrupt/solid-client-authn-browser".',
-      'packages/solid-memo-client/src/access.ts: @solid-memo/solid-memo-client may not import "@inrupt/solid-client".',
-      'packages/solid-client/src/interface.ts: @solid-memo/solid-client may not import "@inrupt/solid-client".',
+      'packages/adapters/solid-memo-client/src/rdf.ts: @solid-memo/solid-memo-client may not import "@inrupt/solid-client".',
+      'packages/adapters/solid-memo-client/src/rdf.test.ts: @solid-memo/solid-memo-client may not import "@inrupt/solid-client-authn-browser".',
+      'packages/adapters/solid-memo-client/src/access.ts: @solid-memo/solid-memo-client may not import "@inrupt/solid-client".',
+      'packages/adapters/solid-client/src/interface.ts: @solid-memo/solid-client may not import "@inrupt/solid-client".',
     ]);
   });
 
@@ -436,9 +504,9 @@ describe("boundaryProblems", () => {
       { "@inrupt/solid-client": "*" },
     );
     expect(problems(client)).toEqual([
-      "packages/inrupt-client/src/pod.ts: may not import AclDataset from @inrupt/solid-client: only inrupt-client files matching /^src\\/access\\.ts$/ may.",
-      "packages/inrupt-client/src/pod.ts: may not import universalAccess from @inrupt/solid-client: only inrupt-client files matching /^src\\/access\\.ts$/ may.",
-      "packages/inrupt-client/src/pod.ts: may not import everything from @inrupt/solid-client/universal: only inrupt-client files matching /^src\\/access\\.ts$/ may.",
+      "packages/adapters/inrupt-client/src/pod.ts: may not import AclDataset from @inrupt/solid-client: only inrupt-client files matching /^src\\/access\\.ts$/ may.",
+      "packages/adapters/inrupt-client/src/pod.ts: may not import universalAccess from @inrupt/solid-client: only inrupt-client files matching /^src\\/access\\.ts$/ may.",
+      "packages/adapters/inrupt-client/src/pod.ts: may not import everything from @inrupt/solid-client/universal: only inrupt-client files matching /^src\\/access\\.ts$/ may.",
     ]);
   });
 });
@@ -471,12 +539,12 @@ describe("the raw getters of the RDF module", () => {
     const only =
       "(only solid files matching /^src\\/(records\\.ts|shaclShapeValidator\\.ts)$/ may).";
     expect(problems(solid)).toEqual([
-      `packages/solid/src/mappers/deckMapper.ts: may not import getUrlAll from ${rdf}: read pod data through records.ts, within its bounds ${only}`,
-      `packages/solid/src/mappers/deckMapper.ts: may not import getStringNoLocale from ${rdf}: read pod data through records.ts, within its bounds ${only}`,
-      `packages/solid/src/ownership.ts: may not import everything from ${rdf}.ts: read pod data through records.ts, within its bounds ${only}`,
-      `packages/solid/src/typeIndex.ts: may not import eachUrl from ${rdf}: read pod data through records.ts, within its bounds ${only}`,
-      `packages/solid/src/typeIndex.ts: may not import propertiesOf from ${rdf}: read pod data through records.ts, within its bounds ${only}`,
-      `packages/solid/src/typeIndex.ts: may not import getPropertyAll from ${rdf}: read pod data through records.ts, within its bounds ${only}`,
+      `packages/adapters/solid/src/mappers/deckMapper.ts: may not import getUrlAll from ${rdf}: read pod data through records.ts, within its bounds ${only}`,
+      `packages/adapters/solid/src/mappers/deckMapper.ts: may not import getStringNoLocale from ${rdf}: read pod data through records.ts, within its bounds ${only}`,
+      `packages/adapters/solid/src/ownership.ts: may not import everything from ${rdf}.ts: read pod data through records.ts, within its bounds ${only}`,
+      `packages/adapters/solid/src/typeIndex.ts: may not import eachUrl from ${rdf}: read pod data through records.ts, within its bounds ${only}`,
+      `packages/adapters/solid/src/typeIndex.ts: may not import propertiesOf from ${rdf}: read pod data through records.ts, within its bounds ${only}`,
+      `packages/adapters/solid/src/typeIndex.ts: may not import getPropertyAll from ${rdf}: read pod data through records.ts, within its bounds ${only}`,
     ]);
   });
 });
@@ -523,8 +591,8 @@ describe("main", () => {
     const io = fakeIo([workspace("turtle", { "src/a.ts": 'import "zod";\nimport "nanoid";' })]);
     expect(main(io)).toBe(1);
     expect(io.logs).toEqual([
-      "packages/turtle/src/a.ts: imports zod, which package.json does not declare.",
-      "packages/turtle/src/a.ts: imports nanoid, which package.json does not declare.",
+      "packages/lib/turtle/src/a.ts: imports zod, which package.json does not declare.",
+      "packages/lib/turtle/src/a.ts: imports nanoid, which package.json does not declare.",
       "2 boundary problem(s).",
     ]);
   });
@@ -543,7 +611,7 @@ describe("the repository's packages", () => {
   it("are read from apps/, packages/ and e2e/, with the root's devDependencies", () => {
     const io = defaultIo(`${import.meta.dirname}/..`);
     const workspaces = io.workspaces();
-    const domain = workspaces.find((one) => one.dir === "packages/domain");
+    const domain = workspaces.find((one) => one.dir === "packages/core/domain");
     expect(domain?.manifest.name).toBe("@solid-memo/domain");
     expect(Object.keys(domain!.files)).toContain("src/account.test.ts");
     expect(workspaces.map((one) => one.dir)).toContain("apps/web");

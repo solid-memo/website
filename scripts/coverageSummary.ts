@@ -10,8 +10,9 @@
  * restores a cached test's coverage/ folder, so a cached run has one too.
  * It only reports: the thresholds are each package's (docs/testing.md).
  */
-import { appendFileSync, existsSync, readdirSync, readFileSync } from "node:fs";
+import { appendFileSync, existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { packageFolders } from "./packageFolders.ts";
 
 /** Where the workspace's code with coverage is, relative to the root. */
 export const FOLDERS = ["apps", "packages"];
@@ -55,14 +56,7 @@ export function defaultIo(root: string, env: Record<string, string | undefined>)
   const read = (path: string) =>
     existsSync(join(root, path)) ? readFileSync(join(root, path), "utf8") : undefined;
   return {
-    packageDirs: () => [
-      ...FOLDERS.flatMap((folder) =>
-        readdirSync(join(root, folder), { withFileTypes: true })
-          .filter((entry) => entry.isDirectory())
-          .map((entry) => `${folder}/${entry.name}`),
-      ),
-      "scripts",
-    ],
+    packageDirs: () => [...FOLDERS.flatMap((folder) => packageFolders(root, folder)), "scripts"],
     read,
     write: (text) => {
       if (env.GITHUB_STEP_SUMMARY) appendFileSync(env.GITHUB_STEP_SUMMARY, text);

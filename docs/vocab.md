@@ -13,7 +13,7 @@ vocabulary covers spaced repetition.
 
 The vocabulary lives in this repository's [`ns/vocab/`](../ns/vocab/)
 folder, and the site publishes it at `https://solid-memo.com/ns/vocab/`
-([ns.ts](../packages/vocab/src/ns.ts), [deployment.md](deployment.md)).
+([ns.ts](../packages/lib/vocab/src/ns.ts), [deployment.md](deployment.md)).
 Its documents are `v1.ttl` (the ontology), `topics.ttl` (the topics
 scheme) and `external.ttl` (reference data). Each document's address is
 its IRI and its `@base`, every term IRI a fragment of it. Changes go
@@ -38,7 +38,7 @@ flowchart LR
     dist -->|read at runtime| refs["reference data<br/>(profile checks)"]
 ```
 
-`SM` in [vocab.ts](../packages/solid/src/vocab.ts) re-exports the
+`SM` in [vocab.ts](../packages/adapters/solid/src/vocab.ts) re-exports the
 generated constants, each with its term's comment and history note as
 JSDoc, and `SM_CONCEPT_PROPERTIES`, the properties whose range is
 `skos:Concept`. The external vocabularies there
@@ -79,14 +79,14 @@ A value from a fixed set is a
 - A concept that replaces a string the app used before carries that
   string as its `skos:notation` (`sm:frontToBack` is `"front-to-back"`).
 - `npm run generate` renders every scheme into
-  `packages/vocab/src/concepts.generated.ts` (`STUDY_DIRECTIONS`,
+  `packages/lib/vocab/src/concepts.generated.ts` (`STUDY_DIRECTIONS`,
   `INVALID_DATA_POLICIES`, `THEMES`, `PALETTES`, `TEXT_SIZES`,
   `ANSWER_MODES`, `TEXT_FORMATS`, `SCHEDULERS`, `TOPICS`), which the
   app lists and labels from in the user's language. It renders the EU
   languages of `external.ttl` too (`EU_LANGUAGES`: IRI, code and
   English label), which the Studio offers as a release's languages
   ([studio.md](studio.md#the-releases-metadata-and-provenance)).
-  [concepts.ts](../packages/domain/src/concepts.ts) looks concepts up by
+  [concepts.ts](../packages/core/domain/src/concepts.ts) looks concepts up by
   IRI or notation.
 - Concepts are only ever added. One that should go is deprecated
   (`owl:deprecated`), never removed (decks point at it).
@@ -555,7 +555,7 @@ emits them into the build and serves them in dev.
    annotation; bump the version and the change note.
 2. Run `npm run generate`. CI runs `npm run generate:check` and fails
    on drift, as does the drift test in
-   `packages/vocab/tooling/generate.test.ts`.
+   `packages/lib/vocab/tooling/generate.test.ts`.
 3. Use it in a [shape](shapes.md): the fixture test checks that every
    `sm:` predicate a shape uses is declared here. Only a new class's
    shape takes a term: a published shape is never edited and gets no
