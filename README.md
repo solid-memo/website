@@ -88,7 +88,10 @@ To see what the app does without signing in, open the report of its
 [user journeys](https://journeys.solid-memo.com/): tests that use the
 app in a browser as a person would, step by step, from CI's run on the
 version the site runs (none after a deploy by hand)
-([docs/testing.md](docs/testing.md#user-journeys)).
+([docs/testing.md](docs/testing.md#user-journeys)). Its components,
+each in its states, languages, palettes and themes, are in the
+[Storybook](https://storybook.solid-memo.com/) of that version
+([docs/storybook.md](docs/storybook.md)).
 
 ## Status
 

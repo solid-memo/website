@@ -31,7 +31,8 @@
  * It writes `jobs=all` or `jobs=reuse` to GITHUB_OUTPUT, and with the
  * latter `tested-by=<run id>`: the CI run that tested this tree, whose
  * artifacts the run takes over: the journeys' blobs for main's report,
- * the site the deploy ships, and, but on a release commit, Turbo's cache
+ * the site the deploy ships, the Storybook it publishes, and, but on a
+ * release commit, Turbo's cache
  * for main. When that run keeps one of them no longer (GitHub keeps
  * them 7 days, as after a release made late by hand), every job runs
  * instead, so nothing is missing.
@@ -58,6 +59,8 @@ const MAIN = "refs/heads/main";
 export const JOURNEYS_BLOBS = "journeys-blob-";
 /** The site the run built (ci.yml's site job), which the deploy ships. */
 export const SITE = "site";
+/** The Storybook the run built (ci.yml's site job), which the deploy publishes. */
+export const STORYBOOK = "storybook";
 /**
  * Turbo's cache after a run's checks (ci.yml's check job): a pull
  * request's, which the queue adds to main's, and the queue's, which
@@ -175,7 +178,7 @@ export async function decide(io: GateIo): Promise<Gate> {
     return testedIn(
       io,
       testedBy,
-      [JOURNEYS_BLOBS, SITE],
+      [JOURNEYS_BLOBS, SITE, STORYBOOK],
       `A release commit, changing only the version's files, on ${parent.slice(0, 8)}, which CI passed on main; run ${testedBy} ran every job on its code`,
     );
   }
@@ -184,7 +187,7 @@ export async function decide(io: GateIo): Promise<Gate> {
     return testedIn(
       io,
       queued,
-      [JOURNEYS_BLOBS, SITE, TURBO_CACHE],
+      [JOURNEYS_BLOBS, SITE, STORYBOOK, TURBO_CACHE],
       `${sha.slice(0, 8)} passed the merge queue in run ${queued}`,
     );
   }

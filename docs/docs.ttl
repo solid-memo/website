@@ -96,7 +96,7 @@
     schema:isPartOf <#the-code> ;
     schema:position 42 ;
     schema:learningResourceType "reference" ;
-    dcterms:abstract "the Storybook of the UI's components: running it, the toolbar's language, palette, theme, text size and direction, writing a story with the test fakes, and the stories run as tests."@en .
+    dcterms:abstract "the Storybook of the UI's components: running it, the toolbar's language, palette, theme, text size and direction, writing a story with the test fakes, the stories run as tests, and its own site, storybook.solid-memo.com, published with each release."@en .
 
 <interop.md>
     a schema:TechArticle ;

@@ -465,3 +465,127 @@ jobs:
             -m "The user journeys' report of the CI run on $TAG in $GITHUB_REPOSITORY ($RUN_URL). Each release replaces main with one commit, so this repository keeps only the newest report."
           git push --force "git@github.com:$JOURNEYS_REPO.git" main
           echo "Published the journeys' report of $TAG at https://$JOURNEYS_HOST/."
+
+  # The Storybook of the UI's components, as the CI run deployed from
+  # built it, published at storybook.solid-memo.com from the repository
+  # solid-memo/storybook (docs/storybook.md#where-it-is-published): a
+  # site of its own, as the journeys' report is, so Storybook's scripts
+  # do not run on the app's origin. Each release replaces that
+  # repository's main with one commit, so it keeps only the newest
+  # version's. A run by hand has no CI run, so no Storybook.
+  storybook:
+    needs: [version, deploy]
+    if: github.event_name == 'workflow_run'
+    runs-on: ubuntu-latest
+    # To download the Storybook from the CI run.
+    permissions:
+      contents: read
+      actions: read
+    timeout-minutes: 15
+    # Its secret is the storybook repository's deploy key, with write
+    # access; the environment admits only main.
+    environment:
+      name: storybook
+      url: https://storybook.solid-memo.com/
+    env:
+      STORYBOOK_REPO: solid-memo/storybook
+      STORYBOOK_HOST: storybook.solid-memo.com
+    steps:
+      # A copy without the key, such as a fork, publishes no Storybook,
+      # and says so.
+      - name: The deploy key is set
+        id: key
+        env:
+          KEY: ${{ secrets.STORYBOOK_DEPLOY_KEY }}
+        run: |
+          if [ -z "$KEY" ]; then
+            echo "::notice::No STORYBOOK_DEPLOY_KEY secret (in the storybook environment), so the Storybook is not published (docs/storybook.md#where-it-is-published)."
+            echo "set=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "set=true" >> "$GITHUB_OUTPUT"
+          fi
+      # As in the deploy job: re-running this job alone of an older run
+      # must not put an older version's Storybook back.
+      - if: steps.key.outputs.set == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          filter: blob:none
+          # .github for the tags.
+          sparse-checkout: .github
+          persist-credentials: false
+      - name: The tag is still the newest version
+        if: steps.key.outputs.set == 'true'
+        env:
+          TAG: ${{ needs.version.outputs.tag }}
+        run: |
+          newest=$(git tag --merged origin/main --list 'v[0-9]*' --sort=-v:refname |
+            grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1 || true)
+          if [ "$TAG" != "$newest" ]; then
+            echo "::error::$TAG is no longer the newest version on main ($newest is), so its Storybook is not published (docs/deployment.md)."
+            exit 1
+          fi
+      - if: steps.key.outputs.set == 'true'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: storybook
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/storybook
+      # Any job of the CI run could have uploaded the artifact in the
+      # Storybook's place, so it is published only as plain files and
+      # folders, with no name that starts with a dot, as the journeys'
+      # report is (docs/deployment.md#the-journeys-report). Storybook's
+      # build has none, and the upload leaves hidden files out. Checked
+      # before the key is on disk.
+      - name: The Storybook is plain files
+        if: steps.key.outputs.set == 'true'
+        run: |
+          cd "$RUNNER_TEMP/storybook"
+          test -f index.html
+          odd="$(find . -mindepth 1 \( -name '.*' -o ! \( -type f -o -type d \) \) -print)"
+          if [ -n "$odd" ]; then
+            printf '%s\n' "$odd"
+            echo "::error::The storybook artifact holds a hidden entry or one that is neither a file nor a folder (listed above), so it is not published (docs/storybook.md#where-it-is-published)."
+            exit 1
+          fi
+      # The Storybook, with the files Pages needs beside it: CNAME, which
+      # keeps the custom domain, .nojekyll, so Pages serves the files as
+      # they are, and robots.txt, which keeps search engines out. One
+      # commit with no parent, force-pushed over main, as the journeys'
+      # report is: the key in a file for this step alone, GitHub's host
+      # keys from its API, git's repository in a folder of its own, no
+      # hooks and no file system monitor.
+      - name: Publish the Storybook to the storybook repository
+        if: steps.key.outputs.set == 'true'
+        env:
+          KEY: ${{ secrets.STORYBOOK_DEPLOY_KEY }}
+          TAG: ${{ needs.version.outputs.tag }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ssh="$(mktemp -d "$RUNNER_TEMP/storybook-ssh.XXXXXX")"
+          trap 'rm -rf "$ssh"' EXIT
+          (umask 077 && printf '%s\n' "$KEY" > "$ssh/key")
+          unset KEY
+          gh api meta --jq '.ssh_keys[] | "github.com " + .' > "$ssh/known_hosts"
+          export GIT_SSH_COMMAND="ssh -i $ssh/key -o IdentitiesOnly=yes -o UserKnownHostsFile=$ssh/known_hosts -o StrictHostKeyChecking=yes"
+          GIT_DIR="$(mktemp -d "$RUNNER_TEMP/storybook-git.XXXXXX")"
+          export GIT_DIR GIT_WORK_TREE="$RUNNER_TEMP/storybook"
+          export GIT_CONFIG_COUNT=2
+          export GIT_CONFIG_KEY_0=core.hooksPath GIT_CONFIG_VALUE_0=/dev/null
+          export GIT_CONFIG_KEY_1=core.fsmonitor GIT_CONFIG_VALUE_1=false
+          cd "$GIT_WORK_TREE"
+          test -f index.html
+          echo "$STORYBOOK_HOST" > CNAME
+          touch .nojekyll
+          printf 'User-agent: *\nDisallow: /\n' > robots.txt
+          git init --quiet -b main
+          git add -A
+          git -c user.name="github-actions[bot]" \
+            -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit --quiet \
+            -m "chore: publish the Storybook of $TAG" \
+            -m "The Storybook of the UI's components, built by the CI run on $TAG in $GITHUB_REPOSITORY ($RUN_URL). Each release replaces main with one commit, so this repository keeps only the newest Storybook."
+          git push --force "git@github.com:$STORYBOOK_REPO.git" main
+          echo "Published the Storybook of $TAG at https://$STORYBOOK_HOST/."

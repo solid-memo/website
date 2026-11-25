@@ -5,7 +5,8 @@ drawn in one state, with made-up data, in a
 [Storybook](https://storybook.js.org/). A contributor or a reviewer sees
 a component in every state, language, palette and theme without a pod
 and without going through the app to reach that state. The stories run
-as tests in `npm run check`.
+as tests in `npm run check`, and each release publishes the Storybook
+at <https://storybook.solid-memo.com/>.
 
 ## Running it
 
@@ -102,6 +103,33 @@ code (`isTestFile` in
 [checkBoundaries.ts](../scripts/checkBoundaries.ts)): they may import
 the test fakes, and `npm run check:exports` doesn't ask for their
 exports to be used elsewhere.
+
+## Where it is published
+
+The CI's `site` job builds the Storybook on every run and keeps it a
+week as the `storybook` artifact, so a pull request's Storybook can be
+downloaded from its run. On a release, the deploy workflow's `storybook`
+job publishes the artifact of the CI run it deploys from at
+<https://storybook.solid-memo.com/>, a site of its own. Storybook's
+scripts don't run on the app's origin, which holds a learner's session,
+the reason the journeys' report has a site of its own too
+([deployment.md](deployment.md#the-journeys-report)).
+
+The job publishes it as the journeys' report is published. It refuses
+an artifact with a hidden entry or a link. It then force-pushes the
+files, with a `CNAME`, a `.nojekyll` and a `robots.txt` that keeps
+search engines out, as one commit with no parent over `main` of
+[solid-memo/storybook](https://github.com/solid-memo/storybook), which
+GitHub Pages serves. That repository keeps only the newest release's
+Storybook. A deploy by hand publishes none, and the last one stays.
+
+The job pushes with a deploy key: the public half, with write access, is
+the storybook repository's, and the private half is the secret
+`STORYBOOK_DEPLOY_KEY` of the `storybook` environment, which admits
+only `main`. Without the secret, as in a fork, the job publishes
+nothing and says so. `storybook.solid-memo.com` is a `CNAME` record
+pointing at `solid-memo.github.io`, and the storybook repository's Pages
+settings name it, with HTTPS enforced.
 
 ## Its dependencies
 
