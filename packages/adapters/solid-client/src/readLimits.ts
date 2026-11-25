@@ -398,6 +398,7 @@ export function sharedReadBudget({
   const budgets = new Map<string, BudgetSpent>();
   const allSpent = noneSpent();
   const allFree = total === NO_SIZE_LIMITS ? undefined : { ...rereads };
+  const holders = noHolders();
   const budgetOf = (url: string): BudgetSpent => {
     const key = scope(url);
     const found = budgets.get(key);
@@ -433,6 +434,31 @@ export function sharedReadBudget({
       // Past none of the tallies: past what the read's limits bound that no budget counts (valuesPerPredicate).
       return over(allSpent, total, bytes) ? total : limits;
     });
+    // Room held for a parse elsewhere comes out of what a read again may take within the largest read first, as the setter counts it.
+    const again = (key: ParsedKey) => Math.min(Math.max(0, most[key] - document[key]), free[key]);
+    ROOMS.set(spent, {
+      holders,
+      roomOf: (key) => {
+        const own = limits[key] - document[key];
+        const inBudget = budget[key] - session[key];
+        const inTotal = total[key] - allSpent[key];
+        const left = Math.min(inBudget, inTotal);
+        const room = Math.min(own, left < 0 ? left : left + again(key));
+        if (room >= own) return { room, whole: true };
+        return { room, whole: false, bound: inBudget <= inTotal ? budget : total };
+      },
+      hold: (key, room) => {
+        const reread = Math.min(again(key), room);
+        free[key] -= reread;
+        session[key] += room - reread;
+        allSpent[key] += room - reread;
+        return () => {
+          free[key] += reread;
+          session[key] -= room - reread;
+          allSpent[key] -= room - reread;
+        };
+      },
+    });
     for (const key of SPENT_KEYS) {
       Object.defineProperty(spent, key, {
         get: () =>
@@ -455,6 +481,142 @@ export function sharedReadBudget({
     }
     return limitedFetch(fetch, limits, spent)(input, init);
   };
+}
+
+/** The counts of a parse, which a parse made elsewhere holds room for (holdRoom): a body's bytes are counted as it is read. */
+const PARSED_KEYS = ["quads", "characters"] as const;
+export type ParsedKey = (typeof PARSED_KEYS)[number];
+
+/** The parses made elsewhere holding room in tallies counted together, and those waiting for room (holdRoom). */
+export interface Holders {
+  holding: number;
+  waiting: (() => boolean)[];
+}
+
+/** No parse holding room, nor waiting for it: one for each budget that tallies count in together (holdRoom). */
+export function noHolders(): Holders {
+  return { holding: 0, waiting: [] };
+}
+
+/**
+ * How a tally holds room for a parse made elsewhere (holdRoom). Holding
+ * room counts it as spent wherever what the tally counts is counted, and
+ * never goes through the tally's own counting (its setters), which
+ * counts what a read took in.
+ */
+export interface Rooms {
+  holders: Holders;
+  /**
+   * The room left for `key` under `limits`, whether it is all the read's
+   * own limits would leave were none of it held, and the budget or total
+   * that leaves less, if any.
+   */
+  roomOf(key: ParsedKey, limits: ReadLimits): { room: number; whole: boolean; bound?: ReadLimits };
+  /** Takes `room` of `key` from what the tally counts in, until the function it gives is called. */
+  hold(key: ParsedKey, room: number): () => void;
+}
+
+/** The rooms of each tally that counts in more than itself: a budget shared with other reads (sharedReadBudget, roomsIn). */
+const ROOMS = new WeakMap<ReadsSpent, Rooms>();
+
+/** Has parses made elsewhere of reads counted in `spent` hold room as `rooms` says (holdRoom). */
+export function roomsIn(spent: ReadsSpent, rooms: Rooms): void {
+  ROOMS.set(spent, rooms);
+}
+
+/**
+ * The rooms of any other tally, which counts in nothing but itself: what
+ * is left of it under the limits, held by one parse at a time. The room
+ * held is kept apart from the tally, never counted in it.
+ */
+function roomsOf(spent: ReadsSpent): Rooms {
+  let rooms = ROOMS.get(spent);
+  if (rooms !== undefined) return rooms;
+  const held = { quads: 0, characters: 0 };
+  rooms = {
+    holders: noHolders(),
+    roomOf: (key, limits) => ({ room: limits[key] - spent[key] - held[key], whole: false }),
+    hold: (key, room) => {
+      held[key] += room;
+      return () => {
+        held[key] -= room;
+      };
+    },
+  };
+  ROOMS.set(spent, rooms);
+  return rooms;
+}
+
+/** Room held in a tally for a parse made elsewhere (holdRoom). */
+export interface HeldRoom {
+  /** What the parse counts on from, under the read's limits: past them once it takes more than the room it holds. */
+  start: ReadsSpent;
+  /**
+   * Gives back the room, `used` (the parse's triples and their
+   * characters) counted in the tally instead. It says the budget (or
+   * total) the parse went past, when it took more of a count than its
+   * room and the budget left less room than the read's own limits: what
+   * a ReadLimitError of the parse names, as a parse in the page would
+   * (isPastBudget), whatever the tally says once the room is given back.
+   */
+  settle(used: { quads: number; characters: number }): ReadLimits | undefined;
+}
+
+/**
+ * Room in `spent` for the triples and characters of a parse made
+ * elsewhere (in a worker, offPage.ts) of a body read under `limits`
+ * (limitedFetch): all that is left of them, and of a budget the tally
+ * shares with other reads (sharedReadBudget, or one whose tallies hold
+ * room as roomsIn says), held in the budget until the parse's counts
+ * come back, so that parses at once, here or
+ * elsewhere, never take in more together than the budget. A parse
+ * that holds room in no other tally (`wait`) waits for room while
+ * others hold some and a budget leaves it less than the read's own
+ * limits, so that it is refused only for what is spent, as a parse in
+ * the page after them would be; it is given what is left once none
+ * holds any. A tally that counts in no budget is held by one parse at
+ * a time, the room kept apart from what it counts.
+ */
+export function holdRoom(
+  spent: ReadsSpent,
+  limits: ReadLimits,
+  { wait }: { wait: boolean },
+): Promise<HeldRoom> {
+  const rooms = roomsOf(spent);
+  const { holders } = rooms;
+  return new Promise((resolve) => {
+    const tryHold = (): boolean => {
+      const each = PARSED_KEYS.map((key) => ({ key, ...rooms.roomOf(key, limits) }));
+      if (wait && holders.holding > 0 && each.some(({ whole }) => !whole)) return false;
+      holders.holding++;
+      // The body is read and counted already: its bytes are within the limits as the page read it, whatever was read since.
+      const start = {
+        bytes: Math.min(spent.bytes, limits.bytes),
+        quads: spent.quads,
+        characters: spent.characters,
+      };
+      // A read with no limit on a count, nor any budget, has nothing to hold of it.
+      const gives = each
+        .filter(({ room }) => Number.isFinite(room))
+        .map(({ key, room }) => {
+          start[key] = limits[key] - room;
+          return rooms.hold(key, Math.max(0, room));
+        });
+      resolve({
+        start,
+        settle(used) {
+          for (const give of gives) give();
+          for (const key of PARSED_KEYS) spent[key] += used[key];
+          holders.holding--;
+          holders.waiting = holders.waiting.filter((retry) => !retry());
+          return each.find(({ key, room, bound }) => bound !== undefined && used[key] > room)
+            ?.bound;
+        },
+      });
+      return true;
+    };
+    if (!tryHold()) holders.waiting.push(tryHold);
+  });
 }
 
 /**

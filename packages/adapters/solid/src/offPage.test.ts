@@ -202,10 +202,13 @@ describe("createOffPage", () => {
     // The first waits for its request: the second works on a second worker, the third waits for one.
     expect(await spawned[1]!.sent(1)).toMatchObject({ job: "b" });
     expect(spawned).toHaveLength(2);
+    // The first's request is answered while the second works: the answer waits for a place to work.
     answer!();
-    await spawned[0]!.sent(2);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(spawned[0]!.posted).toHaveLength(1);
     spawned[1]!.say({ type: "done", result: 2, frozen: [] });
     expect(await second).toBe(2);
+    expect(await spawned[0]!.sent(2)).toMatchObject({ type: "response", call: 1 });
     // The third works once the first is done working, on the worker last left idle.
     spawned[0]!.say({ type: "done", result: 1, frozen: [] });
     expect(await waits).toBe(1);
@@ -613,6 +616,120 @@ describe("createOffPage", () => {
     expect(isPastBudget(past)).toBe(true);
     expect((await failing(own, 500)).limits).toEqual(limits);
     expect(isPastBudget(await failing(shared(), 5, "https://bob.example/other.ttl"))).toBe(false);
+  });
+
+  it("holds room in a shared budget for each answer's parse, waits for room others hold, and gives back what a job ended holds", async () => {
+    const limits = { bytes: 1000, quads: 100, characters: 10_000 };
+    const budget = { bytes: 1000, quads: 10, characters: 10_000 };
+    const fetch = sharedReadBudget({ limits, budget, rereads: noneSpent() })(async (input) =>
+      Object.defineProperty(new Response("<a> <b> <c>."), "url", { value: String(input) }),
+    );
+    const { offPage, spawned } = offPageOf();
+    const ask = (worker: Fake, call: number, name: string) =>
+      worker.say({
+        type: "fetch",
+        call,
+        fetch: 1,
+        url: `https://bob.example/${name}.ttl`,
+        init: { method: "GET", headers: [] },
+      });
+    const start = (message: PageMessage) =>
+      (message as Extract<PageMessage, { type: "response" }>).response.read!.spent.quads;
+    const first = offPage.run({ job: "a", input: null, fetches: { doc: fetch }, tooLarge });
+    await vi.waitFor(() => spawned[0]!.sent(1));
+    ask(spawned[0]!, 1, "a");
+    // All the budget leaves, less than the document's own limits.
+    expect(start(await spawned[0]!.sent(2))).toBe(90);
+    const second = offPage.run({ job: "b", input: null, fetches: { doc: fetch }, tooLarge });
+    await vi.waitFor(() => spawned[1]!.sent(1));
+    ask(spawned[1]!, 1, "b");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(spawned[1]!.posted).toHaveLength(1);
+    // Its worker ends while it waits for room: it gives back the room it is given later.
+    spawned[1]!.emit("error");
+    await expect(second).rejects.toBeInstanceOf(ReadLimitError);
+    // A job holding room takes what is left at once, never waiting for itself.
+    ask(spawned[0]!, 2, "c");
+    expect(start(await spawned[0]!.sent(3))).toBe(100);
+    spawned[0]!.say({ type: "tally", call: 1, quads: 3, characters: 30 });
+    spawned[0]!.say({ type: "done", result: 1, frozen: [] });
+    expect(await first).toBe(1);
+    const third = offPage.run({ job: "c", input: null, fetches: { doc: fetch }, tooLarge });
+    await vi.waitFor(() => spawned[0]!.sent(4));
+    ask(spawned[0]!, 1, "d");
+    expect(start(await spawned[0]!.sent(5))).toBe(93);
+    spawned[0]!.say({ type: "done", result: 3, frozen: [] });
+    expect(await third).toBe(3);
+  });
+
+  it("names the budget a parse given no room went past, though the room its job gave back leaves the tally within it", async () => {
+    const limits = { bytes: 1000, quads: 100, characters: 10_000 };
+    const budget = { bytes: 1000, quads: 10, characters: 10_000 };
+    const fetch = sharedReadBudget({ limits, budget, rereads: noneSpent() })(async (input) =>
+      Object.defineProperty(new Response("<a> <b> <c>."), "url", { value: String(input) }),
+    );
+    const { offPage, spawned } = offPageOf();
+    const result = offPage.run({ job: "a", input: null, fetches: { doc: fetch }, tooLarge });
+    await vi.waitFor(() => spawned[0]!.sent(1));
+    const worker = spawned[0]!;
+    const ask = (call: number, name: string) =>
+      worker.say({
+        type: "fetch",
+        call,
+        fetch: 1,
+        url: `https://bob.example/${name}.ttl`,
+        init: { method: "GET", headers: [] },
+      });
+    ask(1, "a");
+    await worker.sent(2);
+    // The job holds all the budget leaves for its first answer: its second is given none.
+    ask(2, "b");
+    await worker.sent(3);
+    worker.say({ type: "tally", call: 1, quads: 3, characters: 30 });
+    worker.say({ type: "tally", call: 2, quads: 1, characters: 10 });
+    worker.say({
+      type: "failed",
+      error: { kind: "limit", url: "https://bob.example/b.ttl", limits },
+    });
+    const error = await result.then(
+      () => Promise.reject(new Error("refused")),
+      (failed: ReadLimitError) => failed,
+    );
+    expect(error.limits).toBe(budget);
+  });
+
+  it("with `freeWhileWaiting`, keeps a job's answers from its worker until it has a place to work again", async () => {
+    const { offPage, spawned } = offPageOf({ workers: 1, workersInAll: 3, freeWhileWaiting: true });
+    const answers: (() => void)[] = [];
+    const slow: typeof globalThis.fetch = () =>
+      new Promise((resolve) => answers.push(() => resolve(new Response("late"))));
+    const ask = (worker: Fake, call: number) =>
+      worker.say({ type: "fetch", call, fetch: 1, url: DOC, init: { method: "GET", headers: [] } });
+    const first = offPage.run({ job: "a", input: null, fetches: { slow }, tooLarge });
+    await vi.waitFor(() => spawned[0]!.sent(1));
+    ask(spawned[0]!, 1);
+    const second = offPage.run({ job: "b", input: null, fetches: { slow }, tooLarge });
+    await vi.waitFor(() => spawned[1]!.sent(1));
+    ask(spawned[1]!, 1);
+    const third = offPage.run({ job: "c", input: null, tooLarge });
+    await vi.waitFor(() => spawned[2]!.sent(1));
+    // Both answered while the third works: each waits for a place.
+    answers[0]!();
+    answers[1]!();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    // The first asks again meanwhile: it waits for its request again, and the second's worker ends.
+    ask(spawned[0]!, 2);
+    spawned[1]!.emit("error");
+    await expect(second).rejects.toBeInstanceOf(ReadLimitError);
+    spawned[2]!.say({ type: "done", result: 3, frozen: [] });
+    expect(await third).toBe(3);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(spawned[0]!.posted).toHaveLength(1);
+    answers[2]!();
+    expect(await spawned[0]!.sent(3)).toMatchObject({ type: "response", call: 2 });
+    expect(spawned[0]!.posted[1]).toMatchObject({ type: "response", call: 1 });
+    spawned[0]!.say({ type: "done", result: 1, frozen: [] });
+    expect(await first).toBe(1);
   });
 
   it("sends nothing of an answer that comes after the job is done", async () => {

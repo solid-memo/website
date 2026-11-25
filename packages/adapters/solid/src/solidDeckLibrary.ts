@@ -17,9 +17,11 @@ import { ReadLimitError, type ReadLimits } from "@solid-memo/solid-client/interf
 import { getSolidDatasetLinear } from "@solid-memo/solid-client/resources";
 import {
   limitedFetch,
+  noHolders,
   noneSpent,
   RELEASE_LIMITS,
   type ReadsSpent,
+  roomsIn,
 } from "@solid-memo/solid-client/readLimits";
 import { WHOLE_READ_MS as RELEASE_READ_MS } from "./readDeadline";
 import {
@@ -225,9 +227,15 @@ type LinkedReads = <T>(url: string, work: (read: LinkedRead) => Promise<T>) => P
  * whatever the document says of its size. When a read is done, what it
  * counted that the document's largest read now holds comes out of
  * LINKED_REREADS too, and goes back to the budget.
+ *
+ * A parse made elsewhere (offPage.ts) holds the room it may take of
+ * the budget and of `own` (holdRoom), so every other read sees it as
+ * spent until its counts come back; one that would get less than its
+ * read's own limits waits while others hold room.
  */
 function linkedReadsBudget(fetch: typeof globalThis.fetch) {
   const session = noneSpent();
+  const holders = noHolders();
   /** The largest read of each document so far: what stays counted of it. */
   const largest = new Map<string, ReadsSpent>();
   /** What is left of LINKED_REREADS. */
@@ -250,6 +258,8 @@ function linkedReadsBudget(fetch: typeof globalThis.fetch) {
   };
   return {
     reads(own: ReadsSpent = noneSpent()): LinkedReads {
+      /** What of `own` parses made elsewhere hold. */
+      const ownHeld = noneSpent();
       return async (url, work) => {
         const document = noneSpent();
         const counted = noneSpent();
@@ -273,6 +283,35 @@ function linkedReadsBudget(fetch: typeof globalThis.fetch) {
             },
           });
         }
+        roomsIn(spent, {
+          holders,
+          roomOf: (key, limits) => {
+            const ownRoom = limits[key] - own[key];
+            const inBudget = left(key);
+            const budgetRoom = inBudget < 0 ? inBudget : inBudget + within(key);
+            const room = Math.min(ownRoom, budgetRoom);
+            if (room >= ownRoom + ownHeld[key]) return { room, whole: true };
+            return {
+              room,
+              whole: false,
+              bound: budgetRoom < ownRoom ? LINKED_READS_BUDGET : undefined,
+            };
+          },
+          // Held as the setter counts what a read takes in, rereads first, but not as taken in by the document.
+          hold: (key, room) => {
+            const reread = Math.min(within(key), room);
+            rereads[key] -= reread;
+            session[key] += room - reread;
+            own[key] += room;
+            ownHeld[key] += room;
+            return () => {
+              rereads[key] += reread;
+              session[key] -= room - reread;
+              own[key] -= room;
+              ownHeld[key] -= room;
+            };
+          },
+        });
         const limited = limitedFetch(
           async (input, init) => {
             const response = await fetch(input, init);
