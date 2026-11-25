@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.4.1](https://github.com/solid-memo/website/compare/v8.4.0...v8.4.1) (2026-11-25)
+
+### Fixes
+
+* **docs:** link build-tools from the markdown and vocab READMEs ([db2da8d](https://github.com/solid-memo/website/commit/db2da8df46d13a9f4f849e45716c131cf319b902)), closes [#1019](https://github.com/solid-memo/website/issues/1019)
+
 ## [8.4.0](https://github.com/solid-memo/website/compare/v8.3.4...v8.4.0) (2026-11-24)
 
 ### Features
