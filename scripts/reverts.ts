@@ -14,8 +14,8 @@
  * message alone cannot take a commit, such as one that breaks, out of
  * the release. Patch ids leave out line numbers, so a change that puts
  * the same lines back at another place, with the same context, also
- * counts as undoing the commit; check:breaking's comparison of api/
- * still finds a line of api/ that is gone.
+ * counts as undoing the commit; check:breaking's comparison of semver-public-api-declaration/
+ * still finds a line of semver-public-api-declaration/ that is gone.
  *
  * releaseWithoutMerges.ts hands the plugins every other revert with its
  * hash taken out of that line, so they still read it as a revert, which

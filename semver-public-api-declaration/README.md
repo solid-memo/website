@@ -45,3 +45,10 @@ as it was made, so that a newer version is shown to read what an older
 one saved
 ([releasing.md](../docs/releasing.md#what-never-changes)). A line added
 is a promise added, and needs nothing.
+
+The folder is named for what it is: the public API that
+[Semantic Versioning](https://semver.org/#spec-item-1) asks a project
+to declare, which decides whether a change is a major, minor or patch
+release. It holds no server's API; Solid Memo has none. Until #1034 it
+was named `api/`, and `npm run check:breaking` reads it under that name
+at a commit from before then.

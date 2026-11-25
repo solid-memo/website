@@ -163,7 +163,7 @@ const ROUTES: StudioRoute[] = [
  * renamed or no longer read, is a breaking change, which
  * `npm run check:breaking` holds to a commit that says so.
  */
-it("keeps api/routes/studio.txt to the hashes the Studio opens", async () => {
+it("keeps semver-public-api-declaration/routes/studio.txt to the hashes the Studio opens", async () => {
   const opened = (hash: string, route: StudioRoute) => {
     expect(parseStudioHash(hash)).toEqual(route);
     expect(isStudioHash(hash)).toBe(true);
@@ -177,6 +177,6 @@ it("keeps api/routes/studio.txt to the hashes the Studio opens", async () => {
     opened(`#${STUDIO_PATH}/${hashParams({ instance: INSTANCE })}`, home),
   ];
   await expect(`${lines.sort().join("\n")}\n`).toMatchFileSnapshot(
-    "../../../../api/routes/studio.txt",
+    "../../../../semver-public-api-declaration/routes/studio.txt",
   );
 });

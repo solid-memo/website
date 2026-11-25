@@ -581,7 +581,8 @@ They need checking again before anything relies on them.
 - MUST, met — the drafts and de facto ones don't hinder reuse
   (standards.md).
 - SHOULD, met — where no standard existed, the project publishes its own
-  open vocabulary and shapes in `ns/`. Since 2.0.0, `api/frozen/` and
+  open vocabulary and shapes in `ns/`. Since 2.0.0, `semver-public-api-declaration/frozen/` (`api/frozen/`
+  until #1034) and
   `npm run check:breaking` keep a published shape or term from being
   taken back ([releasing.md](releasing.md#the-public-api)).
 - SHOULD, met — machine-testable standards preferred: two engines in CI
@@ -635,9 +636,10 @@ They need checking again before anything relies on them.
   export has a comment.
 - OPTIONAL, partial — the policy and the docs tested against the code.
   - The generated vocabulary, the vendored packages' list, the SM-2 and
-    FSRS-6 tables and, since 2.0.0, the public API in `api/` are
+    FSRS-6 tables and, since 2.0.0, the public API in `semver-public-api-declaration/`
+    (`api/` until #1034) are
     checked: a test writes each file from the code and fails when they
-    disagree ([api/README.md](../api/README.md)).
+    disagree ([semver-public-api-declaration/README.md](../semver-public-api-declaration/README.md)).
   - Since 2.1.1, the built site's test checks that every address
     publiccode.yml names on the site's domain is a page the build
     serves.

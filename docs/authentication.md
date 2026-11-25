@@ -226,7 +226,7 @@ before the document restores with the client it was registered as. The
 next login moves it to the document.
 
 - **The address is part of the public API**
-  ([api/self-hosting.txt](../api/self-hosting.txt)): providers record
+  ([semver-public-api-declaration/self-hosting.txt](../semver-public-api-declaration/self-hosting.txt)): providers record
   consent per client ID, so a new address asks every learner again.
 - **The provider reads it, not the app.** A provider that lists `webid`
   but can't fetch the document refuses the login on its own page and

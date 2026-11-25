@@ -179,7 +179,7 @@ and the earlier ones stay. For each snapshot, the current app reads
 every value the records hold, and saving them back leaves each document
 saying what it said
 ([podSnapshots.roundtrip.test.ts](../packages/adapters/solid/src/podSnapshots.roundtrip.test.ts)).
-`api/frozen/pods.txt` holds each file's hash, so a snapshot edited or
+`semver-public-api-declaration/frozen/pods.txt` holds each file's hash, so a snapshot edited or
 removed fails `check:breaking` whatever a commit says.
 
 ### What a merge commit decides
@@ -224,12 +224,12 @@ only in its spaces doesn't undo it
 [releaseWithoutMerges.ts](../scripts/releaseWithoutMerges.ts)). Patch
 ids leave out line numbers, so a change that puts the same lines back
 at another place, with the same context, counts as undoing the commit
-too. `npm run check:breaking` still compares `api/` itself and finds a
+too. `npm run check:breaking` still compares `semver-public-api-declaration/` itself and finds a
 line of it that is gone. A revert that doesn't undo its commit still
 releases a patch, and the commit it names counts as usual, a breaking
 one too. `npm run check:breaking` reads the commits in the
 same way, so a breaking commit that a revert undoes no longer declares
-a line of `api/` gone, and one that a revert only names still does. Its
+a line of `semver-public-api-declaration/` gone, and one that a revert only names still does. Its
 base can be later than the last release, so it checks again from the
 last release tag, the commits the release reads
 ([below](#how-ci-holds-to-it)). On a
@@ -259,9 +259,9 @@ miss part of a message.
 
 ## How CI holds to it
 
-[`api/`](../api/README.md) holds the public API, one promise a line: the
+[`semver-public-api-declaration/`](../semver-public-api-declaration/README.md) holds the public API, one promise a line: the
 formats the app reads, the hashes,
-what the app keeps in the browser and what a copy relies on. `api/frozen/` holds
+what the app keeps in the browser and what a copy relies on. `semver-public-api-declaration/frozen/` holds
 [what never changes](#what-never-changes): the formats the app writes,
 where data lives in a pod, the databases' versions, the
 published documents and the vocabulary's terms. Each file is written by
@@ -290,12 +290,15 @@ it on every pull request, in the merge queue and on every push to
   went again after it. With no release tag yet, the check says so
   ("No release tag found; checked from the base only.") and reads from
   the base alone.
-- **A line of `api/frozen/` gone** fails the check, whatever the
+- **A line of `semver-public-api-declaration/frozen/` gone** fails the check, whatever the
   commits say. A format written never moves, nor does the data in a
   pod. A published address keeps answering, a published shape
   is never edited, a term is never taken back.
 - **A commit that says it breaks** while no line went is noted, and
   passes: removing a feature changes no file.
+- **A base or release from before #1034** has these files in `api/`,
+  the folder's old name. The check reads them there, as if they were in
+  `semver-public-api-declaration/`, so the rename takes no line away.
 
 A line added needs nothing. Review covers what no file can hold, such
 as a feature removed.

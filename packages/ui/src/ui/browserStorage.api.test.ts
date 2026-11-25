@@ -23,7 +23,7 @@ const KINDS: Record<RecentLanguageKind, null> = { deck: null, own: null };
  * breaking change, which
  * `npm run check:breaking` holds to a commit that says so.
  */
-it("keeps api/browser-storage/ui.txt to what the browser keeps", async () => {
+it("keeps semver-public-api-declaration/browser-storage/ui.txt to what the browser keeps", async () => {
   const lines = [
     ...(Object.keys(KINDS) as RecentLanguageKind[]).map(
       (kind) => `localStorage: ${recentKey(kind)}`,
@@ -34,6 +34,6 @@ it("keeps api/browser-storage/ui.txt to what the browser keeps", async () => {
     `sessionStorage: ${loginWebIdKey}, until the next page load`,
   ];
   await expect(`${lines.sort().join("\n")}\n`).toMatchFileSnapshot(
-    "../../../../api/browser-storage/ui.txt",
+    "../../../../semver-public-api-declaration/browser-storage/ui.txt",
   );
 });

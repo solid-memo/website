@@ -393,8 +393,8 @@ jobs:
   # (docs/deck-library.md#checks): no published version
   # (decks/<name>/v<N>.ttl) edited or removed, and every version new
   # since then naming the library's contact and no email. The public
-  # API (docs/releasing.md#how-ci-holds-to-it): no line of api/ gone
-  # unless a commit says the change breaks, and none of api/frozen/ at
+  # API (docs/releasing.md#how-ci-holds-to-it): no line of semver-public-api-declaration/ gone
+  # unless a commit says the change breaks, and none of semver-public-api-declaration/frozen/ at
   # all. Earlier releases' own code
   # (docs/releasing.md#what-never-changes): a pod is exchanged with
   # the first release that has the exchange's runner and the first of

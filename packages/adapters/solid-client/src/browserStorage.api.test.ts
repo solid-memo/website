@@ -12,8 +12,8 @@ import { PROVIDER_REDIRECT_KEY } from "./providerRedirect";
  * it. A line that goes is a breaking change, which
  * `npm run check:breaking` holds to a commit that says so.
  */
-it("keeps api/browser-storage/solid-client.txt to what the browser keeps", async () => {
+it("keeps semver-public-api-declaration/browser-storage/solid-client.txt to what the browser keeps", async () => {
   await expect(`sessionStorage: ${PROVIDER_REDIRECT_KEY}\n`).toMatchFileSnapshot(
-    "../../../../api/browser-storage/solid-client.txt",
+    "../../../../semver-public-api-declaration/browser-storage/solid-client.txt",
   );
 });

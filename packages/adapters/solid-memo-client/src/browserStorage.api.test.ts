@@ -33,7 +33,7 @@ const SESSION_FIELDS: Record<keyof StoredSession, null> = {
  * breaking change, which `npm run check:breaking` holds to a commit
  * that says so.
  */
-it("keeps api/browser-storage/solid-memo-client.txt to what the browser keeps", async () => {
+it("keeps semver-public-api-declaration/browser-storage/solid-memo-client.txt to what the browser keeps", async () => {
   const lines = [
     `indexedDB: ${DATABASE} version ${DATABASE_VERSION}, stores ${[REGISTRATIONS, SESSIONS].sort().join(", ")}`,
     `indexedDB: ${DATABASE} store ${REGISTRATIONS}, keyed by issuer and redirect URL`,
@@ -42,7 +42,7 @@ it("keeps api/browser-storage/solid-memo-client.txt to what the browser keeps", 
     `Web Locks: ${SESSION_LOCK}`,
   ];
   await expect(`${lines.sort().join("\n")}\n`).toMatchFileSnapshot(
-    "../../../../api/browser-storage/solid-memo-client.txt",
+    "../../../../semver-public-api-declaration/browser-storage/solid-memo-client.txt",
   );
 });
 
@@ -51,8 +51,8 @@ it("keeps api/browser-storage/solid-memo-client.txt to what the browser keeps", 
  * older version cannot open a database a newer one raised. A line that
  * goes fails `npm run check:breaking` whatever a commit says.
  */
-it("keeps api/frozen/browser-storage/solid-memo-client.txt to the database's version", async () => {
+it("keeps semver-public-api-declaration/frozen/browser-storage/solid-memo-client.txt to the database's version", async () => {
   await expect(`indexedDB: ${DATABASE} version ${DATABASE_VERSION}\n`).toMatchFileSnapshot(
-    "../../../../api/frozen/browser-storage/solid-memo-client.txt",
+    "../../../../semver-public-api-declaration/frozen/browser-storage/solid-memo-client.txt",
   );
 });

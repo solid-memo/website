@@ -16,11 +16,11 @@
  *   it when it was made. This app reads no less of it: every value
  *   there is read again, and a value read besides is one added since.
  * - Saving what was read back leaves each document saying what it said.
- * - `api/frozen/pods.txt` holds the hash of each file, so a snapshot
+ * - `semver-public-api-declaration/frozen/pods.txt` holds the hash of each file, so a snapshot
  *   edited or removed fails here and in `npm run check:breaking`.
  *
  * To add the next snapshot after a change you meant, run this test with
- * `-u` and commit the new files with the change (api/README.md).
+ * `-u` and commit the new files with the change (semver-public-api-declaration/README.md).
  */
 import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
@@ -142,7 +142,7 @@ describe.each(kept)("snapshot %i", (number) => {
   });
 });
 
-it("keeps api/frozen/pods.txt to the snapshots kept, each as it was made", async () => {
+it("keeps semver-public-api-declaration/frozen/pods.txt to the snapshots kept, each as it was made", async () => {
   const lines = (existsSync(PODS) ? readdirSync(PODS) : []).sort().map(
     (name) =>
       `pods/${name} sha256:${createHash("sha256")
@@ -150,6 +150,6 @@ it("keeps api/frozen/pods.txt to the snapshots kept, each as it was made", async
         .digest("hex")}`,
   );
   await expect(`${lines.join("\n")}\n`).toMatchFileSnapshot(
-    join(REPOSITORY_ROOT, "api/frozen/pods.txt"),
+    join(REPOSITORY_ROOT, "semver-public-api-declaration/frozen/pods.txt"),
   );
 });

@@ -9,7 +9,7 @@ import { expect, it } from "vitest";
 import { isTestFile, sourceFiles } from "./checkBoundaries.ts";
 
 const ROOT = join(import.meta.dirname, "..");
-const CONTRACT = join(ROOT, "api/browser-storage");
+const CONTRACT = join(ROOT, "semver-public-api-declaration/browser-storage");
 
 /**
  * The names under `solid-memo` the apps' and packages' code holds that
@@ -44,12 +44,12 @@ const listed = (contract: string, name: string) =>
 /**
  * Every name the code keeps in the browser under (a storage key or its
  * prefix, a database, a lock, a channel) is in a file of
- * api/browser-storage, so that renaming or dropping it is a line gone,
+ * semver-public-api-declaration/browser-storage, so that renaming or dropping it is a line gone,
  * which `npm run check:breaking` holds to a commit that says so. A key
  * only the code knows would change unnoticed and leave what it held
  * behind in the browser.
  */
-it("finds every browser storage name of the code in api/browser-storage", () => {
+it("finds every browser storage name of the code in semver-public-api-declaration/browser-storage", () => {
   const contract = readdirSync(CONTRACT)
     .map((file) => readFileSync(join(CONTRACT, file), "utf8"))
     .join("");

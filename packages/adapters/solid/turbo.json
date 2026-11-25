@@ -43,7 +43,7 @@
       ],
       "inputs": [
         "$TURBO_EXTENDS$",
-        "$TURBO_ROOT$/api/frozen/pods.txt",
+        "$TURBO_ROOT$/semver-public-api-declaration/frozen/pods.txt",
         "$TURBO_ROOT$/ns/**",
         "$TURBO_ROOT$/decks/**",
         "!$TURBO_ROOT$/decks/index.ttl",

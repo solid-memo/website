@@ -5,21 +5,23 @@
 /**
  * `npm run check:breaking -- --base <git ref>`: a change to the public
  * API (docs/releasing.md#the-public-api) is not released as a minor
- * version by mistake. The API is written down in api/, one promise a
- * line, each file kept to the code by a test in the package it reads
- * (api/README.md):
+ * version by mistake. The API is written down in
+ * semver-public-api-declaration/, one promise a line, each file kept to
+ * the code by a test in the package it reads
+ * (semver-public-api-declaration/README.md):
  *
- * - A file of api/: a line may go only in a breaking change, so when
- *   one that was there at the base is gone, a commit since the base must
- *   say it breaks (`!` after its type, or a `BREAKING CHANGE:` footer),
- *   whatever its type, as the release makes any such commit a major
- *   version, a `revert:` one too, or say why it does not (a
- *   `Contract-Change: not-breaking <reason>` trailer).
- * - api/frozen/: a line never goes, breaking or not. A published shape
- *   is never edited, nor a published file removed, and the format a
- *   kind of data is written in, the place of the data in a pod and the
- *   version of a database in the browser never move: an older version
- *   of the app could not save, find or open what a newer one left.
+ * - A file of semver-public-api-declaration/: a line may go only in a
+ *   breaking change, so when one that was there at the base is gone, a
+ *   commit since the base must say it breaks (`!` after its type, or a
+ *   `BREAKING CHANGE:` footer), whatever its type, as the release makes
+ *   any such commit a major version, a `revert:` one too, or say why it
+ *   does not (a `Contract-Change: not-breaking <reason>` trailer).
+ * - semver-public-api-declaration/frozen/: a line never goes, breaking
+ *   or not. A published shape is never edited, nor a published file
+ *   removed, and the format a kind of data is written in, the place of
+ *   the data in a pod and the version of a database in the browser
+ *   never move: an older version of the app could not save, find or
+ *   open what a newer one left.
  *
  * The base is where the branch left `<git ref>` (their merge base), so a
  * line that the ref gained since then is not taken for one the branch
@@ -89,8 +91,10 @@ export type Commit = { hash: string; message: string };
 /** A line of a file at the base that the file no longer has. */
 export type LostLine = { file: string; line: string };
 
-const API = "api/";
-const FROZEN = "api/frozen/";
+const API = "semver-public-api-declaration/";
+const FROZEN = `${API}frozen/`;
+/** The folder's name until #1034: a commit from before then has the files there. */
+const OLD_API = "api/";
 
 /** Whether a path is one of the files that write the public API down. */
 export function isApiFile(path: string): boolean {
@@ -127,7 +131,7 @@ export function saysBreaking(message: string): boolean {
 }
 
 /**
- * The reason a commit gives for a line of api/ it removes without
+ * The reason a commit gives for a line of semver-public-api-declaration/ it removes without
  * breaking anything, on a line of its own as the release's parser
  * splits a message into lines.
  */
@@ -160,7 +164,7 @@ export function verdict(
   if (contract.length > 0 && breaking.length === 0 && waived.length === 0) {
     for (const { file, line } of contract) problems.push(`${file}: "${line}" is gone.`);
     problems.push(
-      "A line of api/ went, so the public API changed (docs/releasing.md#the-public-api). If the change is breaking, its commit says so: `!` after its type and a `BREAKING CHANGE:` footer that tells users what to do. If it is not (an old address still opens, a key's old value is still read), add a `Contract-Change: not-breaking <reason>` trailer to the commit.",
+      "A line of semver-public-api-declaration/ went, so the public API changed (docs/releasing.md#the-public-api). If the change is breaking, its commit says so: `!` after its type and a `BREAKING CHANGE:` footer that tells users what to do. If it is not (an old address still opens, a key's old value is still read), add a `Contract-Change: not-breaking <reason>` trailer to the commit.",
     );
   } else if (contract.length > 0) {
     for (const { file, line } of contract) notes.push(`${file}: "${line}" is gone.`);
@@ -171,14 +175,14 @@ export function verdict(
   } else if (lost.length === 0) {
     for (const commit of breaking) {
       notes.push(
-        `${subjectOf(commit)} says it breaks, but no line of api/ went. That is right for a feature removed; otherwise drop the \`!\` and the footer.`,
+        `${subjectOf(commit)} says it breaks, but no line of semver-public-api-declaration/ went. That is right for a feature removed; otherwise drop the \`!\` and the footer.`,
       );
     }
   }
   return { problems, notes };
 }
 
-/** What to do instead, for each file of api/frozen/ that holds the data where it is; any other lists what is published. */
+/** What to do instead, for each file of semver-public-api-declaration/frozen/ that holds the data where it is; any other lists what is published. */
 const HELD: readonly [file: string, why: string][] = [
   [
     `${FROZEN}formats.txt`,
@@ -208,9 +212,9 @@ function neverWhy(file: string): string {
 export interface BreakingIo {
   /** The merge base of `ref` and HEAD. */
   mergeBase(ref: string): string;
-  /** The files of api/ at a commit. */
+  /** The files of semver-public-api-declaration/ at a commit. */
   filesAt(commit: string): Files;
-  /** The files of api/ in the working tree. */
+  /** The files of semver-public-api-declaration/ in the working tree. */
   files(): Files;
   /** The commits from `commit` to HEAD, merges aside, as the release reads them. */
   commitsSince(commit: string): Commit[];
@@ -294,13 +298,17 @@ export function defaultIo(repo: string): BreakingIo {
   const paths = (listing: string) => listing.split("\0").filter(isApiFile);
   return {
     mergeBase: (ref) => git("merge-base", "--end-of-options", ref, "HEAD").trim(),
-    filesAt: (commit) =>
-      new Map(
-        paths(git("ls-tree", "-r", "-z", "--name-only", commit, "--", API)).map((path) => [
-          path,
-          git("show", `${commit}:${path}`),
-        ]),
-      ),
+    // Under the folder's new name, so the rename takes no line away.
+    filesAt: (commit) => {
+      const listed = (folder: string) =>
+        git("ls-tree", "-r", "-z", "--name-only", commit, "--", folder)
+          .split("\0")
+          .map((path) => ({ path: `${API}${path.slice(folder.length)}`, at: path }))
+          .filter(({ path }) => isApiFile(path));
+      const now = listed(API);
+      const files = now.length > 0 ? now : listed(OLD_API);
+      return new Map(files.map(({ path, at }) => [path, git("show", `${commit}:${at}`)]));
+    },
     // Tracked or new, and still there: a file deleted but not yet staged is gone.
     files: () =>
       new Map(
