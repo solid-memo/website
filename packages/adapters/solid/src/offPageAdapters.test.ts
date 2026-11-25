@@ -12,7 +12,14 @@ import { catalogUrlOf } from "@solid-memo/domain/instanceLayout";
 import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { ReadLimitError } from "@solid-memo/solid-client/interface";
-import { FOREIGN_LIMITS, limitVars, RELEASE_LIMITS } from "@solid-memo/solid-client/readLimits";
+import {
+  FOREIGN_LIMITS,
+  isPastBudget,
+  limitVars,
+  noneSpent,
+  RELEASE_LIMITS,
+  sharedReadBudget,
+} from "@solid-memo/solid-client/readLimits";
 import { sourceOf } from "@solid-memo/solid-client/rdf";
 import { readDocument } from "@solid-memo/solid-client/resources";
 import { keyOf, quadsOf, termOf } from "./mappers/releaseDraftMapper";
@@ -25,7 +32,7 @@ import {
   offPageShapeValidator,
 } from "./offPageAdapters";
 import { offPageJobs } from "./offPageJobs";
-import type { Jobs } from "./offPageServe";
+import type { JobEnv, Jobs } from "./offPageServe";
 import { createShaclShapeValidator } from "./shaclShapeValidator";
 import { createSolidDeckArchive, DECK_FILE_LIMITS } from "./solidDeckArchive";
 import { releaseDocumentsOf } from "./solidDeckLibrary";
@@ -332,5 +339,53 @@ describe("offPageDocumentReader", () => {
     await expect(read(RELEASE, { fetch: releaseFetch })).rejects.toEqual(
       new ReadLimitError(RELEASE, FOREIGN_LIMITS),
     );
+  });
+
+  it("holds reads at once to the budget they share, as reads in the page are, and gives back what a failed one held", async () => {
+    // Each document of 8 triples, within its own limits; 10 for all of them together.
+    const limits = { bytes: 1_000_000, quads: 100, characters: 1_000_000 };
+    const budget = { bytes: 1_000_000, quads: 10, characters: 1_000_000 };
+    const served: typeof globalThis.fetch = async (input) =>
+      Object.defineProperty(
+        new Response(
+          Array.from({ length: 8 }, (_, at) => `<#s> <https://p.example/p> <#o${at}> .`).join("\n"),
+          { headers: { "Content-Type": "text/turtle" } },
+        ),
+        "url",
+        { value: String(input) },
+      );
+    const urls = ["a", "b", "c", "d"].map((name) => `https://other.example/${name}.ttl`);
+    const outcomes = (results: PromiseSettledResult<unknown>[]) =>
+      results.map((result) =>
+        result.status === "fulfilled" ? "read" : isPastBudget(result.reason) ? "budget" : "other",
+      );
+    const shared = () => sharedReadBudget({ limits, budget, rereads: noneSpent() })(served);
+    const inPage = shared();
+    expect(
+      outcomes(await Promise.allSettled(urls.map((url) => readDocument(url, { fetch: inPage })))),
+    ).toEqual(["read", "budget", "budget", "budget"]);
+    const read = offPageDocumentReader(
+      createOffPage({
+        spawn: () => inProcessWorker(),
+        config: SHAPE_SOURCES,
+        freeWhileWaiting: true,
+      }),
+    );
+    const offPage = shared();
+    expect(
+      outcomes(await Promise.allSettled(urls.map((url) => read(url, { fetch: offPage })))),
+    ).toEqual(["read", "budget", "budget", "budget"]);
+
+    // A read whose worker ends once the body is sent gives back the room it held: the next read has all of it.
+    const fetch = shared();
+    const hangs = {
+      readDocument: async (env: JobEnv, { url }: { url: string }) => {
+        await env.fetch("doc")(url);
+        await new Promise(() => {});
+      },
+    } as unknown as Jobs;
+    const ended = offPageDocumentReader(offPageOf(hangs, 10));
+    await expect(ended(urls[0]!, { fetch })).rejects.toBeInstanceOf(ReadLimitError);
+    await expect(read(urls[1]!, { fetch })).resolves.toBeDefined();
   });
 });

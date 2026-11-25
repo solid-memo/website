@@ -37,7 +37,8 @@ const MAX_BRIDGED = 16;
  * JobEnv), each with the page's fetch of the id the job names: the
  * answer comes back with its body whole, and is read here as a
  * response, under the limits the page reads it under (limitedFetch),
- * counting on from what the page had spent of them. What the job's
+ * counting on from where the page puts it, so that it may take only the
+ * room the page holds for it in its tally (holdRoom). What the job's
  * parses count of triples and their characters in that tally is sent
  * back to the page as the job ends, before its result, so that the
  * page's tally holds it as if it had parsed the answer itself. A

@@ -23,9 +23,11 @@ import type { ReadLimits } from "./interface";
 import {
   blankNodeNamer,
   FOREIGN_LIMITS,
+  holdRoom,
   isPastBudget,
   limitedFetch,
   limitsOf,
+  noHolders,
   limitVars,
   MAX_DUE_DAYS,
   MAX_TERM_CHARACTERS,
@@ -38,6 +40,7 @@ import {
   NO_SIZE_LIMITS,
   RELEASE_LIMITS,
   sharedReadBudget,
+  roomsIn,
   spentOf,
   termKeyLength,
   textChunks,
@@ -491,6 +494,156 @@ describe("sharedReadBudget", () => {
   it("gives an answer with no body as it is, counting nothing", async () => {
     const fetch = budgeted()(serving(null).fetch);
     for (let read = 0; read < 30; read++) expect((await fetch(URL_)).status).toBe(304);
+  });
+});
+
+describe("holdRoom", () => {
+  const LIMITS_ = { bytes: 1000, quads: 10, characters: 1000 };
+  const turtle = (quads: number) =>
+    serving(Array.from({ length: quads }, (_, at) => `<#s> <#p> ${at} .`).join("\n"), {
+      headers: { "Content-Type": "text/turtle" },
+    }).fetch;
+  /** The tally of a read of `url` through `fetch`, its body read and none of it parsed, as the page reads one for a worker. */
+  const tallyOf = async (fetch: typeof globalThis.fetch, url: string) => {
+    const response = await fetch(url);
+    await response.arrayBuffer();
+    return spentOf(response)!;
+  };
+
+  it("holds what is left of a tally under its limits for one parse at a time, and counts what the parse took instead", async () => {
+    const spent = { bytes: 4, quads: 3, characters: 100 };
+    const first = await holdRoom(spent, LIMITS_, { wait: true });
+    expect(first.start).toEqual({ bytes: 4, quads: 3, characters: 100 });
+    // The room is held apart from the tally, which counts only what was taken in.
+    expect(spent).toEqual({ bytes: 4, quads: 3, characters: 100 });
+    let second: Awaited<ReturnType<typeof holdRoom>> | undefined;
+    void holdRoom(spent, LIMITS_, { wait: true }).then((held) => (second = held));
+    // One that holds room elsewhere takes what is left at once.
+    const third = await holdRoom(spent, LIMITS_, { wait: false });
+    expect(third.start.quads).toBe(10);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    first.settle({ quads: 2, characters: 50 });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(second).toBeUndefined();
+    third.settle({ quads: 0, characters: 0 });
+    await vi.waitFor(() => expect(second).toBeDefined());
+    expect(second!.start).toEqual({ bytes: 4, quads: 5, characters: 150 });
+  });
+
+  it("holds room in a tally as the rooms given for it say, never through the tally itself", async () => {
+    const spent = { bytes: 4, quads: 3, characters: 100 };
+    const budget = { quads: 0, characters: 0 };
+    const bound = { bytes: 1000, quads: 5, characters: 1000 };
+    roomsIn(spent, {
+      holders: noHolders(),
+      roomOf: (key) => ({ room: key === "quads" ? 2 : 900, whole: false, bound }),
+      hold: (key, room) => {
+        budget[key] += room;
+        return () => {
+          budget[key] -= room;
+        };
+      },
+    });
+    const held = await holdRoom(spent, LIMITS_, { wait: true });
+    expect(held.start).toEqual({ bytes: 4, quads: 8, characters: 100 });
+    expect(budget).toEqual({ quads: 2, characters: 900 });
+    expect(spent).toEqual({ bytes: 4, quads: 3, characters: 100 });
+    expect(held.settle({ quads: 3, characters: 10 })).toBe(bound);
+    expect(budget).toEqual({ quads: 0, characters: 0 });
+    expect(spent).toEqual({ bytes: 4, quads: 6, characters: 110 });
+  });
+
+  it("holds nothing of a count with no limit, the parse counting on from what is spent", async () => {
+    const spent = { bytes: 4, quads: 3, characters: 100 };
+    const held = await holdRoom(spent, NO_SIZE_LIMITS, { wait: true });
+    expect(held.start).toEqual(spent);
+    held.settle({ quads: 2, characters: 50 });
+    expect(spent).toEqual({ bytes: 4, quads: 5, characters: 150 });
+  });
+
+  it("holds what a shared budget leaves in it for every read, so that parses at once take in no more than it together", async () => {
+    const budget = { bytes: 10_000, quads: 12, characters: 10_000 };
+    const fetch = sharedReadBudget({ limits: LIMITS_, budget, rereads: noneSpent() })(turtle(8));
+    const first = await holdRoom(await tallyOf(fetch, "https://other.example/a.ttl"), LIMITS_, {
+      wait: true,
+    });
+    expect(first.start.quads).toBe(0);
+    const tally = await tallyOf(fetch, "https://other.example/c.ttl");
+    // What the first holds is spent for a read in the page too: past it, the budget is named.
+    await expect(
+      getSolidDatasetLinear("https://other.example/b.ttl", { fetch }),
+    ).rejects.toMatchObject({ limits: budget });
+    // Less is left than a read's own limits: the next waits while others hold room.
+    let second: Awaited<ReturnType<typeof holdRoom>> | undefined;
+    void holdRoom(tally, LIMITS_, { wait: true }).then((held) => (second = held));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(second).toBeUndefined();
+    // Within its own limits, which the budget left it whole: no budget to name.
+    expect(first.settle({ quads: 8, characters: 200 })).toBeUndefined();
+    await vi.waitFor(() => expect(second).toBeDefined());
+    // 8 and the refused read's 3 taken: 1 left of 12.
+    expect(second!.start.quads).toBe(9);
+    // Past the room the budget left it: the budget is named.
+    expect(second!.settle({ quads: 2, characters: 10 })).toBe(budget);
+    await expect(fetch("https://other.example/d.ttl")).rejects.toMatchObject({ limits: budget });
+  });
+
+  it("gives a read within the budget all its own limits at once, though others hold room", async () => {
+    const budget = { bytes: 10_000, quads: 100, characters: 10_000 };
+    const fetch = sharedReadBudget({ limits: LIMITS_, budget, rereads: noneSpent() })(turtle(8));
+    const first = await holdRoom(await tallyOf(fetch, "https://other.example/a.ttl"), LIMITS_, {
+      wait: true,
+    });
+    const second = await holdRoom(await tallyOf(fetch, "https://other.example/b.ttl"), LIMITS_, {
+      wait: true,
+    });
+    expect([first.start.quads, second.start.quads]).toEqual([0, 0]);
+  });
+
+  it("gives a read again the room its document's largest read leaves out of the rereads, and gives it back", async () => {
+    const budget = { bytes: 10_000, quads: 6, characters: 10_000 };
+    const rereads = { bytes: 10_000, quads: 3, characters: 10_000 };
+    const fetch = sharedReadBudget({ limits: LIMITS_, budget, rereads })(turtle(4));
+    const url = "https://other.example/a.ttl";
+    await getSolidDatasetLinear(url, { fetch });
+    // 4 of 6 spent: 2 left, and 3 of the rereads within the largest read of 4.
+    const again = await holdRoom(await tallyOf(fetch, url), LIMITS_, { wait: true });
+    expect(again.start.quads).toBe(LIMITS_.quads - 5);
+    again.settle({ quads: 0, characters: 0 });
+    // Given back: a read again in the page has the rereads still, then 2 of the budget.
+    await expect(getSolidDatasetLinear(url, { fetch })).resolves.toBeDefined();
+    await expect(getSolidDatasetLinear(url, { fetch })).rejects.toMatchObject({ limits: budget });
+  });
+
+  it("gives a read whose budget others spent past it no room, so that its parse is past it at once", async () => {
+    const budget = { bytes: 10_000, quads: 2, characters: 10_000 };
+    const fetch = sharedReadBudget({ limits: LIMITS_, budget, rereads: noneSpent() })(turtle(3));
+    const tally = await tallyOf(fetch, "https://other.example/a.ttl");
+    await expect(
+      getSolidDatasetLinear("https://other.example/b.ttl", { fetch }),
+    ).rejects.toMatchObject({ limits: budget });
+    const held = await holdRoom(tally, LIMITS_, { wait: true });
+    expect(held.start.quads).toBe(LIMITS_.quads + 1);
+    expect(held.settle({ quads: 1, characters: 10 })).toBe(budget);
+  });
+
+  it("names the total a parse went past when it left less room than the budget of its scope", async () => {
+    const budget = { bytes: 10_000, quads: 100, characters: 10_000 };
+    const total = { bytes: 10_000, quads: 6, characters: 10_000 };
+    const fetch = sharedReadBudget({
+      limits: LIMITS_,
+      budget,
+      rereads: noneSpent(),
+      scope: (url) => new URL(url).host,
+      total,
+    })(turtle(4));
+    await getSolidDatasetLinear("https://one.example/a.ttl", { fetch });
+    const held = await holdRoom(await tallyOf(fetch, "https://two.example/a.ttl"), LIMITS_, {
+      wait: true,
+    });
+    expect(held.start.quads).toBe(LIMITS_.quads - 2);
+    // Within the room, nothing is named; past it, the total.
+    expect(held.settle({ quads: 3, characters: 10 })).toBe(total);
   });
 });
 

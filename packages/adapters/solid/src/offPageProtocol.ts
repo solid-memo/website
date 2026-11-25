@@ -40,7 +40,7 @@ export interface RunMessage {
   budget: boolean;
 }
 
-/** An answer the page got, its body read whole, with the limits it is read under and what was spent of them as it was. */
+/** An answer the page got, its body read whole, with the limits it is read under and the room its parse has of them. */
 export interface SentResponse {
   url: string;
   status: number;
@@ -48,7 +48,11 @@ export interface SentResponse {
   redirected: boolean;
   headers: [string, string][];
   body: ArrayBuffer | null;
-  /** The limits the page reads it under, and what was spent of them as it was (limitedFetch): none when it has none, or no body. */
+  /**
+   * The limits the page reads it under (limitedFetch), and what the parse
+   * counts on from, which leaves it only the room the page holds for it
+   * in its tally (holdRoom): none when it has none, or no body.
+   */
   read?: { limits: ReadLimits; spent: ReadsSpent };
 }
 

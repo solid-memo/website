@@ -355,12 +355,31 @@ is the ports' side in the page, which the composition root wires in
   proof is its own fetch's to add.
 - **The read limits hold.** The page reads a body under the limits of
   its read ([readLimits.ts](../packages/adapters/solid-client/src/readLimits.ts)),
-  and the worker parses it under them, counting on from what the page
-  had spent. What the parse counts goes back into the page's tally
-  before the job's result does. A parse past a budget the page's reads
-  share names that budget, as a parse in the page does.
+  and the worker parses it under them. Before the page sends the body,
+  it holds what's left of the limits for the parse in its tally
+  (`holdRoom`), and the worker may take only that room. Every budget
+  the page's reads share holds across reads off the page at once, as
+  it does in the page. That's so for the documents from elsewhere
+  (`FOREIGN_READS_BUDGET`, `INSTANCE_READS_TOTAL`), and for releases
+  from a link (`LINKED_READS_BUDGET`, and one release's limits for a
+  plan's reads together). Room one parse holds is spent for every
+  other read until the parse's counts come back. A read under no
+  budget has its own limits, which one parse at a time holds, apart
+  from what the read counts. Until they settle, a read in the page may
+  be refused for a budget while reads off the page hold room they
+  don't take, though the budget isn't spent once they're done. The
+  budget errs on the side of reading less, never more.
+  A parse that would get less than its read's own limits waits while
+  others hold room, so it's refused only for what's spent. A job that
+  holds room already doesn't wait for itself: its next parse gets
+  what's left at once, maybe none. What the parse counts goes back
+  into the page's tally before the job's result does, and the room it
+  didn't take is given back, also when the job fails or its worker
+  ends. A parse past the room a budget left it names that budget, as
+  a parse in the page does.
 - **A deadline.** A job may work for `OFF_PAGE_DEADLINE_MS` (60
-  seconds), the time it waits for its requests left out. Past it, the
+  seconds). The clock stops while it waits for its requests, for room
+  in the tally, and for a place to work again. Past it, the
   page ends the worker, and shows the document as too large to read: a
   release as `releaseTooLarge`, a file as `deckFileTooLarge`, a
   document from elsewhere as one past `FOREIGN_LIMITS`. A
@@ -374,7 +393,9 @@ is the ports' side in the page, which the composition root wires in
   The reads of documents elsewhere have workers of their own, which
   read no shapes. There, a job waiting for its requests doesn't count,
   so a slow server holds no other read up, and there are at most
-  `OFF_PAGE_WORKERS_IN_ALL` (16) of them.
+  `OFF_PAGE_WORKERS_IN_ALL` (16) of them. A job whose requests are
+  answered waits for a place before its worker gets the answers, so no
+  more than four parse at once.
 - **The build.** Vite bundles the worker as a module of its own
   ([offPageWorker.ts](../packages/adapters/solid/src/offPageWorker.ts)), with the
   Solid client the page has (`worker` in `apps/web/vite.config.ts`). It's
