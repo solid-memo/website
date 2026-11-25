@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { activeCards, type Card } from "@solid-memo/domain/deck";
+import { activeCountOf, type Card } from "@solid-memo/domain/deck";
 import type { LibraryUpgradePlan } from "@solid-memo/domain/libraryUpgrade";
 import { bounded } from "./bounded";
 import { CardRowFront } from "./CardFace";
@@ -26,9 +26,10 @@ export function describeChanges(
   { t, directionLabel }: Pick<I18n, "t" | "directionLabel">,
   none: string = t("libraryUpgradeNotice.noStudiedChanges"),
 ): string {
-  const added = activeCards(plan.add).length;
-  const changed = activeCards(plan.change).length;
-  const about = activeCards(plan.about).length;
+  // The plan's lists are frozen and shared by the copies of one release: each is counted once.
+  const added = activeCountOf(plan.add);
+  const changed = activeCountOf(plan.change);
+  const about = activeCountOf(plan.about);
   const parts = [
     ...(added > 0 ? [t("libraryUpgradeNotice.adds", { count: added })] : []),
     ...(changed > 0 ? [t("libraryUpgradeNotice.changes", { count: changed })] : []),

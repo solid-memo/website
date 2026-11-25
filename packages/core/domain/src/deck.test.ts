@@ -7,6 +7,7 @@ import { MAX_PICTURE_HOSTS } from "./deckPictures";
 import { describe, expect, it } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import {
+  activeCountOf,
   boundedCompletedChapters,
   boundedKeywords,
   cardLabel,
@@ -816,5 +817,35 @@ describe("boundedKeywords", () => {
     expect(bounded[`x-${MAX_DECK_KEYWORDS / MAX_DECK_METADATA - 1}`]).toHaveLength(
       MAX_DECK_METADATA - 1,
     );
+  });
+});
+
+describe("activeCountOf", () => {
+  /** Cards that count each time one is asked whether it's retired. */
+  const looked = () => {
+    const looks = { count: 0 };
+    const card = (retired?: true) => ({
+      get retired() {
+        looks.count += 1;
+        return retired;
+      },
+    });
+    return { looks, cards: [card(), card(true), card()] };
+  };
+
+  it("counts the cards in use once of a frozen array, however often it's asked", () => {
+    const { looks, cards } = looked();
+    const frozen = Object.freeze(cards);
+    expect(activeCountOf(frozen)).toBe(2);
+    expect(activeCountOf(frozen)).toBe(2);
+    expect(looks.count).toBe(cards.length);
+  });
+
+  it("counts them afresh of an array that may still change", () => {
+    const { looks, cards } = looked();
+    expect(activeCountOf(cards)).toBe(2);
+    cards.push({ retired: undefined } as never);
+    expect(activeCountOf(cards)).toBe(3);
+    expect(looks.count).toBe(6);
   });
 });

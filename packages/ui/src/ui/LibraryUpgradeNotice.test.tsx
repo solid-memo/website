@@ -55,6 +55,31 @@ function renderNotice(overrides: Partial<Parameters<typeof LibraryUpgradeNotice>
 }
 
 describe("describeChanges", () => {
+  it("counts the cards of a plan's frozen lists once, for every copy that shares them", () => {
+    let looks = 0;
+    // A card that counts each time it's asked whether it's retired.
+    const looked = <T extends object>(card: T): T =>
+      Object.defineProperty({ ...card }, "retired", {
+        get: () => {
+          looks += 1;
+          return undefined;
+        },
+      });
+    const add = Object.freeze([looked(libraryCard("no")), looked(libraryCard("ax"))]);
+    const change = Object.freeze([looked(libraryCard("se"))]);
+    const about = Object.freeze([looked(card("dk"))]);
+    const shared = { ...plan, add, change, about, remove: [] };
+    // One plan per copy, as the copies of one release have them, each described on each render.
+    for (let render = 0; render < 3; render += 1) {
+      for (let copy = 0; copy < 10; copy += 1) {
+        expect(describeChanges({ ...shared }, en)).toBe(
+          "adds 2 cards, changes 1 card and records what 1 card is about",
+        );
+      }
+    }
+    expect(looks).toBe(add.length + change.length + about.length);
+  });
+
   it("names what the update does, in a list", () => {
     expect(describeChanges(plan, en)).toBe("adds 1 card, changes 2 cards and removes 1 card");
     expect(

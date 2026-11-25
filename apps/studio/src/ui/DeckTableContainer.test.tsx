@@ -417,15 +417,14 @@ describe("DeckTableContainer", () => {
         },
       } as Card;
     };
-    const cards = [counted("a"), counted("b"), counted("c", true)];
+    // Frozen, as the repository gives a read of cards.
+    const cards = Object.freeze([counted("a"), counted("b"), counted("c", true)]) as Card[];
     const useCases = makeUseCasesFake({
       listDecks: vi.fn(async () => decks),
       listCardsInTurn: vi.fn(async () => cards),
     });
-    // The cards kept as read, so that their looks are the container's alone.
-    const queryClient = new QueryClient({
-      defaultOptions: { queries: { retry: false, structuralSharing: false } },
-    });
+    // Structural sharing as the app has it: the query itself keeps the read as it came.
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const { rerender } = renderContainer(useCases, { filter: "" }, queryClient);
     const row = await screen.findByRole("row", { name: /Deck 29/ });
     await waitFor(() => expect(cells(row).at(-1)).toBe("2 cards of Deck 29"));
@@ -436,8 +435,9 @@ describe("DeckTableContainer", () => {
     expect(screen.getByRole("row", { name: /Deck 29/ })).toBeInTheDocument();
     expect(looks).toBe(cards.length);
 
-    // A new read of the document is counted once, and every row shows it.
-    const next = [counted("d"), counted("e"), counted("f"), counted("g", true)];
+    // A new read of the document, with cards the one before had too, is
+    // counted once, and every row shows it.
+    const next = Object.freeze([cards[0]!, cards[1]!, counted("f"), counted("g", true)]);
     queryClient.setQueryData(queryKeys.deckTableCards(decks[0]!.cardsDocumentUrl), next);
     await waitFor(() =>
       expect(cells(screen.getByRole("row", { name: /Deck 29/ })).at(-1)).toBe("3 cards of Deck 29"),

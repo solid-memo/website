@@ -5,7 +5,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
-import { LibraryUpgradeContainer } from "./LibraryUpgradeContainer";
+import { LibraryUpgradeContainer, libraryUpgradeQuery } from "./LibraryUpgradeContainer";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
@@ -83,6 +83,34 @@ function renderPage(useCases: UseCases) {
   );
   return { invalidate, remove };
 }
+
+describe("libraryUpgradeQuery", () => {
+  it("keeps a plan planned again as planned, its lists frozen, though it shares cards with the one before", async () => {
+    const frozenPlan = (about: LibraryUpgradePlan["about"]): LibraryUpgradePlan =>
+      Object.freeze({ ...plan, add: Object.freeze([...plan.add]), about: Object.freeze(about) });
+    const first = frozenPlan([]);
+    // The same card added, and one more recorded as what it is about.
+    const second = frozenPlan([
+      {
+        ...plan.add[0]!,
+        id: "se",
+        url: `${imported.cardsDocumentUrl}#se`,
+        createdAt: "2026-09-21T10:00:00.000Z",
+      },
+    ]);
+    const planLibraryUpgrade = vi.fn().mockResolvedValueOnce(first).mockResolvedValueOnce(second);
+    const useCases = makeUseCasesFake({ planLibraryUpgrade });
+    // Structural sharing as the app has it.
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const query = libraryUpgradeQuery(useCases, imported);
+    expect(await queryClient.fetchQuery(query)).toBe(first);
+    await queryClient.invalidateQueries({ queryKey: query.queryKey, refetchType: "none" });
+    await queryClient.fetchQuery(query);
+    const kept = queryClient.getQueryData<LibraryUpgradePlan>(query.queryKey);
+    expect(kept).toBe(second);
+    expect(Object.isFrozen(kept?.about)).toBe(true);
+  });
+});
 
 describe("LibraryUpgradeContainer", () => {
   it("checks nothing for a home-made deck", async () => {
