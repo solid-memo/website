@@ -586,6 +586,19 @@ export function activeCards<T extends { retired?: true }>(cards: readonly T[]): 
   return cards.filter((card) => card.retired !== true);
 }
 
+const activeCounts = new WeakMap<readonly { retired?: true }[], number>();
+
+/**
+ * How many of the cards are in use (activeCards), counted once of a
+ * frozen array (derivedOnce): the decks that name one cards document
+ * share its read, and the copies of one release share their plan's
+ * lists, so a table of them counts each list once, not once a row on
+ * each render.
+ */
+export function activeCountOf(cards: readonly { retired?: true }[]): number {
+  return derivedOnce(activeCounts, cards, (all) => activeCards(all).length);
+}
+
 /** A deck's cards in use (activeCards), and the place of each among them, by id. */
 export interface ActiveCards {
   /** The cards in use, in the order given: frozen when the cards given are, never to be changed. */

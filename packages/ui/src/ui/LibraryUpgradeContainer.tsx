@@ -25,13 +25,16 @@ import { changes, useWrite, type WriteEffect } from "./writeEffects";
  * What upgrading the deck would do (UseCases.planLibraryUpgrade), kept
  * for the session. Planned for the deck as it is: once an upgrade moves
  * it to another release, the plan for the deck as it was no longer
- * applies.
+ * applies. The plan kept is the very one planned, not a copy shared with
+ * the one before it (structural sharing): its lists stay frozen, so what
+ * is counted of them is counted once (activeCountOf).
  */
 export function libraryUpgradeQuery(useCases: LibraryUseCases, deck: Deck) {
   return {
     queryKey: queryKeys.libraryUpgradePlan(deck.url, deck.sourceUrl, deck.cardsDocumentUrl),
     queryFn: () => useCases.planLibraryUpgrade(deck),
     staleTime: Infinity,
+    structuralSharing: false,
   };
 }
 
