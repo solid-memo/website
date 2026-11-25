@@ -254,8 +254,8 @@ describe("boundaryProblems", () => {
         workspace(
           "browser",
           {
-            "src/localStorageSetting.ts":
-              'import type { DeviceSetting } from "@solid-memo/application/ports/device";',
+            "src/webStorageDeviceStore.ts":
+              'import type { DeviceStore } from "@solid-memo/application/ports/device";',
             "src/fileExchange.ts":
               'import type { DeckRepository } from "@solid-memo/application/ports/pod";',
           },

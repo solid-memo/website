@@ -11,10 +11,7 @@ import {
   type StoredPreferences,
   type StudyPreferences,
 } from "@solid-memo/domain/preferences";
-import type { Palette } from "@solid-memo/domain/palette";
-import type { TextSize } from "@solid-memo/domain/textSize";
-import type { ThemeChoice } from "@solid-memo/domain/theme";
-import type { CustomPalettePreference, DeviceSetting } from "./ports/device";
+import type { DeviceChoices } from "./deviceChoices";
 import type { PreferencesRepository } from "./ports/pod";
 
 /** Stored preferences that fit their shape; null for none, and for ones that do not. */
@@ -37,11 +34,10 @@ export function createPreferenceStore({
   textSizePreference,
 }: {
   preferencesRepository: PreferencesRepository;
-  themePreference: DeviceSetting<ThemeChoice>;
-  palettePreference: DeviceSetting<Palette>;
-  customPalettePreference: CustomPalettePreference;
-  textSizePreference: DeviceSetting<TextSize>;
-}) {
+} & Pick<
+  DeviceChoices,
+  "themePreference" | "palettePreference" | "customPalettePreference" | "textSizePreference"
+>) {
   const preferenceReads = new Map<string, Promise<PreferencesRead>>();
   /**
    * An instance's stored preferences as read ("misfit" when they do not
@@ -173,12 +169,12 @@ export function createPreferenceStore({
    * keeps as it was chosen, is left as it is.
    */
   function keepAppearance(instanceUrl: string, preferences: StudyPreferences) {
-    themePreference.choose(preferences.theme);
+    themePreference.write(preferences.theme);
     if (!isPaletteOf(instanceUrl, preferences.palette)) {
-      palettePreference.choose(shownPalette(preferences));
-      customPalettePreference.choose(null);
+      palettePreference.write(shownPalette(preferences));
+      customPalettePreference.write(null);
     }
-    textSizePreference.choose(preferences.textSize);
+    textSizePreference.write(preferences.textSize);
   }
   /**
    * The preferences of an instance made now, or saved for the first
@@ -189,15 +185,15 @@ export function createPreferenceStore({
     preferences: StudyPreferences,
     instanceUrl: string | null = null,
   ): StudyPreferences {
-    const custom = customPalettePreference.chosen();
+    const custom = customPalettePreference.read();
     return {
       ...preferences,
-      theme: themePreference.chosen(),
+      theme: themePreference.read(),
       palette:
         custom !== null && instanceUrl !== null && isPaletteOf(instanceUrl, custom.url)
           ? custom.url
-          : conceptOfPalette(palettePreference.chosen()),
-      textSize: textSizePreference.chosen(),
+          : conceptOfPalette(palettePreference.read()),
+      textSize: textSizePreference.read(),
     };
   }
 

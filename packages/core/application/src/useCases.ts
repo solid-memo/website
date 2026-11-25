@@ -3,16 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { ShapeValidator } from "./ports/checks";
-import type {
-  LanguagePreference,
-  CustomPalettePreference,
-  DeviceSetting,
-  SeenHighlights,
-  UpdateJournal,
-  LogoutChannel,
-  FileExchange,
-  DeviceStore,
-} from "./ports/device";
+import type { UpdateJournal, LogoutChannel, FileExchange, DeviceStore } from "./ports/device";
 import type {
   DeckLibrary,
   DeckArchive,
@@ -33,9 +24,6 @@ import type {
   InstanceGraphReader,
 } from "./ports/pod";
 import type { SessionGateway, StorageGateway, WebIdDocumentRepository } from "./ports/session";
-import type { Palette } from "@solid-memo/domain/palette";
-import type { TextSize } from "@solid-memo/domain/textSize";
-import type { ThemeChoice } from "@solid-memo/domain/theme";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { createPreferenceStore } from "./preferenceStore";
 import { createAnswerStore } from "./answerStore";
@@ -49,6 +37,7 @@ import { createCardUseCases, type CardUseCases } from "./cards";
 import { createLibraryUseCases, withLinkedReleasesChecked, type LibraryUseCases } from "./library";
 import { createMistakeReportUseCases, type MistakeReportUseCases } from "./mistakeReports";
 import { createWhatsNewUseCases, type WhatsNewUseCases } from "./whatsNew";
+import { deviceChoices } from "./deviceChoices";
 import { createDeviceValueUseCases, type DeviceValueUseCases } from "./deviceValues";
 import { createCourseUseCases, type CourseUseCases } from "./courses";
 import { createStudyUseCases, type StudyUseCases } from "./study";
@@ -117,21 +106,13 @@ export interface Dependencies {
   /** Notes of a guest's study being moved or added to an instance, kept on this device. */
   updateJournal: UpdateJournal;
   logoutChannel: LogoutChannel;
-  /** The language the user chose, kept on this device. */
-  languagePreference: LanguagePreference;
-  /** The theme the user chose, kept on this device. */
-  themePreference: DeviceSetting<ThemeChoice>;
-  /** The palette the user chose, kept on this device. */
-  palettePreference: DeviceSetting<Palette>;
-  /** A copy of the user's own palette being shown, kept on this device. */
-  customPalettePreference: CustomPalettePreference;
   /** The palettes the user designed, in each instance. */
   paletteRepository: PaletteRepository;
-  /** The text size the user chose, kept on this device. */
-  textSizePreference: DeviceSetting<TextSize>;
-  /** The highlights of new versions this browser has shown, kept on this device. */
-  seenHighlights: SeenHighlights;
-  /** The values the screens keep on this device. */
+  /**
+   * The values kept on this device: the choices of the use cases
+   * (deviceChoices: the language, how the app is shown, the highlights
+   * seen) and the screens' values.
+   */
   deviceStore: DeviceStore;
   /** The values the screens keep for the tab's life. */
   tabStore: DeviceStore;
@@ -184,13 +165,7 @@ export function createUseCases({
   instanceCopier,
   updateJournal,
   logoutChannel,
-  languagePreference,
-  themePreference,
-  palettePreference,
-  customPalettePreference,
   paletteRepository,
-  textSizePreference,
-  seenHighlights,
   deviceStore,
   tabStore,
   now = () => new Date(),
@@ -209,13 +184,8 @@ export function createUseCases({
 }: Dependencies): UseCases {
   // A release added from a link is checked on its first read in the page, by whichever slice reads it.
   const deckLibrary = withLinkedReleasesChecked(library);
-  const preferenceStore = createPreferenceStore({
-    preferencesRepository,
-    themePreference,
-    palettePreference,
-    customPalettePreference,
-    textSizePreference,
-  });
+  const { seenHighlights, ...preferenceChoices } = deviceChoices(deviceStore);
+  const preferenceStore = createPreferenceStore({ preferencesRepository, ...preferenceChoices });
   const answerStore = createAnswerStore({
     answerLog,
     reviewStateRepository,
@@ -300,11 +270,7 @@ export function createUseCases({
     }),
     ...instances,
     ...createPreferenceUseCases({
-      languagePreference,
-      themePreference,
-      palettePreference,
-      customPalettePreference,
-      textSizePreference,
+      ...preferenceChoices,
       paletteRepository,
       preferencesRepository,
       instanceRepository,

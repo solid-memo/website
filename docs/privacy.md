@@ -63,13 +63,13 @@ before any pod is reached:
 
 | Key | What | Written by |
 |---|---|---|
-| `solid-memo:language` | the chosen language | [`localStorageLanguagePreference.ts`](../packages/adapters/browser/src/localStorageLanguagePreference.ts) |
-| `solid-memo:theme` | light, dark or the browser's; copied from the preferences once saved | [`localStorageSetting.ts`](../packages/adapters/browser/src/localStorageSetting.ts) |
-| `solid-memo:palette` | the chosen colors (none for Standard); copied from the preferences | `localStorageSetting.ts` |
-| `solid-memo:palette-colors` | a chosen custom palette's address, base and colors, for the first paint; copied from the pod (none for a built-in palette) | [`localStorageCustomPalettePreference.ts`](../packages/adapters/browser/src/localStorageCustomPalettePreference.ts) |
-| `solid-memo:textSize` | the chosen text size (none for Default); copied from the preferences | `localStorageSetting.ts` |
-| `solid-memo:seenHighlights` | the new-version highlights this browser has shown | [`localStorageSeenHighlights.ts`](../packages/adapters/browser/src/localStorageSeenHighlights.ts) |
-| `solid-memo:recentLanguages.deck`, `solid-memo:recentLanguages.own` | languages picked lately for text | [`remembered.ts`](../packages/ui/src/ui/remembered.ts), through [`webStorageDeviceStore.ts`](../packages/adapters/browser/src/webStorageDeviceStore.ts) |
+| `solid-memo:language` | the chosen language | [`deviceChoices.ts`](../packages/core/application/src/deviceChoices.ts), through [`webStorageDeviceStore.ts`](../packages/adapters/browser/src/webStorageDeviceStore.ts) |
+| `solid-memo:theme` | light, dark or the browser's; copied from the preferences once saved | `deviceChoices.ts`, through `webStorageDeviceStore.ts` |
+| `solid-memo:palette` | the chosen colors (none for Standard); copied from the preferences | `deviceChoices.ts`, through `webStorageDeviceStore.ts` |
+| `solid-memo:palette-colors` | a chosen custom palette's address, base and colors, for the first paint; copied from the pod (none for a built-in palette) | `deviceChoices.ts`, through `webStorageDeviceStore.ts` |
+| `solid-memo:textSize` | the chosen text size (none for Default); copied from the preferences | `deviceChoices.ts`, through `webStorageDeviceStore.ts` |
+| `solid-memo:seenHighlights` | the new-version highlights this browser has shown | `deviceChoices.ts`, through `webStorageDeviceStore.ts` |
+| `solid-memo:recentLanguages.deck`, `solid-memo:recentLanguages.own` | languages picked lately for text | [`remembered.ts`](../packages/ui/src/ui/remembered.ts), through `webStorageDeviceStore.ts` |
 | `solid-memo:webId` | the WebID last logged in with, only if the learner checked the box to remember it | `remembered.ts`, through `webStorageDeviceStore.ts` |
 | `solid-memo:collapsedGroups` | by instance URL, which deck groups the learner folded, for the 20 instances folded last; an older `solid-memo:collapsedGroups.<instance URL>` is moved into it once read | `remembered.ts`, through `webStorageDeviceStore.ts` |
 | `solid-memo:update:<…>` | a guest's study being moved or added, so another tab knows | [`localStorageUpdateJournal.ts`](../packages/adapters/browser/src/localStorageUpdateJournal.ts) |

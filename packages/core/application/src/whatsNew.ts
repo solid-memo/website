@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { SeenHighlights } from "./ports/device";
+import type { DeviceChoices } from "./deviceChoices";
 
 export interface WhatsNewUseCases {
   /**
@@ -22,20 +22,18 @@ export interface WhatsNewUseCases {
 /** The highlights of new versions a user is shown, once, on this browser. */
 export function createWhatsNewUseCases({
   seenHighlights,
-}: {
-  seenHighlights: SeenHighlights;
-}): WhatsNewUseCases {
+}: Pick<DeviceChoices, "seenHighlights">): WhatsNewUseCases {
   return {
     unseenHighlights(ids) {
-      const seen = seenHighlights.seen();
+      const seen = seenHighlights.read();
       if (seen === null) {
-        seenHighlights.see(ids);
+        seenHighlights.write([...ids]);
         return [];
       }
       return ids.filter((id) => !seen.includes(id));
     },
     dismissHighlights(ids) {
-      seenHighlights.see([...new Set([...(seenHighlights.seen() ?? []), ...ids])]);
+      seenHighlights.write([...new Set([...(seenHighlights.read() ?? []), ...ids])]);
     },
   };
 }

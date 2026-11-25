@@ -27,6 +27,7 @@ import {
   card,
   makeDeps,
 } from "./testing/fakePorts";
+import { choicesStore } from "./testing/fakePorts";
 
 describe("instances", () => {
   const CC0 = "https://creativecommons.org/publicdomain/zero/1.0/";
@@ -96,9 +97,11 @@ describe("instances", () => {
     const deps = makeDeps();
     const useCases = createUseCases({
       ...deps,
-      themePreference: { chosen: () => "dark", choose: vi.fn() },
-      palettePreference: { chosen: () => "high-contrast", choose: vi.fn() },
-      textSizePreference: { chosen: () => "larger", choose: vi.fn() },
+      deviceStore: choicesStore({
+        themePreference: { read: () => "dark", write: vi.fn() },
+        palettePreference: { read: () => "high-contrast", write: vi.fn() },
+        textSizePreference: { read: () => "larger", write: vi.fn() },
+      }),
     });
     await useCases.createInstance(session, {
       containerUrl: "https://alice.example/solid-memo/main/",

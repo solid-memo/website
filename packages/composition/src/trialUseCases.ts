@@ -13,10 +13,8 @@ import { createPreferenceStore } from "@solid-memo/application/preferenceStore";
 import { createPreferenceUseCases } from "@solid-memo/application/preferences";
 import { createStudyUseCases } from "@solid-memo/application/study";
 import type { Dependencies } from "@solid-memo/application/useCases";
-import { unkeptSetting } from "@solid-memo/application/deviceSetting";
-import { PALETTE_SETTING } from "@solid-memo/domain/palette";
-import { TEXT_SIZE_SETTING } from "@solid-memo/domain/textSize";
-import { THEME_SETTING } from "@solid-memo/domain/theme";
+import { deviceChoices, type DeviceChoices } from "@solid-memo/application/deviceChoices";
+import { UNKEPT_STORE } from "@solid-memo/application/deviceValues";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { TRIAL_ORIGIN } from "@solid-memo/domain/release/trial";
 import { createDraftDeckLibrary } from "@solid-memo/solid/draftDeckLibrary";
@@ -174,23 +172,11 @@ export function readOnlyFetch(fetch: typeof globalThis.fetch): typeof globalThis
 /**
  * What the device keeps of how the app is shown, none of which is a
  * trial's: the page's language, theme, palette and text size are the
- * page's, so a trial keeps no choice of them, and it has no palettes of
- * its own.
+ * page's, so a trial keeps them in a store that keeps nothing, and it
+ * has no palettes of its own.
  */
-export const NO_DEVICE: Pick<
-  Dependencies,
-  | "languagePreference"
-  | "themePreference"
-  | "palettePreference"
-  | "customPalettePreference"
-  | "textSizePreference"
-  | "paletteRepository"
-> = {
-  languagePreference: { chosen: () => null, choose: () => undefined },
-  themePreference: unkeptSetting(THEME_SETTING),
-  palettePreference: unkeptSetting(PALETTE_SETTING),
-  customPalettePreference: { chosen: () => null, choose: () => undefined },
-  textSizePreference: unkeptSetting(TEXT_SIZE_SETTING),
+export const NO_DEVICE: DeviceChoices & Pick<Dependencies, "paletteRepository"> = {
+  ...deviceChoices(UNKEPT_STORE),
   paletteRepository: {
     listPalettes: async () => [],
     savePalette: async () => {

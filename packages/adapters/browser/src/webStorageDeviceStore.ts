@@ -40,8 +40,10 @@ const MAX_INSTANCE_URL = HASHED_CHARACTERS;
  * the device keeps, or `sessionStorage` for what a tab keeps. Storage may
  * be missing or refuse (a private window, blocked site data, a full
  * quota), so every access is guarded: a value then reads as its
- * fallback, and a write is dropped. A value is kept as JSON, unless its
- * kind keeps its text; its fallback is kept as no value at all.
+ * fallback, and a write is dropped. A value is kept as JSON (of what its
+ * kind encodes, when it encodes), unless its kind keeps its text; its
+ * fallback is kept as no value at all. A value takes at most
+ * MAX_VALUE_CHARACTERS, or fewer when its kind says so.
  */
 export function createWebStorageDeviceStore(
   storage: () => Storage = () => globalThis.localStorage,
@@ -77,11 +79,11 @@ export function createWebStorageDeviceStore(
 
   return {
     value(key, kind) {
+      const limit = Math.min(kind.maxCharacters ?? MAX_VALUE_CHARACTERS, MAX_VALUE_CHARACTERS);
       return {
         read() {
           const text = get(key);
-          if (text === null || key.length + text.length > MAX_VALUE_CHARACTERS)
-            return kind.fallback;
+          if (text === null || key.length + text.length > limit) return kind.fallback;
           return kind.text === true ? kind.decode(text) : decoded(text, kind);
         },
         write(value) {
@@ -89,8 +91,8 @@ export function createWebStorageDeviceStore(
             ? null
             : kind.text === true
               ? String(value)
-              : JSON.stringify(value);
-          set(key, text !== null && key.length + text.length > MAX_VALUE_CHARACTERS ? null : text);
+              : JSON.stringify(kind.encode === undefined ? value : kind.encode(value));
+          set(key, text !== null && key.length + text.length > limit ? null : text);
         },
       };
     },

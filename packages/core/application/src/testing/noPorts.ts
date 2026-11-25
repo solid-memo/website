@@ -2,14 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type {
-  LanguagePreference,
-  CustomPalettePreference,
-  SeenHighlights,
-  UpdateJournal,
-  LogoutChannel,
-  FileExchange,
-} from "../ports/device";
+import type { UpdateJournal, LogoutChannel, FileExchange } from "../ports/device";
 import type { DeckArchive, ReleaseDraftRepository, ReleasePublisher } from "../ports/library";
 import type {
   AnswerLog,
@@ -20,21 +13,10 @@ import type {
   InstanceGraphReader,
 } from "../ports/pod";
 import { AppError } from "@solid-memo/domain/appError";
-import { PALETTE_SETTING } from "@solid-memo/domain/palette";
-import { TEXT_SIZE_SETTING } from "@solid-memo/domain/textSize";
-import { THEME_SETTING } from "@solid-memo/domain/theme";
-import { unkeptSetting } from "../deviceSetting";
 import { UNKEPT_STORE } from "../deviceValues";
 
 const nothing = async () => undefined;
 const none = async (): Promise<never[]> => [];
-
-const NO_LANGUAGE_PREFERENCE: LanguagePreference = { chosen: () => null, choose: () => undefined };
-
-const NO_CUSTOM_PALETTE_PREFERENCE: CustomPalettePreference = {
-  chosen: () => null,
-  choose: () => undefined,
-};
 
 const NO_PALETTES: PaletteRepository = {
   listPalettes: none,
@@ -42,8 +24,6 @@ const NO_PALETTES: PaletteRepository = {
     throw new Error("This app keeps no palettes.");
   },
 };
-
-const NO_SEEN_HIGHLIGHTS: SeenHighlights = { seen: () => null, see: () => undefined };
 
 const NO_DECK_ARCHIVE: DeckArchive = {
   exportDeck: async () => {
@@ -153,13 +133,7 @@ export const NO_PORTS = {
   digestRepository: NO_DIGESTS,
   deckArchive: NO_DECK_ARCHIVE,
   fileExchange: NO_FILE_EXCHANGE,
-  languagePreference: NO_LANGUAGE_PREFERENCE,
-  themePreference: unkeptSetting(THEME_SETTING),
-  palettePreference: unkeptSetting(PALETTE_SETTING),
-  customPalettePreference: NO_CUSTOM_PALETTE_PREFERENCE,
   paletteRepository: NO_PALETTES,
-  textSizePreference: unkeptSetting(TEXT_SIZE_SETTING),
-  seenHighlights: NO_SEEN_HIGHLIGHTS,
   deviceStore: UNKEPT_STORE,
   tabStore: UNKEPT_STORE,
   /** No one signed in. */

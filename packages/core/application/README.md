@@ -23,8 +23,10 @@ interfaces; the adapters conform to them.
 - `preferenceStore`, `answerStore` and `digestStore`: what the slices
   share, made once by `createUseCases`; `writes` and `progress`, their
   helpers.
-- `deviceSetting`: `unkeptSetting`, a `DeviceSetting` port that keeps
-  no choice, for an app whose page keeps none (a Studio trial).
+- `deviceChoices`: the language, the theme, the palette, the text
+  size, the custom palette's copy and the highlights seen, each a value
+  of the device store with its key and what it looks like; the keys of
+  the first paint are those `index.html` reads.
 - `testing/*`: the fixtures, the fake ports and `NO_PORTS`, for tests.
 
 ## Boundaries

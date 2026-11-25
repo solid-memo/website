@@ -3,14 +3,18 @@
 // SPDX-License-Identifier: MIT
 
 import { expect, it } from "vitest";
+import {
+  CUSTOM_PALETTE_KEY,
+  LANGUAGE_KEY,
+  PALETTE_KEY,
+  SEEN_HIGHLIGHTS_KEY,
+  TEXT_SIZE_KEY,
+  THEME_KEY,
+} from "@solid-memo/application/ports/device";
 import type { StoredResource } from "@solid-memo/application/ports/device";
 import { GUEST_ORIGIN } from "@solid-memo/domain/guest";
 import { DATABASE, DATABASE_VERSION, LOCK, RESOURCES } from "./indexedDbResourceStore";
 import { CHANNEL as LOGOUT_CHANNEL, KEY as LOGOUT_KEY } from "./logoutChannel";
-import { KEY as LANGUAGE_KEY } from "./localStorageLanguagePreference";
-import { KEY as CUSTOM_PALETTE_KEY } from "./localStorageCustomPalettePreference";
-import { KEY as SEEN_HIGHLIGHTS_KEY } from "./localStorageSeenHighlights";
-import { PALETTE_KEY, TEXT_SIZE_KEY, THEME_KEY } from "./localStorageSetting";
 import { PREFIX as JOURNAL_PREFIX } from "./localStorageUpdateJournal";
 
 /**
@@ -26,7 +30,9 @@ const RECORDS: { [K in StoredResource["kind"]]: Extract<StoredResource, { kind: 
 
 /**
  * What this package keeps in the browser, part of the app's public API
- * (docs/releasing.md#the-public-api): the localStorage keys, the
+ * (docs/releasing.md#the-public-api): the localStorage keys (those of
+ * the choices the use cases keep among them, which this package's
+ * device store keeps), the
  * IndexedDB database that holds a guest's pod, its version, store,
  * records and the origin its keys are under, and the Web Locks and the
  * BroadcastChannel the site's tabs share. A line that goes, a key renamed or a database
