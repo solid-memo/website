@@ -1370,6 +1370,9 @@
       "used": "이 버전을 만들 때 사용함",
       "usedEarlier": "이전 버전을 만들 때 사용했어요.",
       "sourceMoreCreators": "그대로 유지되는 다른 만든 사람: {names}",
+      "sourceCreatorsMore": {
+        "other": "{names} 외 {count}명"
+      },
       "sourceOthers": {
         "other": "이 출처에 대한 다른 진술 {count}개는 그대로 유지돼요."
       },

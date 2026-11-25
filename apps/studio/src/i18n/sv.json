@@ -1459,6 +1459,10 @@
       "used": "Den här versionens framtagning använde den",
       "usedEarlier": "En tidigare versions framtagning använde den.",
       "sourceMoreCreators": "Dess övriga upphovspersoner, som behålls som de är: {names}.",
+      "sourceCreatorsMore": {
+        "one": "{names} och {count} till",
+        "other": "{names} och {count} till"
+      },
       "sourceOthers": {
         "one": "{count} uppgift till om den behålls som den är.",
         "other": "{count} uppgifter till om den behålls som de är."
