@@ -585,6 +585,11 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci --ignore-scripts
+      # The library's index, which solid's round trip and the tests of
+      # composition and web read, is made from the releases
+      # (docs/deck-library.md#the-index): npm runs the tests here, not
+      # Turbo, which would make it first for them.
+      - run: npm run library:index -w @solid-memo/shacl
       - run: npm run test:unit -w @solid-memo/solid-client
       - if: success() || failure()
         run: npm run test:unit -w @solid-memo/solid
@@ -592,11 +597,6 @@ jobs:
         run: npm run test:roundtrip -w @solid-memo/solid
       - if: success() || failure()
         run: npm run test:unit -w @solid-memo/shacl
-      # The library's index, which the tests of composition and web read,
-      # is made from the releases (docs/deck-library.md#the-index): npm
-      # runs them here, not Turbo, which makes it first for them.
-      - if: success() || failure()
-        run: npm run library:index -w @solid-memo/shacl
       - if: success() || failure()
         run: npm run test:unit -w @solid-memo/composition
       - if: success() || failure()
