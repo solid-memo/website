@@ -16,6 +16,7 @@ import {
   main,
   run,
   SITE,
+  STORYBOOK,
   strayFiles,
   TURBO_CACHE,
 } from "./ciGate.ts";
@@ -156,6 +157,7 @@ describe("decide", () => {
     expect(kept.mock.calls).toEqual([
       [9, JOURNEYS_BLOBS],
       [9, SITE],
+      [9, STORYBOOK],
       [9, TURBO_CACHE],
     ]);
   });
@@ -172,7 +174,7 @@ describe("decide", () => {
   it("names every artifact the queue run keeps no longer", async () => {
     const io = fakeIo({ passed: runs({ [`${SHA}:merge_group`]: 9 }), kept: async () => false });
     expect((await decide(io)).why).toContain(
-      "keeps no journeys-blob-*, site*, turbo-cache*, or they expired",
+      "keeps no journeys-blob-*, site*, storybook*, turbo-cache*, or they expired",
     );
   });
 
@@ -197,6 +199,7 @@ describe("decide", () => {
       expect(kept.mock.calls).toEqual([
         [9, JOURNEYS_BLOBS],
         [9, SITE],
+        [9, STORYBOOK],
       ]);
     });
 

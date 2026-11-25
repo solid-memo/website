@@ -336,7 +336,10 @@ jobs:
   # main's cache entries. In the merge queue and on main it attests the
   # site's manifest, and the deploy ships the artifact only if it matches
   # that attestation, so no other job of the run can stand in a site of
-  # its own. Deterministic.
+  # its own. The Storybook of the UI's components is built here too, and
+  # kept a week as the storybook artifact: a pull request's to browse,
+  # and on main the one deploy.yml publishes on its own site
+  # (docs/storybook.md#where-it-is-published). Deterministic.
   site:
     needs: gate
     if: needs.gate.outputs.jobs == 'all'
@@ -385,6 +388,14 @@ jobs:
         with:
           name: site
           path: apps/web/dist/
+          retention-days: 7
+          if-no-files-found: error
+          overwrite: true
+      - run: npm run storybook:build
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: storybook
+          path: packages/ui/dist/
           retention-days: 7
           if-no-files-found: error
           overwrite: true
@@ -958,6 +969,8 @@ jobs:
   # jobs=reuse, tested-by), what that run made is taken over, not made
   # again: its site, kept as this run's site artifact, which the deploy
   # ships once it matches the site job's attestation (docs/deployment.md),
+  # its Storybook, kept as this run's storybook artifact, which the deploy
+  # publishes on its own site (docs/storybook.md#where-it-is-published),
   # and, but on a release commit, its Turbo
   # cache, saved as main's, which every pull request and queue run
   # restores. That run tested this very tree: the queue's commit is the
@@ -971,7 +984,7 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: read
-      # To download the site and Turbo's cache from the run that tested this tree.
+      # To download the site, the Storybook and Turbo's cache from the run that tested this tree.
       actions: read
     env:
       RELEASE: >-
@@ -987,6 +1000,19 @@ jobs:
         with:
           name: site
           path: site/
+          retention-days: 7
+          if-no-files-found: error
+          overwrite: true
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: storybook
+          run-id: ${{ needs.gate.outputs.tested-by }}
+          github-token: ${{ github.token }}
+          path: storybook/
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: storybook
+          path: storybook/
           retention-days: 7
           if-no-files-found: error
           overwrite: true

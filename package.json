@@ -36,6 +36,8 @@
   "scripts": {
     "dev": "npm run library:index && npm run dev -w @solid-memo/web",
     "start": "npm run build && npm run preview -w @solid-memo/web",
+    "storybook": "npm run storybook -w @solid-memo/ui",
+    "storybook:build": "turbo run build:storybook",
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
@@ -119,5 +121,10 @@
   },
   "engines": {
     "node": ">=26.13"
+  },
+  "overrides": {
+    "@storybook/preact": {
+      "preact": "^11.2.0"
+    }
   }
 }

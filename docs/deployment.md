@@ -236,7 +236,7 @@ and folders, none whose name starts with a dot: no link, and no git
 directory or settings. Playwright's report has none, and CI's upload
 leaves hidden files out. git then keeps its repository in a folder of
 its own, outside the report, and runs no hooks and no file system
-monitor ([journeysDeploy.test.ts](../scripts/journeysDeploy.test.ts)
+monitor ([deployRepositories.test.ts](../scripts/deployRepositories.test.ts)
 runs both steps on such an artifact).
 
 The report's own trace viewer isn't published. It opens a trace from
@@ -279,6 +279,11 @@ in a fork, the job publishes nothing and says so.
 `journeys.solid-memo.com` is a `CNAME` record pointing at
 `solid-memo.github.io`, and the journeys repository's Pages settings
 name it, with HTTPS enforced.
+
+The deploy workflow's `storybook` job publishes the Storybook of the
+UI's components the same way, at <https://storybook.solid-memo.com/>
+from [solid-memo/storybook](https://github.com/solid-memo/storybook),
+with its own deploy key ([storybook.md](storybook.md#where-it-is-published)).
 
 ## Why any static host works, unconfigured
 

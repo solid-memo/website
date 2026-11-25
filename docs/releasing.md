@@ -421,7 +421,7 @@ reused run made.
 |---|---|
 | A pull request | every job |
 | The merge queue (`merge_group`) | every job but `dependency-review`, a pull request's alone, at full strength; a flaky check is fixed here, not retried |
-| A push to `main` the merge queue passed | the queue's run is reused: its site and Turbo's cache are taken over |
+| A push to `main` the merge queue passed | the queue's run is reused: its site, its Storybook and Turbo's cache are taken over |
 | A push to `main` that skipped the queue | every job, as in the queue |
 | A release commit | when CI passed its parent on `main`, the run that tested the parent is reused and the commit's own files are linted; otherwise every job |
 | A run by hand | every job but `dependency-review`, as in the queue |
@@ -459,7 +459,9 @@ the five files `release.config.mjs` lists (`assets`): `CHANGELOG.md`,
 `CITATION.cff`, `package.json`, `package-lock.json` and
 `publiccode.yml`. Its run reuses the run that tested its parent and
 takes over its site, which the deploy ships
-([deployment.md](deployment.md#the-build-ci-tested)). The gate fails the
+([deployment.md](deployment.md#the-build-ci-tested)), and its
+Storybook, which the deploy publishes
+([storybook.md](storybook.md#where-it-is-published)). The gate fails the
 run if the commit changes any other file or has more than one parent.
 The `release-files` job lints the five files as `npm run check` does,
 and checks `publiccode.yml` with its parser; nothing that tests code
@@ -879,7 +881,7 @@ canceled run is handled by what it left behind, as in the cases below.
   - the `gate`, which refuses a release commit that changes more than
     the version's files;
   - `release-files`, which lints them;
-  - `reuse`, which takes over the tested run's site;
+  - `reuse`, which takes over the tested run's site and Storybook;
   - `journeys-report`, which merges the tested run's journeys.
 
   A failed lint is fixed in its own pull request, which the next
