@@ -39,22 +39,21 @@ every test and journey.
 
 ## JavaScript Solid Server
 
-Version 0.0.224 from npm, started with `--conneg` (Turtle as well as
+Version 0.0.231 from npm, started with `--conneg` (Turtle as well as
 JSON-LD) and `--public` (no access control), files in the container.
 The source links are at gitHead
-[`7c9b0de7`](https://github.com/JavaScriptSolidServer/JavaScriptSolidServer/tree/7c9b0de7f50e12084642234fdded5b826ea06239).
+[`943fb8d5`](https://github.com/JavaScriptSolidServer/JavaScriptSolidServer/tree/943fb8d5fa7f7115e08dcfe4e7fcc0160964ab91).
 
 | Id | Cause | Requirement |
 |---|---|---|
 | [`jss-lang-tag`](#jss-lang-tag) | SPARQL Update drops the language tag of a literal in its body | Definition (RDF 1.1); optional feature |
-| [`jss-own-iri`](#jss-own-iri) | A document's own IRI is stored as `"."`, which reads back as its container | MUST (N3 Patch) |
 | [`jss-acl-turtle`](#jss-acl-turtle) | PUT of a Turtle ACL gets 415, though `Accept-Put` lists Turtle | MUST (`Accept-Put`) |
 | [`jss-no-extension`](#jss-no-extension) | A Turtle document without a file extension is served as `application/octet-stream` | MUST |
 
 Beside these causes, JSS deletes every `..` inside each decoded path
 segment, again until none is left, before it maps the address to a
 file
-([url.js](https://github.com/JavaScriptSolidServer/JavaScriptSolidServer/blob/7c9b0de7f50e12084642234fdded5b826ea06239/src/utils/url.js),
+([url.js](https://github.com/JavaScriptSolidServer/JavaScriptSolidServer/blob/943fb8d5fa7f7115e08dcfe4e7fcc0160964ab91/src/utils/url.js),
 `normalizeUrlPath`). So `decks/span..ish.ttl` and `decks/spanish.ttl`
 are one file there. Solid Memo takes no instance or deck's document at
 an address with two dots in a row in its path, in any spelling, and
@@ -95,10 +94,10 @@ server answers 409 and applies none of the PATCH.
 - **Observed:** `termToJsonLdValue` tests a term's datatype before its
   language, and N3.js gives a tagged literal the datatype
   `rdf:langString`
-  ([sparql-update.js L140–160](https://github.com/JavaScriptSolidServer/JavaScriptSolidServer/blob/7c9b0de7f50e12084642234fdded5b826ea06239/src/patch/sparql-update.js#L140-L160)).
+  ([sparql-update.js L140–160](https://github.com/JavaScriptSolidServer/JavaScriptSolidServer/blob/943fb8d5fa7f7115e08dcfe4e7fcc0160964ab91/src/patch/sparql-update.js#L140-L160)).
   The stored document then holds a literal that strict parsers refuse,
   such as N3.js 2, which reports a language-tagged string with an
-  explicit datatype. The code is unchanged in 0.0.225.
+  explicit datatype. The code is unchanged in 0.0.231.
 - **Upstream:** none yet. [#633](https://github.com/JavaScriptSolidServer/JavaScriptSolidServer/pull/633)
   moved SPARQL Update onto quads and kept this converter.
 
@@ -132,55 +131,6 @@ DELETE DATA { <#a> <http://purl.org/dc/terms/title> "Put"@en . }
 The same two changes sent as N3 Patch (`text/n3`) succeed and keep
 the tag.
 
-### jss-own-iri
-
-**A document's own IRI is stored as `"."`, which reads back as its
-container.** `<>` in a Turtle PUT, or in an N3 Patch's
-`solid:inserts`, is written as the JSON-LD `"@id": "."`. On read,
-`"."` resolves to the parent container, as a subject or an object.
-
-- **Requirement:** for N3 Patch, a MUST of the Solid Protocol,
-  [N3 Patch semantics](https://solidproject.org/TR/protocol#server-patch-n3-semantics):
-  "The triples resulting from ?insertions are to be added to the RDF
-  dataset". For PUT, Turtle's [relative IRI resolution](https://www.w3.org/TR/turtle/#sec-iri-references),
-  since the protocol only asks that GET can answer in Turtle and JSON-LD.
-- **Observed:** `makeRelative` writes the document's own IRI as `"."`
-  ([turtle.js L508–517](https://github.com/JavaScriptSolidServer/JavaScriptSolidServer/blob/7c9b0de7f50e12084642234fdded5b826ea06239/src/rdf/turtle.js#L508-L517)),
-  and the read resolves it with `new URL(".", base)`. The PUT case
-  needs `--conneg`; the PATCH case hits every resource stored as
-  JSON-LD, which includes every one a PATCH creates. A JSON-LD body
-  with `"@id": ""` keeps its IRI.
-- **Upstream:** [#636](https://github.com/JavaScriptSolidServer/JavaScriptSolidServer/pull/636),
-  open, fixes it.
-
-```http
-PUT $POD/own/doc.ttl
-Content-Type: text/turtle
-
-<> <http://example.org/p> <http://example.org/o> .
-<#it> <http://example.org/p> <> .
-→ 201 Created
-
-GET $POD/own/doc.ttl
-Accept: text/turtle
-→ 200 OK
-<$POD/own/> <http://example.org/p> <http://example.org/o> .
-<$POD/own/doc.ttl#it> <http://example.org/p> <$POD/own/> .
-
-PATCH $POD/own/new.ttl
-Content-Type: text/n3
-
-@prefix solid: <http://www.w3.org/ns/solid/terms#> .
-_:p a solid:InsertDeletePatch ;
-  solid:inserts { <> <http://example.org/q> <http://example.org/r> . } .
-→ 201 Created
-
-GET $POD/own/new.ttl
-Accept: text/turtle
-→ 200 OK
-<$POD/own/> <http://example.org/q> <http://example.org/r> .
-```
-
 ### jss-acl-turtle
 
 **PUT of a Turtle ACL gets 415, though `Accept-Put` lists Turtle.**
@@ -196,7 +146,7 @@ and GET of one as Turtle, work.
   a PUT takes. On a `.acl` URL, JSS lists `text/turtle` and then
   refuses it.
 - **Observed:** the 415 comes from
-  [resource.js L963–977](https://github.com/JavaScriptSolidServer/JavaScriptSolidServer/blob/7c9b0de7f50e12084642234fdded5b826ea06239/src/handlers/resource.js#L963-L977);
+  [resource.js L992–1007](https://github.com/JavaScriptSolidServer/JavaScriptSolidServer/blob/943fb8d5fa7f7115e08dcfe4e7fcc0160964ab91/src/handlers/resource.js#L992-L1007);
   the `Accept-Put` from `getAcceptHeaders` in `src/rdf/conneg.js`,
   which has no ACL exception. WAC clients, mashlib and Inrupt's
   `solid-client` among them, write ACLs in Turtle.
@@ -235,7 +185,7 @@ HEAD says the same.
   `application/ld+json`.
 - **Observed:** JSS keeps no record of the type the client gave. It
   works the type out from the extension on every read
-  ([url.js L220–254](https://github.com/JavaScriptSolidServer/JavaScriptSolidServer/blob/7c9b0de7f50e12084642234fdded5b826ea06239/src/utils/url.js#L220-L254)),
+  ([url.js L232–271](https://github.com/JavaScriptSolidServer/JavaScriptSolidServer/blob/943fb8d5fa7f7115e08dcfe4e7fcc0160964ab91/src/utils/url.js#L232-L271)),
   falls back to `application/octet-stream`, and converts stored JSON-LD
   back only for an RDF type. Without `--conneg`, the PUT gets 415
   instead.
