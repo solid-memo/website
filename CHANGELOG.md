@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.5.0](https://github.com/solid-memo/website/compare/v8.4.3...v8.5.0) (2026-11-25)
+
+### Features
+
+* **ui:** show a message of the day on about one day in three ([e560628](https://github.com/solid-memo/website/commit/e560628fea9de7458f6b1c550b01e2ade3fb0d7e)), closes [#1036](https://github.com/solid-memo/website/issues/1036)
+
 ## [8.4.3](https://github.com/solid-memo/website/compare/v8.4.2...v8.4.3) (2026-11-25)
 
 ### Fixes
