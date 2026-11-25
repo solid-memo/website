@@ -21,6 +21,16 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.5.2](https://github.com/solid-memo/website/compare/v8.5.1...v8.5.2) (2026-11-25)
+
+### Fixes
+
+* **ci:** read no workflow commands from commit text in logs ([175665b](https://github.com/solid-memo/website/commit/175665b7113c1ad02ea6ca52211e5e941879ee99))
+* **deps:** update dependency @tanstack/react-query to ^5.108.3 ([358961e](https://github.com/solid-memo/website/commit/358961e793398b585aba11be2565b802412ecfcd))
+* **solid:** hold the shared read budget across reads off the page ([712bdb6](https://github.com/solid-memo/website/commit/712bdb6a558e1e6427d63445fe69bbeefd27212c))
+* **solid:** read a release only when its deck is at an http(s) URL ([382f263](https://github.com/solid-memo/website/commit/382f263cf26f603dbeb972841ca6f75aa76a3a2d))
+* **studio:** gather a draft's published ids once in the question editor ([ae7a48d](https://github.com/solid-memo/website/commit/ae7a48d24e2ceea4c6cf7288acbab4b1c7bd0fc8))
+
 ## [8.5.1](https://github.com/solid-memo/website/compare/v8.5.0...v8.5.1) (2026-11-25)
 
 ### Fixes
