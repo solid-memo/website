@@ -734,6 +734,26 @@
     "close": "Stäng",
     "highlight": {}
   },
+  "dailyMessage": {
+    "label": "Dagens meddelande",
+    "dismiss": "Dölj i dag",
+    "link": {
+      "donate": "Hur donationerna används (på engelska)",
+      "discussions": "Diskussioner",
+      "repository": "Källkod"
+    },
+    "message": {
+      "donate": "Om du tycker att Solid Memo är värdefullt får du gärna donera till den som underhåller det.",
+      "discussions": "Har du en idé för Solid Memo? Dela den i gemenskapens diskussioner.",
+      "star": "Gillar du Solid Memo? En stjärna på källkoden hjälper andra att hitta det.",
+      "noServers": "Visste du? Solid Memo har inga egna servrar: det du studerar stannar i din pod, eller i den här webbläsaren medan du är gäst.",
+      "undo": "Visste du? Tryckte du på fel knapp när du studerade? U tar tillbaka ditt senaste svar.",
+      "pause": "Visste du? Pausa, i en kortleks meny, lägger kortleken åt sidan under en resa eller en tenta, och dina framsteg finns kvar.",
+      "reportMistake": "Visste du? Rapportera ett fel, under ett kort från biblioteket, öppnar en rapport med kortleken och kortet ifyllda.",
+      "courses": "Visste du? Kortleksbiblioteket har kurser, inte bara kortlekar.",
+      "statistics": "Visste du? Statistik visar hur dina studier går, kortlek för kortlek."
+    }
+  },
   "deckPreferences": {
     "loading": "Läser in inställningar…",
     "heading": "Inställningar: {deck}",

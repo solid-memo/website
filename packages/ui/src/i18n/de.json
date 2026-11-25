@@ -734,6 +734,26 @@
     "close": "Schließen",
     "highlight": {}
   },
+  "dailyMessage": {
+    "label": "Nachricht des Tages",
+    "dismiss": "Für heute ausblenden",
+    "link": {
+      "donate": "Wofür Spenden verwendet werden (auf Englisch)",
+      "discussions": "Diskussionen",
+      "repository": "Quellcode"
+    },
+    "message": {
+      "donate": "Wenn dir Solid Memo etwas wert ist, kannst du gern an seinen Maintainer spenden.",
+      "discussions": "Hast du eine Idee für Solid Memo? Teile sie in den Diskussionen der Community.",
+      "star": "Gefällt dir Solid Memo? Ein Stern für den Quellcode hilft anderen, es zu finden.",
+      "noServers": "Schon gewusst? Solid Memo hat keine eigenen Server: Was du lernst, bleibt in deinem Pod, oder als Gast in diesem Browser.",
+      "undo": "Schon gewusst? Beim Lernen den falschen Knopf gedrückt? U nimmt deine letzte Antwort zurück.",
+      "pause": "Schon gewusst? Pausieren, im Menü eines Stapels, legt den Stapel für eine Reise oder eine Prüfung beiseite, und dein Fortschritt bleibt.",
+      "reportMistake": "Schon gewusst? Fehler melden, unter einer Karte aus der Bibliothek, öffnet eine Meldung mit Stapel und Karte schon ausgefüllt.",
+      "courses": "Schon gewusst? Die Stapelbibliothek hat nicht nur Stapel, sondern auch Kurse.",
+      "statistics": "Schon gewusst? Die Statistik zeigt, wie dein Lernen läuft, Stapel für Stapel."
+    }
+  },
   "deckPreferences": {
     "loading": "Einstellungen werden geladen…",
     "heading": "Einstellungen: {deck}",

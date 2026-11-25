@@ -5196,6 +5196,39 @@ p[role="status"]:not(.loading) {
   margin: 0.5rem 0 0;
 }
 
+/* The day's message, above the deck list: one slim line, quieter than
+   the cards around it, its button to hide it at the end. */
+.daily-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 1rem;
+  padding-block: 0.15rem;
+  padding-inline: 0.9rem 0.15rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+}
+
+.daily-message p {
+  flex: 1;
+  margin: 0.4rem 0;
+}
+
+.daily-message button.icon {
+  flex: none;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border-color: transparent;
+  background: none;
+  color: inherit;
+}
+
+.daily-message button.icon svg.icon {
+  margin: 0;
+}
+
 .whats-new-sparkles {
   position: absolute;
   top: 50%;

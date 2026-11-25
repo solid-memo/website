@@ -24,6 +24,7 @@ import { NewcomerCourseContainer } from "./NewcomerCourseContainer";
 import { SchedulerInvitationContainer } from "./SchedulerInvitation";
 import { TodaySummaryContainer } from "./TodaySummaryContainer";
 import { WhatsNewContainer } from "./WhatsNew";
+import { DailyMessageContainer } from "./DailyMessage";
 import {
   courseHref,
   deckHref,
@@ -50,7 +51,10 @@ import {
  * on SM-2 is invited to switch to FSRS-6 above the list
  * (SchedulerInvitationContainer), until they switch or answer "Not now".
  * The highlights of a version this browser has not shown are at the top
- * (WhatsNewContainer), until closed. A study session just left with an
+ * (WhatsNewContainer), until closed, and under them, on about one day
+ * in three, the day's message (DailyMessageContainer), until hidden for
+ * the day, once the instance has a deck (groups aside): a new instance
+ * has the course for newcomers to start with. A study session just left with an
  * answer (`celebrate`) is celebrated in today's strip once nothing is
  * left to study today (TodaySummary). A deck paused today
  * (useStudyToday) is left out of today's strip and of the course strip;
@@ -114,6 +118,7 @@ export function DeckListContainer({
   return (
     <>
       <WhatsNewContainer useCases={useCases} />
+      {decks.length > 0 && <DailyMessageContainer />}
       <TodaySummaryContainer
         useCases={useCases}
         instance={instance}

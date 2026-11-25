@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { DeckListContainer } from "./DeckListContainer";
@@ -18,6 +18,7 @@ import { QUEUE_DEFAULTS } from "../test/fakes/study";
 import { courseHref, deckHref, libraryHref, routeToHash } from "./router";
 import { CH1, CH2, courseLibraryDeck, courseOutline } from "../test/course";
 import { HIGHLIGHTS } from "./highlights";
+import { DAILY_MESSAGES, messageOfDay } from "./dailyMessages";
 import { boundedQueryKeyHash, queryKeys } from "./queryKeys";
 import { collapsedGroups, rememberCollapsed } from "./remembered";
 
@@ -473,6 +474,37 @@ describe("DeckListContainer", () => {
     await screen.findByRole("link", { name: "Kanji N5" });
     expect(useCases.unseenHighlights).toHaveBeenCalledWith(HIGHLIGHTS.map(({ id }) => id));
     expect(screen.queryByRole("complementary", { name: /^New in/ })).toBeNull();
+  });
+
+  describe("the message of the day", () => {
+    /** Noon of the first day from 2026-11-01 on that has a message. */
+    function onAMessageDay() {
+      let day = Date.parse("2026-11-01");
+      while (messageOfDay(new Date(day).toISOString().slice(0, 10), DAILY_MESSAGES) === null) {
+        day += 86_400_000;
+      }
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date(`${new Date(day).toISOString().slice(0, 10)}T12:00:00`));
+    }
+    const message = () => screen.queryByRole("complementary", { name: "Message of the day" });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("shows above the list once there are decks", async () => {
+      onAMessageDay();
+      renderContainer(makeUseCasesFake({ listDecks: vi.fn(async () => [deck]) }));
+      await screen.findByRole("link", { name: "Kanji N5" });
+      expect(message()).toBeInTheDocument();
+    });
+
+    it("is left out while there are no decks", async () => {
+      onAMessageDay();
+      renderContainer(makeUseCasesFake());
+      await screen.findByText(/^No decks yet\./);
+      expect(message()).toBeNull();
+    });
   });
 
   it("invites a learner on SM-2 to FSRS-6 above the list", async () => {
