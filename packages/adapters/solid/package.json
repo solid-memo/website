@@ -15,7 +15,7 @@
     "test:unit": "vitest run",
     "test:watch": "vitest",
     "test:roundtrip": "vitest run --config vitest.roundtrip.config.ts",
-    "exchange": "vitest run --config vitest.exchange.config.ts"
+    "exchange": "npm run library:index --prefix ../../.. && vitest run --config vitest.exchange.config.ts"
   },
   "dependencies": {
     "@solid-memo/application": "*",

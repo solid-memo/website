@@ -30,10 +30,6 @@
       "passThroughEnv": [
         "PLAYWRIGHT_*",
         "XDG_CACHE_HOME"
-      ],
-      "dependsOn": [
-        "$TURBO_EXTENDS$",
-        "@solid-memo/shacl#library:index"
       ]
     },
     "build": {
