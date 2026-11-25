@@ -608,7 +608,30 @@ what the versions make. Both check:
   name or a PDF. The problem names the first character
   that composes differently, by its code points;
 - every version and the index against Solid Memo's shapes, DCAT-AP (a
-  version with the index beside it) and SKOS, with the reference data.
+  version with the part of the index it reaches beside it, where its
+  series and publisher are) and SKOS, with the reference data.
+
+### Checking each version once
+
+A version's checks read the version, the version before it, whether it
+is its deck's newest, and the part of the index it reaches
+(`relevantIndexQuads`). That part is the triples its terms lead to,
+and those that point at its subjects by a predicate whose objects a
+profile checks (`sh:targetObjectsOf`). The profiles follow no path backwards and their
+SPARQL constraints are left out, so the DCAT-AP check says the same of
+a version over that part as over the whole index. That part changes
+only with the version's own deck, though every new deck changes the
+index.
+
+So both commands keep each version whose checks passed, by a key of
+those inputs and of the code that checks them: every file of `shacl`,
+the packages it depends on, `ns/` and `package-lock.json`
+([releaseCache.ts](../packages/adapters/shacl/node/releaseCache.ts)).
+They check again only the versions whose key is new, and say how many
+they didn't. The keys are files in `~/.cache/solid-memo/library-check/`,
+one folder for every checkout and worktree. A version that fails is
+never kept. Deleting the folder checks every version again, as a run on
+CI does, which starts with none. The index's own checks run every time.
 
 ### Where the rules live
 

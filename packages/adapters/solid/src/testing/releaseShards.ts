@@ -2,11 +2,32 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { statSync } from "node:fs";
+import { readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { DECKS_ROOT } from "@solid-memo/vocab/tooling/root";
+import { codeFingerprint, fileReleaseCache, keyOf } from "@solid-memo/shacl/node/releaseCache";
+import { DECKS_ROOT, REPOSITORY_ROOT } from "@solid-memo/vocab/tooling/root";
 import { draftPod, libraryReleases, roundTrip } from "./releaseDrafts";
+
+/**
+ * The releases whose round trip passed (docs/testing.md, The round
+ * trip): a round trip reads the release alone, so its key is the
+ * release's text, the code that made the trip (this package and the
+ * packages it depends on, ns/, the lockfile, the shared test setup) and
+ * the Solid client it ran with (SOLID_CLIENT).
+ */
+const PASSED = fileReleaseCache("round-trip");
+const CODE = codeFingerprint(REPOSITORY_ROOT, "@solid-memo/solid", [
+  "ns",
+  "package-lock.json",
+  "vitest.shared.ts",
+  "scripts/solidClient.ts",
+]);
+
+/** The key of the round trip of the release whose text is `text`. */
+function roundTripKey(text: string): string {
+  return keyOf(["round-trip", CODE, process.env.SOLID_CLIENT ?? "", text]);
+}
 
 /**
  * The round trip of every library release is split into this many files,
@@ -49,13 +70,20 @@ export function libraryReleaseShards(): string[][] {
 /**
  * The round trip of each release of shard `n` (from 1) of libraryReleaseShards.
  * The largest releases take seconds here and over a minute in CI, where every
- * package's tests share two cores, hence the timeout of 180 s.
+ * package's tests share two cores, hence the timeout of 180 s. A release
+ * whose round trip passed with the same key is skipped.
  */
 export function describeRoundTrips(n: number): void {
   describe.each(libraryReleaseShards()[n - 1]!)("decks/%s", (path) => {
-    it("comes back whole as a draft published again", { timeout: 180_000 }, async () => {
-      const { release, assembled } = await roundTrip(await draftPod(), path);
-      expect(assembled).toEqual(release);
-    });
+    const key = roundTripKey(readFileSync(join(DECKS_ROOT, path), "utf8"));
+    it.skipIf(PASSED.has(key))(
+      "comes back whole as a draft published again",
+      { timeout: 180_000 },
+      async () => {
+        const { release, assembled } = await roundTrip(await draftPod(), path);
+        expect(assembled).toEqual(release);
+        PASSED.add(key);
+      },
+    );
   });
 }

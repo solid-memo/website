@@ -27,9 +27,11 @@ import {
   newcomerProblems,
   normalizationProblems,
   releasesOf,
+  relevantIndexQuads,
   run,
   validateLibrary,
   type DeckRelease,
+  type LibraryCache,
   type LibraryIo,
 } from "./deckLibrary.ts";
 import { DataFactory, type Quad_Object, type Quad_Subject } from "n3";
@@ -623,7 +625,101 @@ describe("metadataProblems", () => {
   });
 });
 
+/** A cache in memory, its keys and what was added to it. */
+function memoryCache(code = "code"): LibraryCache & { keys: Set<string>; added: string[] } {
+  const keys = new Set<string>();
+  const added: string[] = [];
+  return {
+    code,
+    keys,
+    added,
+    cache: {
+      has: (key) => keys.has(key),
+      add: (key) => {
+        keys.add(key);
+        added.push(key);
+      },
+    },
+  };
+}
+
+describe("relevantIndexQuads", () => {
+  const ns = "https://example.org/";
+  const quads = (turtle: string) => parseTurtle(`@prefix : <${ns}> .\n${turtle}`, ns);
+  const lines = (found: ReturnType<typeof quads>) =>
+    found.map((q) => `${q.subject.value} ${q.predicate.value} ${q.object.value}`);
+
+  it("takes what the release's terms reach, and what points at its subjects by a checked predicate", () => {
+    const release = quads(":r :inSeries :s ; :about :thing .");
+    const index = quads(`
+      :catalog :dataset :s ; :other :r .
+      :s :publisher :p ; :title "S" ; :hasVersion :r .
+      :p :name "P" ; :in [ :at :q ] .
+      :other :dataset :t .
+      :t :publisher :p .
+      :c :broader :r .
+    `);
+    expect(lines(relevantIndexQuads(release, index, new Set([`${ns}broader`])))).toEqual([
+      `${ns}s ${ns}publisher ${ns}p`,
+      `${ns}s ${ns}title S`,
+      `${ns}s ${ns}hasVersion ${ns}r`,
+      `${ns}p ${ns}name P`,
+      expect.stringMatching(new RegExp(` ${ns}at ${ns}q$`)),
+      expect.stringMatching(new RegExp(`^${ns}p ${ns}in `)),
+      `${ns}c ${ns}broader ${ns}r`,
+    ]);
+    expect(relevantIndexQuads(release, index, new Set())).toHaveLength(6);
+  });
+
+  it("is the same for a release however many other decks the index lists", () => {
+    const of = (releases: readonly DeckRelease[]) =>
+      relevantIndexQuads(
+        CAPITALS[1].quads,
+        parseTurtle(buildIndex(releases), INDEX_URL),
+        validators.objectTargets,
+      ).map((q) => `${q.subject.value} ${q.predicate.value} ${q.object.value}`);
+    expect(of(LIBRARY)).toEqual(of(CAPITALS));
+    expect(of(CAPITALS).length).toBeGreaterThan(0);
+  });
+});
+
 describe("validateLibrary", () => {
+  it("checks a release again only when its key is new, keeps one that passes, and none that fails", async () => {
+    const cache = memoryCache();
+    await expect(
+      validateLibrary(CAPITALS, buildIndex(CAPITALS), validators, cache),
+    ).resolves.toEqual([]);
+    expect(cache.added).toHaveLength(2);
+    // Another deck changes the index, not the part of it a release of capitals reaches.
+    await expect(validateLibrary(LIBRARY, buildIndex(LIBRARY), validators, cache)).resolves.toEqual(
+      [],
+    );
+    expect(cache.added).toHaveLength(3);
+    await validateLibrary(LIBRARY, buildIndex(LIBRARY), validators, cache);
+    expect(cache.added).toHaveLength(3);
+    // A new version changes its deck's series, so v1 and v2 are checked
+    // again and kept; v3 fails, so it is not kept.
+    const dropped = [...CAPITALS, release("capitals", 3)];
+    expect(await validateLibrary(dropped, buildIndex(dropped), validators, cache)).toEqual([
+      "decks/capitals/v3.ttl: drops <#no>, which v2.ttl has. A card is never removed: retire it (owl:deprecated true), so the copies that have it keep it and its review history.",
+    ]);
+    expect(cache.added).toHaveLength(5);
+    // Other code checks every release again.
+    const other = memoryCache("other code");
+    for (const key of cache.keys) other.keys.add(key);
+    await validateLibrary(CAPITALS, buildIndex(CAPITALS), validators, other);
+    expect(other.added).toHaveLength(2);
+  });
+
+  it("checks no release it has a key of, though it would fail", async () => {
+    const dropped = [...CAPITALS, release("capitals", 3)];
+    const kept: LibraryCache = { code: "code", cache: { has: () => true, add: vi.fn() } };
+    await expect(validateLibrary(dropped, buildIndex(dropped), validators, kept)).resolves.toEqual(
+      [],
+    );
+    expect(kept.cache.add).not.toHaveBeenCalled();
+  });
+
   it("accepts releases and an index that conform to the shapes and to the profiles", async () => {
     await expect(validateLibrary(LIBRARY, buildIndex(LIBRARY), validators)).resolves.toEqual([]);
   });
@@ -1471,6 +1567,19 @@ describe("main", () => {
     ]);
   });
 
+  it("says how many versions it didn't check again, as their checks passed before", async () => {
+    const cache = memoryCache();
+    const files = filesOf(LIBRARY);
+    const { io: library, log } = io(files);
+    expect(await main(["node", "--check"], { ...library, cache: () => cache })).toBe(0);
+    expect(await main(["node", "--check"], { ...library, cache: () => cache })).toBe(0);
+    expect(log.mock.calls.map(([m]) => m)).toEqual([
+      "decks/: 3 versions of 2 decks, valid.",
+      "decks/: 3 of 3 versions unchanged since their checks passed, not checked again.",
+      "decks/: 3 versions of 2 decks, valid.",
+    ]);
+  });
+
   it("names in the index the course for newcomers its io names", async () => {
     const { io: library, writeIndex } = io(filesOf([course(1)], "stale"));
     expect(await main(["node"], { ...library, newcomerCourse: "solid" })).toBe(0);
@@ -1635,6 +1744,11 @@ describe("defaultIo", () => {
     );
     expect(library.loadValidators).toBe(loadValidators);
     expect(library.newcomerCourse).toBe(NEWCOMER_COURSE);
+    // The cache's key covers the checking code: this repository's, which the temporary one is not.
+    expect(() => library.cache?.()).toThrow();
+    const ours = defaultIo(join(import.meta.dirname, "../../../..")).cache?.();
+    expect(ours?.code).toMatch(/^[0-9a-f]{64}$/);
+    expect(ours?.cache.has("no such key")).toBe(false);
     const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
     library.log("hello");
     expect(log).toHaveBeenCalledWith("hello");

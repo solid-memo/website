@@ -49,8 +49,10 @@ import { SM_NS } from "@solid-memo/vocab/tooling/vocab";
 import { DECKS_ROOT, VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 import { quadsToReleaseModel } from "./quadsToReleaseModel.ts";
 import { releaseMessage, type WordedProblem } from "./releaseMessages.ts";
+import { codeFingerprint, fileReleaseCache, keyOf, type ReleaseCache } from "./releaseCache.ts";
 import {
   loadEngine,
+  loadObjectTargets,
   loadProfileEngine,
   loadReferenceData,
   validateProfile,
@@ -354,17 +356,20 @@ export interface LibraryValidators {
   dcatAp: ShapeEngine;
   skos: ShapeEngine;
   reference: Quad[];
+  /** The predicates whose objects a profile checks (loadObjectTargets). */
+  objectTargets: ReadonlySet<string>;
 }
 
 /** The validators, read from this repository: the shapes and the vocabulary from ns/, the profiles from the vocab package's vendor/. */
 export async function loadValidators(): Promise<LibraryValidators> {
-  const [shapes, dcatAp, skos, reference] = await Promise.all([
+  const [shapes, dcatAp, skos, reference, objectTargets] = await Promise.all([
     loadEngine(),
     loadProfileEngine(VOCAB_ROOT, "dcat-ap"),
     loadProfileEngine(VOCAB_ROOT, "skos"),
     loadReferenceData(),
+    loadObjectTargets(VOCAB_ROOT),
   ]);
-  return { shapes, dcatAp, skos, reference };
+  return { shapes, dcatAp, skos, reference, objectTargets };
 }
 
 /** The rules' problems of a release in English, after its path. */
@@ -609,6 +614,106 @@ async function problemsOf(check: Promise<void>): Promise<string[]> {
   }
 }
 
+/** A term as one key: its kind, value, and a literal's language or datatype. */
+function termKey(term: Quad["subject"] | Quad["object"]): string {
+  return term.termType === "Literal"
+    ? `"${term.value}"@${term.language}^^${term.datatype.value}`
+    : `${term.termType}:${term.value}`;
+}
+
+/**
+ * The part of the index a release's DCAT-AP check reads: every triple
+ * the release's terms reach, following each triple from its subject to
+ * its object (a series, its publisher, the releases it lists), and every
+ * triple whose object is a subject of the release by a predicate a
+ * profile checks the objects of (`objectTargets`). A profile's shapes
+ * follow no path backwards and its SPARQL constraints are left out
+ * (coreOnly), so what the check says of the release's subjects is the
+ * same as over the whole index, which every new deck changes; the part
+ * changes only with the release's own deck.
+ */
+export function relevantIndexQuads(
+  release: readonly Quad[],
+  index: readonly Quad[],
+  objectTargets: ReadonlySet<string>,
+): Quad[] {
+  const bySubject = new Map<string, Quad[]>();
+  for (const quad of index) {
+    const key = termKey(quad.subject);
+    bySubject.set(key, [...(bySubject.get(key) ?? []), quad]);
+  }
+  const subjects = new Set(release.map((quad) => termKey(quad.subject)));
+  const kept = new Set<Quad>(
+    index.filter(
+      (quad) => objectTargets.has(quad.predicate.value) && subjects.has(termKey(quad.object)),
+    ),
+  );
+  const seen = new Set<string>();
+  const todo = release.flatMap((quad) => [termKey(quad.subject), termKey(quad.object)]);
+  while (todo.length > 0) {
+    const key = todo.pop()!;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    for (const quad of bySubject.get(key) ?? []) {
+      kept.add(quad);
+      todo.push(termKey(quad.object));
+    }
+  }
+  return index.filter((quad) => kept.has(quad));
+}
+
+/**
+ * Where validateLibrary keeps the releases whose checks passed
+ * (releaseCache.ts), and the hash of the code that checks them.
+ */
+export interface LibraryCache {
+  cache: ReleaseCache;
+  code: string;
+}
+
+/**
+ * Every problem of one release that the release, the version before it
+ * and the part of the index it reaches decide (validateLibrary).
+ */
+async function releaseProblems(
+  release: DeckRelease,
+  before: DeckRelease | undefined,
+  newest: boolean,
+  indexPart: readonly Quad[],
+  validators: LibraryValidators,
+): Promise<string[]> {
+  const label = labelOf(release.deck, release.version);
+  const problems = metadataProblems(release);
+  if (before !== undefined) {
+    // Its path fixes each version, so metadataProblems names one that is not the one before it plus one.
+    const continuity = continuityProblems(modelOf(before), modelOf(release)).filter(
+      (p) => p.code !== "versionNotNext",
+    );
+    problems.push(...messagesOf(release, continuity));
+  }
+  problems.push(...courseProblems(release), ...markdownProblems(release));
+  if (newest) problems.push(...languageProblems(release));
+  problems.push(
+    ...normalizationProblems(label, releaseUrlOf(release.deck, release.version), release.quads),
+    ...aboutProblems(release),
+  );
+  problems.push(
+    ...(await problemsOf(
+      validateTurtleDocument(label, release.quads, validators.shapes, "library"),
+    )),
+    ...(await problemsOf(
+      validateProfile(label, release.quads, validators.dcatAp, [
+        ...validators.reference,
+        ...indexPart,
+      ]),
+    )),
+    ...(await problemsOf(
+      validateProfile(label, release.quads, validators.skos, validators.reference),
+    )),
+  );
+  return problems;
+}
+
 /**
  * Every problem with the releases and their index: each release's
  * metadata against its path, against the version before it
@@ -620,54 +725,51 @@ async function problemsOf(check: Promise<void>): Promise<string[]> {
  * its text written in Markdown (markdownProblems), its literals in
  * Unicode NFC (normalizationProblems), what its cards are about
  * (aboutProblems), and Solid Memo's shapes, DCAT-AP
- * (a release with the index beside it, where its series and publisher
- * are described) and SKOS, with the reference data; then the index's
+ * (a release with the part of the index it reaches beside it, where its
+ * series and publisher are described: relevantIndexQuads) and SKOS,
+ * with the reference data; then the index's
  * course for newcomers (newcomerProblems), its literals in NFC, and the
  * index to the shapes and the profiles too.
+ *
+ * With a `cache`, a release whose checks passed before, with the same
+ * text, version before it, part of the index and code, is not checked
+ * again, and one whose checks pass now is kept.
  */
 export async function validateLibrary(
   releases: readonly DeckRelease[],
   index: string,
   validators: LibraryValidators,
+  cache?: LibraryCache,
 ): Promise<string[]> {
   const indexQuads = parseTurtle(index, INDEX_URL);
   const problems: string[] = [];
   for (const release of releases) {
-    const label = labelOf(release.deck, release.version);
-    problems.push(...metadataProblems(release));
     const before = releases.find(
       (r) => r.deck === release.deck && r.version === release.version - 1,
     );
-    if (before !== undefined) {
-      // Its path fixes each version, so metadataProblems names one that is not the one before it plus one.
-      const continuity = continuityProblems(modelOf(before), modelOf(release)).filter(
-        (p) => p.code !== "versionNotNext",
-      );
-      problems.push(...messagesOf(release, continuity));
-    }
-    problems.push(...courseProblems(release), ...markdownProblems(release));
     const newest = !releases.some(
       (r) => r.deck === release.deck && r.version === release.version + 1,
     );
-    if (newest) problems.push(...languageProblems(release));
-    problems.push(
-      ...normalizationProblems(label, releaseUrlOf(release.deck, release.version), release.quads),
-      ...aboutProblems(release),
-    );
-    problems.push(
-      ...(await problemsOf(
-        validateTurtleDocument(label, release.quads, validators.shapes, "library"),
-      )),
-      ...(await problemsOf(
-        validateProfile(label, release.quads, validators.dcatAp, [
-          ...validators.reference,
-          ...indexQuads,
-        ]),
-      )),
-      ...(await problemsOf(
-        validateProfile(label, release.quads, validators.skos, validators.reference),
-      )),
-    );
+    const indexPart = relevantIndexQuads(release.quads, indexQuads, validators.objectTargets);
+    const key =
+      cache === undefined
+        ? undefined
+        : keyOf([
+            "library-check",
+            cache.code,
+            release.deck,
+            String(release.version),
+            release.turtle,
+            before?.turtle ?? "",
+            String(newest),
+            indexPart
+              .map((q) => `${termKey(q.subject)} ${q.predicate.value} ${termKey(q.object)}`)
+              .join("\n"),
+          ]);
+    if (key !== undefined && cache?.cache.has(key)) continue;
+    const found = await releaseProblems(release, before, newest, indexPart, validators);
+    if (found.length === 0 && key !== undefined) cache?.cache.add(key);
+    problems.push(...found);
   }
   const label = `decks/${INDEX_FILE}`;
   problems.push(
@@ -720,6 +822,8 @@ export interface LibraryIo {
   loadValidators(): Promise<LibraryValidators>;
   /** The deck the index names the course for newcomers; none when undefined. */
   newcomerCourse?: string;
+  /** Where the releases whose checks passed are kept; each is checked every time when undefined. */
+  cache?: () => LibraryCache;
   log(message: string): void;
 }
 
@@ -770,7 +874,28 @@ export async function main(argv: readonly string[], io: LibraryIo): Promise<numb
       await io.writeIndex(index);
       io.log(`wrote decks/${INDEX_FILE}`);
     }
-    problems.push(...(await validateLibrary(releases, index, await io.loadValidators())));
+    let unchanged = 0;
+    const kept = io.cache?.();
+    const cache =
+      kept === undefined
+        ? undefined
+        : {
+            code: kept.code,
+            cache: {
+              has: (key: string) => {
+                const has = kept.cache.has(key);
+                if (has) unchanged += 1;
+                return has;
+              },
+              add: (key: string) => kept.cache.add(key),
+            },
+          };
+    problems.push(...(await validateLibrary(releases, index, await io.loadValidators(), cache)));
+    if (unchanged > 0) {
+      io.log(
+        `decks/: ${unchanged} of ${releases.length} versions unchanged since their checks passed, not checked again.`,
+      );
+    }
     for (const problem of problems) io.log(problem);
     if (problems.length > 0) return 1;
     io.log(
@@ -843,6 +968,10 @@ export function defaultIo(repo: string): LibraryIo {
     loadValidators,
     log: (message) => console.log(message),
     newcomerCourse: NEWCOMER_COURSE,
+    cache: () => ({
+      cache: fileReleaseCache("library-check"),
+      code: codeFingerprint(repo, "@solid-memo/shacl", ["ns", "package-lock.json"]),
+    }),
   };
 }
 

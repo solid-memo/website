@@ -126,6 +126,28 @@ export async function loadProfileEngine(root: string, profile: ProfileName): Pro
   return createEngine(new Store(coreOnly(quads.flat())));
 }
 
+/**
+ * The predicates whose objects a vendored profile checks
+ * (sh:targetObjectsOf): a subject is checked as their object too, so
+ * the part of the index a release's check reads takes in the triples
+ * that point at the release's subjects with them (relevantIndexQuads).
+ */
+export async function loadObjectTargets(root: string): Promise<Set<string>> {
+  const files = Object.values(PROFILES).flat();
+  const quads = (
+    await Promise.all(
+      files.map(async (path) =>
+        parseTurtle(await readFile(join(root, "vendor", path), "utf8"), `${SITE_VENDOR}${path}`),
+      ),
+    )
+  ).flat();
+  return new Set(
+    quads
+      .filter((q) => q.predicate.value === "http://www.w3.org/ns/shacl#targetObjectsOf")
+      .map((q) => q.object.value),
+  );
+}
+
 /** The reference data a profile check loads next to a document, from ns/vocab/. */
 export async function loadReferenceData(): Promise<Quad[]> {
   return (
