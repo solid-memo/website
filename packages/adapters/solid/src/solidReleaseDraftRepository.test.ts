@@ -2564,6 +2564,39 @@ describe("a release with a contact point for the Studio and another for learners
   });
 });
 
+describe("a contact point's web pages of mixed schemes (GHSA-9475-qxm2-3xgp)", () => {
+  const good = "https://good.example/issues";
+  const withPages = (pages: string) =>
+    readFileSync(join(DECKS_ROOT, "arabic-adjectives/v1.ttl"), "utf8").replace(
+      "vcard:hasURL <https://github.com/solid-memo/website/issues>",
+      `vcard:hasURL ${pages}`,
+    );
+
+  it.each([
+    [`<${good}>`, good],
+    [`<mailto:a@example.org> , <${good}>`, null],
+    [`<${good}> , <urn:example:other>`, null],
+    [`<${good}> , <https://other.example/report>`, null],
+    ["<mailto:a@example.org>", null],
+    ["<urn:example:other>", null],
+  ])("is read alike by the Studio and by learners: %s", async (pages, expected) => {
+    const pod = await draftPod();
+    const text = withPages(pages);
+    expect(text).toContain(pages);
+    const draft = releaseToDraft(
+      await pod.repository.parseRelease(text, "turtle"),
+      draftUrlOf(INSTANCE, "arabic-adjectives", 1),
+    );
+    const published = "https://creator.example/memo/releases/arabic/v1.ttl";
+    const learners = toLibraryDeckContent(
+      published,
+      datasetFromQuads(releaseQuadsOf(draftQuads(rebaseDraft(draft, published)), published, NOW)),
+    ).contact;
+    expect(contactOf(draft)).toBe(expected);
+    expect(learners ?? null).toBe(expected);
+  });
+});
+
 describe("a class another app gives a draft's subject (GHSA-8hh7-p2ww-mpjf)", () => {
   const PALETTE = `${SM}Palette`;
   const OTHER = "http://example.org/Other";

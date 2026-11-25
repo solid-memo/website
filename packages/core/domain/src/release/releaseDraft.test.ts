@@ -1299,7 +1299,7 @@ describe("the contact", () => {
     ).toBe("https://a.example/");
   });
 
-  it("is none for more than one contact point or page, or a point that is text, as learners read it", () => {
+  it("is none for more than one contact point or page, a page that is no web address, or a point that is text, as learners read it", () => {
     const draft = courseDraft();
     const with_ = (...triples: DraftTriple[]) => ({
       ...draft,
@@ -1340,6 +1340,15 @@ describe("the contact", () => {
         with_(
           link(DRAFT, POINT, of("first")),
           link(of("first"), `${VCARD}hasEmail`, "mailto:a@example.org"),
+        ),
+      ),
+    ).toBeNull();
+    // One value that is no web page, as learners read it (GHSA-9475-qxm2-3xgp).
+    expect(
+      contactOf(
+        with_(
+          link(DRAFT, POINT, of("contact")),
+          link(of("contact"), `${VCARD}hasURL`, "mailto:a@example.org"),
         ),
       ),
     ).toBeNull();

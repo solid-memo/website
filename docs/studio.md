@@ -2616,9 +2616,11 @@ the library's releases are
     replaces goes with what it stated, every contact point the release
     named. The field reads the contact as learners do (`contactOf`):
     the one contact point, named or blank, with one web page. A release
-    that names more than one contact point, or a point with more than
-    one web page, names no contact, and the field is empty; the release
-    check warns of it (`contactAmbiguous`). **Use the library's contact**
+    with more than one contact point names no contact, nor does a point
+    with more than one `vcard:hasURL` of any scheme, such as a `mailto:`
+    beside a web page. The field is then empty, and the release check
+    warns of it (`contactAmbiguous`). A point whose one value isn't an
+    http(s) address, such as a `mailto:` alone, names no contact either. **Use the library's contact**
     fills in `LIBRARY_CONTACT`
     ([curationRules.ts](../packages/core/domain/src/release/curationRules.ts)).
     The app reads it to say where a mistake is reported

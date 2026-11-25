@@ -24,6 +24,7 @@ import {
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { EDUCATION_THEME, namedWithin, TURTLE_MEDIA_TYPE } from "../dcat.ts";
 import { PathMap, pathKeys } from "../pathKeys.ts";
+import { isHttpUrl } from "../webId.ts";
 import type { ReleaseKind, ReleaseTerm, ReleaseText } from "./releaseModel.ts";
 
 /**
@@ -1668,12 +1669,13 @@ function contactPointsOf(draft: ReleaseDraft): string[] {
 
 /**
  * The web page the release's contact names: the vcard:hasURL of its one
- * dcat:contactPoint, named or blank, when that point names one page.
- * Null when it names none, or more than one point or page, which
- * learners read as no contact too (`contactOf` in the solid package's
- * libraryMapper.ts), so the Studio never shows a contact other than the
- * one "Report a mistake" leads to; the release check says so
- * (`contactAmbiguous`).
+ * dcat:contactPoint, named or blank, when that point names one IRI and
+ * it is an http(s) URL. Null when it names none, a value of another
+ * scheme alone, such as a mailto:, or more than one point or IRI of any
+ * scheme, which learners read as no contact too (`contactOf` in the
+ * solid package's libraryMapper.ts, GHSA-9475-qxm2-3xgp), so the Studio
+ * never shows a contact other than the one "Report a mistake" leads to;
+ * the release check warns of more than one (`contactAmbiguous`).
  */
 export function contactOf(draft: ReleaseDraft): string | null {
   const points = draft.triples.filter(
@@ -1689,7 +1691,7 @@ export function contactOf(draft: ReleaseDraft): string | null {
       triple.predicate === `${VCARD}hasURL` &&
       triple.object.kind === "iri",
   );
-  return urls.length === 1 ? urls[0]!.object.value : null;
+  return urls.length === 1 && isHttpUrl(urls[0]!.object.value) ? urls[0]!.object.value : null;
 }
 
 /**

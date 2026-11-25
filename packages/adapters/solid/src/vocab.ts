@@ -76,6 +76,11 @@ export const DCAT = {
   contactPoint: "http://www.w3.org/ns/dcat#contactPoint",
 } as const;
 
+export const VCARD = {
+  /** A contact's web page: on a release's contact point, where a mistake in it is reported. */
+  hasURL: "http://www.w3.org/2006/vcard/ns#hasURL",
+} as const;
+
 export const SCHEMA = {
   /** A library release that is also a course (docs/courses.md): chapters of steps whose questions are its cards. */
   Course: "https://schema.org/Course",

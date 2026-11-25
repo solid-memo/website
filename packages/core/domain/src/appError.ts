@@ -17,7 +17,7 @@
  * Errors.
  */
 
-import { shown, type LangText } from "./langText";
+import { shown, type LangText } from "./langText.ts";
 
 /** An error's text, or one per plural category, chosen by its `count`. */
 export type ErrorTemplate = string | { one: string; other: string };

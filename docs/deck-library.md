@@ -1414,9 +1414,10 @@ reported (`ReportPlace`):
   (`dcat:contactPoint`'s `vcard:hasURL`, read with the release as
   `LibraryDeckContent.contact`), unfilled. That's the one contact
   point, named or blank, with one web page, as the Studio reads it
-  ([studio.md](studio.md#the-releases-metadata-and-provenance)); a
-  release with more than one point, or a point with more than one web
-  page, names no contact. The release names this page
+  ([studio.md](studio.md#the-releases-metadata-and-provenance)). A
+  release with more than one point names no contact, nor does a point
+  with more than one `vcard:hasURL` of any scheme, such as a `mailto:`
+  beside a web page. The release names this page
   itself, so the link follows it as a release's other links are
   followed (`DataLink`, [Safety](markdown.md#safety)): http(s) with no
   `user@` before the host, and the host shown beside the link. With
