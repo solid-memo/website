@@ -2571,7 +2571,10 @@ by one.
   same cards documents, share one frozen mapping of it
   ([reviewStateMapper.ts](../packages/adapters/solid/src/mappers/reviewStateMapper.ts)
   `sharedReviewStatesOf`). The way a deck reads it is looked up in the
-  documents its states name, sorted once for each read. A read is mapped
+  documents its states name, sorted once for each read. Those lookups
+  are keyed by the path of their terms, such as a deck's id and its
+  cards document (`PathMap` in `pathKeys.ts`), never by one string
+  joined from them. A read is mapped
   in at most `MAX_READINGS` ways, and finding those ways goes through
   the names of the documents its states name `SCANS_OF_NAMES` times
   over at most, all its decks together. A deck that would read it in
