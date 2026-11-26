@@ -718,6 +718,21 @@ describe("the answer log", () => {
     expect(most).toBe(6);
   });
 
+  it("begins no read of a month once one fails, and fails as it did", async () => {
+    const { byMonth, log, useCases } = setup();
+    for (let month = 1; month <= 12; month++)
+      byMonth.set(`2001-${String(month).padStart(2, "0")}`, []);
+    log.readMonthSince.mockImplementation(async (_, month) => {
+      if (month === "2001-01") throw new Error("503");
+      await new Promise((resolve) => setTimeout(resolve, 1));
+      return { unchanged: false, version: null, value: [] };
+    });
+    await expect(useCases.loadAnswerLog(instance.url)).rejects.toThrow("503");
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    // The first turn of six, begun together; none after the first failed.
+    expect(log.readMonthSince).toHaveBeenCalledTimes(6);
+  });
+
   it("reads no month of the whole log after the day after tomorrow's, which no answer counted can be in", async () => {
     const deps = makeDeps();
     const { log, byMonth } = memoryLog();

@@ -180,21 +180,6 @@ function likeliestNewer(copied: string, links: string[]): { named: string[]; oth
   return { named, others: others.slice(0, MAX_OTHER_LINKS) };
 }
 
-/** `read` of each of `urls`, in their order, `atOnce` of them at most at once. */
-async function readEach<T>(
-  urls: string[],
-  read: (url: string) => Promise<T>,
-  atOnce = LINKED_READS_AT_ONCE,
-): Promise<T[]> {
-  const results: T[] = [];
-  let next = 0;
-  const reader = async () => {
-    for (let at = next++; at < urls.length; at = next++) results[at] = await read(urls[at]!);
-  };
-  await Promise.all(Array.from({ length: atOnce }, reader));
-  return results;
-}
-
 /**
  * Refuse a release with a subject in a format newer than the library's
  * shapes have, which no shape checks (libraryCardTooNew for a card,
@@ -382,8 +367,13 @@ export function createLibraryUseCases({
     // Oldest first. A release from a link lists what its creator wrote: MAX_LINKED_RELEASES of them at most, the
     // newest; a card as one left out has it counts as the user's, and is kept.
     const betweenUrls = fromLink === true ? inBetween.slice(-MAX_LINKED_RELEASES) : inBetween;
-    if (fromLink === true) await readEach(betweenUrls, (url) => checkLinkedRelease(url, reads));
-    const between = await readEach(betweenUrls, (url) => reads.fetchLibraryDeck(url));
+    if (fromLink === true)
+      await mapAtOnce(betweenUrls, (url) => checkLinkedRelease(url, reads), LINKED_READS_AT_ONCE);
+    const between = await mapAtOnce(
+      betweenUrls,
+      (url) => reads.fetchLibraryDeck(url),
+      LINKED_READS_AT_ONCE,
+    );
     // A course's outline stays in its release: a newer one may change only that.
     const outlines =
       from.isCourse === true && to.isCourse === true
@@ -530,8 +520,8 @@ export function createLibraryUseCases({
       });
       newest = newestRelease(newest, [release]);
     };
-    await readEach(named, read, 1);
-    await readEach(others, read);
+    await mapAtOnce(named, read, 1);
+    await mapAtOnce(others, read, LINKED_READS_AT_ONCE);
     if (newest === copied && pastLimits) return { copied, series: copied, complete: false };
     return { copied, series: newest, complete: true };
   }

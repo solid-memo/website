@@ -29,6 +29,7 @@ import {
 import type { ReviewStateRepository, AnswerLog } from "./ports/pod";
 import type { GradeBasis, RecordedReview } from "./study";
 import type { PreferenceStore } from "./preferenceStore";
+import { mapAtOnce } from "./atOnce";
 
 /** What sets each prompt's due day, by the scheduler the preferences name (effectiveStates). */
 export function dueStatesOf(
@@ -58,12 +59,6 @@ function schedulingOf(prefs: StudyPreferences): Scheduling {
     dayBoundaryHour: prefs.dayBoundaryHour,
   };
 }
-
-/**
- * The most months of the answer log read at once: a log of many months
- * is not all asked for together (as instanceGraph's READS_AT_ONCE).
- */
-const MONTH_READS_AT_ONCE = 6;
 
 /**
  * The last month of the answer log a read takes in, of the study day
@@ -253,7 +248,8 @@ export function createAnswerStore({
   /**
    * The answers of the log's months that `wanted` keeps, of `listed` (every
    * month the log has): each month read only when it changed since last
-   * read, and kept with its version, a few at a time (MONTH_READS_AT_ONCE).
+   * read, and kept with its version, a few at a time (mapAtOnce): none is
+   * begun once one fails.
    * What is kept is added to, never replaced, so a read of some months
    * and one of all do not undo each other; a month no longer listed is dropped. A month already being
    * read since the last write to the logs is not read twice: the
@@ -270,15 +266,7 @@ export function createAnswerStore({
     const still = new Set(listed);
     for (const month of known.keys()) if (!still.has(month)) known.delete(month);
     const months = listed.filter(wanted);
-    const answers: Answer[][] = [];
-    let next = 0;
-    const reader = async () => {
-      while (next < months.length) {
-        const at = next++;
-        answers[at] = await readLogMonth(instanceUrl, months[at]!, known);
-      }
-    };
-    await Promise.all(Array.from({ length: MONTH_READS_AT_ONCE }, reader));
+    const answers = await mapAtOnce(months, (month) => readLogMonth(instanceUrl, month, known));
     return answers.flat();
   }
   /**
