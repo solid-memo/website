@@ -8,7 +8,7 @@ import type { MistakeReportUseCases } from "@solid-memo/application/mistakeRepor
 import type { Deck } from "@solid-memo/domain/deck";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import type { ReportPlace } from "@solid-memo/domain/mistakeReport";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 
 /**
  * The library release a deck was copied from (LibraryUseCases.deckRelease): null
@@ -31,12 +31,7 @@ export function useDeckReleaseQuery(
   deck: Deck | undefined,
 ): { release: LibraryDeckContent | null | undefined; error: Error | null } {
   const sourceUrl = deck?.sourceUrl;
-  const query = useQuery({
-    queryKey: queryKeys.deckRelease(sourceUrl),
-    queryFn: () => useCases.deckRelease(deck!),
-    enabled: sourceUrl !== undefined,
-    staleTime: Infinity,
-  });
+  const query = useQuery(queries.deckRelease(useCases, deck));
   return sourceUrl === undefined
     ? { release: null, error: null }
     : { release: query.data, error: query.error };
@@ -55,12 +50,7 @@ export function useReportTarget(
   deck: Deck | undefined,
 ): { place: ReportPlace; releaseUrl: string; cardIds: ReadonlySet<string> } | undefined {
   const sourceUrl = deck?.sourceUrl;
-  const reportQuery = useQuery({
-    queryKey: queryKeys.reportPlace(sourceUrl),
-    queryFn: () => useCases.reportPlace(sourceUrl!),
-    enabled: sourceUrl !== undefined,
-    staleTime: Infinity,
-  });
+  const reportQuery = useQuery(queries.reportPlace(useCases, sourceUrl));
   const release = useDeckRelease(useCases, deck);
   return reportQuery.data === undefined || release === null || release === undefined
     ? undefined

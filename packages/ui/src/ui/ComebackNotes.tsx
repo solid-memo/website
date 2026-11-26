@@ -9,7 +9,7 @@ import { shiftStudyDay } from "@solid-memo/domain/answer";
 import type { Deck } from "@solid-memo/domain/deck";
 import { backlogDayOf } from "@solid-memo/domain/deckPause";
 import { useI18n } from "./i18n";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 import { ReaderText } from "./ReaderText";
 
 /**
@@ -36,11 +36,7 @@ export function ComebackNotes({
   const since = shiftStudyDay(today, -COMEBACK_DAYS);
   const resumed = decks.filter((deck) => (backlogDayOf(deck, today) ?? "") >= since);
   const comebacks = useQueries({
-    queries: resumed.map((deck) => ({
-      queryKey: queryKeys.comeback(deck.url),
-      queryFn: () => useCases.getComeback(instanceUrl, deck, new Date()),
-      refetchOnWindowFocus: false,
-    })),
+    queries: resumed.map((deck) => queries.comeback(useCases, instanceUrl, deck)),
   });
   const shown = resumed.flatMap((deck, at) => {
     const comeback = comebacks[at]!.data;

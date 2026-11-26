@@ -10,8 +10,7 @@ import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { CardHistory } from "./CardHistory";
 import { useI18n } from "./i18n";
 import { Loading } from "./Loading";
-import { STATISTICS_STALE_MS } from "./studyFigures";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 
 /**
  * Reads a card's answers from the whole answer log (with the Studio's
@@ -36,19 +35,9 @@ export function CardHistoryContainer({
   card: Card;
 }) {
   const { t } = useI18n();
-  const answersQuery = useQuery({
-    queryKey: queryKeys.cardAnswers(deck.url, card.id),
-    queryFn: () => useCases.cardAnswers(instanceUrl, deck, card.id),
-    staleTime: STATISTICS_STALE_MS,
-  });
-  const reviewsQuery = useQuery({
-    queryKey: queryKeys.reviews(deck.reviewsDocumentUrl),
-    queryFn: () => useCases.listDeckReviewStates(deck),
-  });
-  const preferencesQuery = useQuery({
-    queryKey: queryKeys.preferences(instanceUrl),
-    queryFn: () => useCases.getPreferences(instanceUrl),
-  });
+  const answersQuery = useQuery(queries.cardAnswers(useCases, instanceUrl, deck, card.id));
+  const reviewsQuery = useQuery(queries.reviews(useCases, deck));
+  const preferencesQuery = useQuery(queries.preferences(useCases, instanceUrl));
   if (answersQuery.error || reviewsQuery.error)
     return <p class="hint">{t("card.historyUnavailable")}</p>;
   if (answersQuery.data === undefined || reviewsQuery.data === undefined)

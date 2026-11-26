@@ -16,7 +16,7 @@ import {
   InstanceUpdateResult,
 } from "./InstanceUpdate";
 import { MigrationNotice } from "./MigrationNotice";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 import { changes, useWrite } from "./writeEffects";
 
 /**
@@ -48,11 +48,7 @@ export function MigrationContainer({
   /** An update that left documents it could not update now, said until the user tries again or closes it. */
   const [unfinished, setUnfinished] = useState<UpdateOutcome | null>(null);
 
-  const planQuery = useQuery({
-    queryKey: queryKeys.migration(instance.url),
-    queryFn: () => useCases.planMigration(instance.url),
-    staleTime: Infinity,
-  });
+  const planQuery = useQuery(queries.migration(useCases, instance.url));
 
   // The documents are where they were, some in newer formats: everything shown of them is read again,
   // while the progress still shows, so the offer comes back only as what is still outdated.

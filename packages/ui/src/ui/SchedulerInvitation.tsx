@@ -12,7 +12,7 @@ import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type ErrorText } from "./i18n";
 import { SchedulerSwitchProgress, SchedulerSwitchResult } from "./SchedulerSwitch";
 import { useTheme } from "./theme";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 import { changes, useWrite } from "./writeEffects";
 
 /**
@@ -98,17 +98,9 @@ export function SchedulerInvitationContainer({
     preferences: StudyPreferences;
   } | null>(null);
   // The preferences screen's key: a save there, or this switch, shows here at once.
-  const preferencesQuery = useQuery({
-    queryKey: queryKeys.preferences(instance.url),
-    queryFn: () => useCases.getPreferences(instance.url),
-    refetchOnWindowFocus: false,
-  });
+  const preferencesQuery = useQuery(queries.preferences(useCases, instance.url));
   // Not offered while the stored preferences do not fit their shape: the defaults shown in their place are not the learner's.
-  const misfitQuery = useQuery({
-    queryKey: queryKeys.preferencesMisfit(instance.url),
-    queryFn: () => useCases.preferencesMisfit(instance.url),
-    refetchOnWindowFocus: false,
-  });
+  const misfitQuery = useQuery(queries.preferencesMisfit(useCases, instance.url));
 
   const switchMutation = useWrite({
     mutationFn: (preferences: StudyPreferences) => {

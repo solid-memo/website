@@ -609,7 +609,7 @@ describe("CardWorkbenchContainer", () => {
       within(screen.getByRole("combobox", { name: "To the deck" }))
         .getAllByRole("option")
         .map((o) => o.textContent);
-    const validationKey = queryKeys.validation(instanceA.url);
+    const validationKey = queryKeys.instanceCheck(instanceA.url);
     const conforming: ValidationReport = {
       instanceUrl: instanceA.url,
       documents: [],

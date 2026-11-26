@@ -21,7 +21,7 @@ import { DeckPictures } from "./deckPictures";
 import { useReportTarget } from "./deckRelease";
 import { deckHref } from "./router";
 import { useI18n } from "./i18n";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 
 /** A leech's prompt, with the deck it is in. */
 interface CramPrompt {
@@ -93,8 +93,7 @@ export function CramContainer({
   const reading = cram === null;
   const progressQuery = useCardProgress(useCases, instance, deck, reading);
   const preferencesQuery = useQuery({
-    queryKey: queryKeys.preferences(instance.url),
-    queryFn: () => useCases.getPreferences(instance.url),
+    ...queries.preferences(useCases, instance.url),
     enabled: reading,
   });
   const up =

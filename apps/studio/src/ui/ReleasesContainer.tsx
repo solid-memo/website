@@ -14,7 +14,7 @@ import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { useMakePublic, useStartNextVersion } from "./releaseActions";
 import { ReleasesScreen } from "./ReleasesScreen";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 
 /**
  * The releases screen's data: the releases the instance published, each
@@ -44,15 +44,9 @@ export function ReleasesContainer({
 }) {
   const { t, errorText } = useI18n();
   const check = useDataCheck(useCases, instance.url);
-  const releasesQuery = useQuery({
-    queryKey: queryKeys.publishedReleases(instance.url),
-    queryFn: () => useCases.listPublishedReleases(instance.url),
-  });
+  const releasesQuery = useQuery(queries.publishedReleases(useCases, instance.url));
   // Drafts that cannot be read say nothing of their release: they are no source of one.
-  const draftsQuery = useQuery({
-    queryKey: queryKeys.releaseDrafts(instance.url),
-    queryFn: () => useCases.listReleaseDrafts(instance.url),
-  });
+  const draftsQuery = useQuery(queries.releaseDrafts(useCases, instance.url));
   // Each draft by its release, the first that names it, once: every row, sort and filter looks its own up.
   const draftsByRelease = useMemo(() => {
     const byRelease = new Map<string, ReleaseDraftSummary>();

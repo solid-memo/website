@@ -11,11 +11,13 @@ import { useDataCheck } from "@solid-memo/ui/dataCheck";
 import { catalogScope } from "@solid-memo/ui/deckTreeEditor";
 import { useI18n } from "@solid-memo/ui/i18n";
 import type { DraftEditor } from "./draftEditor";
-import { markdownCheckOf, publishErrors, useReleaseCheck } from "./releaseCheck";
+import { markdownCheckOf } from "./draftVersions";
+import { publishErrors, useReleaseCheck } from "./releaseCheck";
 import { useMakePublic, useStartNextVersion } from "./releaseActions";
 import { ReleasePublishScreen, type ReleasePublishLinks } from "./ReleasePublishScreen";
 import { changes, useWrite } from "@solid-memo/ui/writeEffects";
 import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 
 /**
  * The release screen's publishing, over the draft as its editor keeps it
@@ -52,8 +54,7 @@ export function ReleasePublishContainer({
   const rules = useReleaseCheck(useCases, draft, "pod");
   const released = draft.root.releasedAs;
   const publicQuery = useQuery({
-    queryKey: queryKeys.releasePublic(released ?? ""),
-    queryFn: () => useCases.isReleasePublic(released!),
+    ...queries.releasePublic(useCases, released),
     // Asked of an address a release may have only: the draft is data anyone may have written.
     enabled: released !== undefined && isPublishedReleaseUrl(released),
   });

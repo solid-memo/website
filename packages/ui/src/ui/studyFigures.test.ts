@@ -4,8 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import { MutationObserver, QueryClient } from "@tanstack/react-query";
-import { makeUseCasesFake } from "../test/useCasesFake";
-import { keepStudyFiguresFresh, statisticsQuery, todayFiguresQuery } from "./studyFigures";
+import { keepStudyFiguresFresh } from "./studyFigures";
 
 const INSTANCE = "https://pod.example/solid-memo/a/";
 const OTHER = "https://pod.example/solid-memo/b/";
@@ -68,53 +67,5 @@ describe("keepStudyFiguresFresh", () => {
     finish();
     await pending;
     expect(invalidated(queryClient, ["statistics", INSTANCE])).toBe(false);
-  });
-});
-
-describe("statisticsQuery", () => {
-  it("reads the range asked for, of the instance or of a deck", async () => {
-    const useCases = makeUseCasesFake();
-    const deckUrl = `${INSTANCE}catalog.ttl#deck-1`;
-    expect(statisticsQuery(useCases, INSTANCE, "12m").queryKey).toEqual([
-      "statistics",
-      INSTANCE,
-      "range",
-      "12m",
-    ]);
-    expect(statisticsQuery(useCases, INSTANCE, "all").queryKey).toEqual([
-      "statistics",
-      INSTANCE,
-      "range",
-      "all",
-    ]);
-    expect(statisticsQuery(useCases, INSTANCE, "30d", deckUrl).queryKey).toEqual([
-      "statistics",
-      INSTANCE,
-      deckUrl,
-      "30d",
-    ]);
-    await statisticsQuery(useCases, INSTANCE, "12m").queryFn();
-    expect(useCases.getStatistics).toHaveBeenLastCalledWith(INSTANCE, expect.any(Date), {});
-    await statisticsQuery(useCases, INSTANCE, "90d", deckUrl).queryFn();
-    expect(useCases.getStatistics).toHaveBeenLastCalledWith(INSTANCE, expect.any(Date), {
-      range: 90,
-      deckUrl,
-    });
-  });
-});
-
-describe("todayFiguresQuery", () => {
-  it("reads the today strip's figures under a key of its own, which a change made clears", async () => {
-    const useCases = makeUseCasesFake();
-    const query = todayFiguresQuery(useCases, INSTANCE);
-    expect(query.queryKey).toEqual(["statistics", INSTANCE, "today"]);
-    expect(query.queryKey).not.toEqual(statisticsQuery(useCases, INSTANCE, "12m").queryKey);
-    await query.queryFn();
-    expect(useCases.getTodayFigures).toHaveBeenLastCalledWith(INSTANCE, expect.any(Date));
-    const queryClient = new QueryClient();
-    queryClient.setQueryData(query.queryKey, await query.queryFn());
-    keepStudyFiguresFresh(queryClient);
-    await new MutationObserver(queryClient, { mutationFn: async () => undefined }).mutate();
-    expect(queryClient.getQueryState(query.queryKey)?.isInvalidated).toBe(true);
   });
 });

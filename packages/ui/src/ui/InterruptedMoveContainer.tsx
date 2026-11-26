@@ -10,6 +10,7 @@ import type { Session } from "@solid-memo/domain/session";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
 import { usePanelFocus } from "./panelFocus";
+import { queries } from "./queries";
 import { queryKeys } from "./queryKeys";
 import { changes, useWrite } from "./writeEffects";
 
@@ -33,11 +34,7 @@ export function InterruptedMoveContainer({
 }) {
   const { t, errorText } = useI18n();
 
-  const leftoverQuery = useQuery({
-    queryKey: queryKeys.interruptedMove(instance.url),
-    queryFn: () => useCases.findInterruptedGuestMove(session, instance),
-    staleTime: Infinity,
-  });
+  const leftoverQuery = useQuery(queries.interruptedMove(useCases, session, instance));
 
   const removeMutation = useWrite({
     mutationFn: () => useCases.removeInterruptedGuestMove(session, instance),

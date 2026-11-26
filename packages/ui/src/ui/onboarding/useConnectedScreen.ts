@@ -7,6 +7,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { PreferenceUseCases } from "@solid-memo/application/preferences";
 import type { SolidAccount } from "@solid-memo/domain/account";
 import type { Session } from "@solid-memo/domain/session";
+import { queries } from "../queries";
 import { queryKeys } from "../queryKeys";
 
 /** How long Discovering waits for the choice once the account is found, before showing the Connected screen. */
@@ -46,14 +47,7 @@ export function useConnectedScreen({
   onEnter: () => void;
 }): ConnectedScreen {
   const queryClient = useQueryClient();
-  const choice = useQuery({
-    queryKey: queryKeys.connectedScreen(session?.webId),
-    queryFn: () => useCases.connectedScreenChoice(session!),
-    enabled: session !== null && connecting,
-    // Read once: a slow retry would hold up the login, and the screen shows on any failure.
-    retry: false,
-    refetchOnWindowFocus: false,
-  });
+  const choice = useQuery({ ...queries.connectedScreen(useCases, session), enabled: connecting });
   const [waitedOut, setWaitedOut] = useState(false);
   // Neither a missing Pod nor an error waits for the choice: those always show.
   const storageFound =

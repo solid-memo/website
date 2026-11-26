@@ -8,7 +8,7 @@ import type { Deck } from "@solid-memo/domain/deck";
 import { isPaused } from "@solid-memo/domain/deckPause";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { studyDayOf } from "@solid-memo/domain/scheduling";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 
 /**
  * Today's study day ("YYYY-MM-DD"), by the instance's day boundary (the
@@ -20,11 +20,7 @@ export function useStudyToday(
   instanceUrl: string | null,
   enabled = true,
 ): string {
-  const preferencesQuery = useQuery({
-    queryKey: queryKeys.preferences(instanceUrl),
-    queryFn: () => useCases.getPreferences(instanceUrl!),
-    enabled: enabled && instanceUrl !== null,
-  });
+  const preferencesQuery = useQuery({ ...queries.preferences(useCases, instanceUrl), enabled });
   const { dayBoundaryHour } = preferencesQuery.data ?? DEFAULT_PREFERENCES;
   return studyDayOf(new Date(), dayBoundaryHour);
 }

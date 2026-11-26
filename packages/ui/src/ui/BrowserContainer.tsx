@@ -14,7 +14,7 @@ import { useDeckRelease } from "./deckRelease";
 import { useI18n } from "./i18n";
 import { Loading } from "./Loading";
 import type { BrowserLanguageFilter } from "./router";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 import { changes, useWrite } from "./writeEffects";
 
 /**
@@ -51,10 +51,7 @@ export function BrowserContainer({
 
   const release = useDeckRelease(useCases, deck);
 
-  const cardsQuery = useQuery({
-    queryKey: queryKeys.cards(deck.cardsDocumentUrl),
-    queryFn: () => useCases.listCards(deck),
-  });
+  const cardsQuery = useQuery(queries.cards(useCases, deck));
 
   const describeDeckMutation = useWrite({
     mutationFn: (about: DeckAbout) => useCases.describeDeck(deck, about),

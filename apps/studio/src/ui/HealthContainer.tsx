@@ -12,9 +12,9 @@ import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { UnclaimedDecksNotice } from "@solid-memo/ui/UnclaimedDecksNotice";
-import { deckHealthQuery, HealthBadge } from "./HealthBadge";
+import { HealthBadge } from "./HealthBadge";
 import { DeckHealthScreen, InstanceHealthScreen } from "./HealthScreen";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 
 /**
  * The health screen's data: with a deck, its health (UseCases.checkDeck)
@@ -26,7 +26,7 @@ import { queryKeys } from "./queryKeys";
  * check (set aside, or the whole instance blocked: useDataCheck) has
  * its problems named, not linked to its forms, which change nothing
  * until then. What the deck's check finds (as the screen opens, or on
- * "Check again") is put in the instance's check (deckHealthQuery), so
+ * "Check again") is put in the instance's check (queries.deckHealth), so
  * a deck mended in the pod by other means is let go. A deck whose
  * documents are
  * unclaimed is named above, with the claim that lets Solid Memo change
@@ -79,22 +79,11 @@ function DeckHealthContainer({
 }) {
   const { t, errorText } = useI18n();
   const queryClient = useQueryClient();
-  const health = deckHealthQuery(useCases, queryClient, instance.url, deck);
+  const health = queries.deckHealth(useCases, queryClient, instance.url, deck, { afresh: true });
   const reason = useDataCheck(useCases, instance.url).readOnly(deck);
-  // Read afresh each time the screen opens, as a card edited since may have mended (or made) a problem:
-  // its documents too, not what another deck's check found of them (forgetDeckCheck), as the query reads.
-  const healthQuery = useQuery({
-    ...health,
-    queryFn: (context) => {
-      useCases.forgetDeckCheck(instance.url, deck);
-      return health.queryFn(context);
-    },
-    refetchOnMount: "always",
-  });
-  const cardsQuery = useQuery({
-    queryKey: queryKeys.cards(deck.cardsDocumentUrl),
-    queryFn: () => useCases.listCards(deck),
-  });
+  // Read afresh each time the screen opens, as a card edited since may have mended (or made) a problem.
+  const healthQuery = useQuery({ ...health, refetchOnMount: "always" });
+  const cardsQuery = useQuery(queries.cards(useCases, deck));
   const error = healthQuery.error ?? cardsQuery.error;
   if (error) return <ErrorMessage error={errorText(error)} />;
   if (healthQuery.data === undefined || cardsQuery.data === undefined)
@@ -135,15 +124,8 @@ function InstanceHealthContainer({
   deckHref: (deck: Deck) => string;
 }) {
   const { t, errorText } = useI18n();
-  const reportQuery = useQuery({
-    queryKey: queryKeys.validation(instance.url),
-    queryFn: () => useCases.checkInstance(instance.url),
-    staleTime: Infinity,
-  });
-  const decksQuery = useQuery({
-    queryKey: queryKeys.decks(instance.url),
-    queryFn: () => useCases.listDecks(instance.url),
-  });
+  const reportQuery = useQuery(queries.instanceCheck(useCases, instance.url));
+  const decksQuery = useQuery(queries.decks(useCases, instance.url));
   const error = reportQuery.error ?? decksQuery.error;
   if (error) return <ErrorMessage error={errorText(error)} />;
   if (reportQuery.data === undefined || decksQuery.data === undefined)

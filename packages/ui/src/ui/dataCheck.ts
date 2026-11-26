@@ -15,7 +15,7 @@ import {
   type UnclaimedDeck,
   type ValidationReport,
 } from "@solid-memo/domain/validation";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 
 /** What the check of an instance, made when it is opened, lets the screens change (docs/validation.md). */
 export interface DataCheck {
@@ -53,31 +53,14 @@ export interface DataCheck {
 
 export type ReadOnlyReason = "checking" | "unchecked" | "blocked" | "setAside";
 
-/** Whether the check found a document it could not read: it is made again, as a failed one is. */
-function hasUnreadable(report: ValidationReport | undefined): boolean {
-  return report?.documents.some((document) => document.status === "unreadable") ?? false;
-}
-
 /**
  * The check of the instance at `instanceUrl` (null: none open), the same
- * query as Solid Memo's workspace makes (queryKeys.validation(url)), so it is
+ * query as Solid Memo's workspace makes (queries.instanceCheck), so it is
  * made once; and the policy it is held to.
  */
 export function useDataCheck(useCases: UseCases, instanceUrl: string | null): DataCheck {
-  const preferencesQuery = useQuery({
-    queryKey: queryKeys.preferences(instanceUrl),
-    queryFn: () => useCases.getPreferences(instanceUrl!),
-    enabled: instanceUrl !== null,
-  });
-  const checkQuery = useQuery({
-    queryKey: queryKeys.validation(instanceUrl),
-    queryFn: () => useCases.checkInstance(instanceUrl!),
-    enabled: instanceUrl !== null,
-    staleTime: Infinity,
-    // A check that failed, or could not read a document, holds data back, so it is made again when the user comes back to the tab.
-    refetchOnWindowFocus: (query) =>
-      query.state.status === "error" || hasUnreadable(query.state.data) ? "always" : false,
-  });
+  const preferencesQuery = useQuery(queries.preferences(useCases, instanceUrl));
+  const checkQuery = useQuery(queries.instanceCheck(useCases, instanceUrl));
   // Until the preferences are read, as under "block the instance": a user who chose it never sees data before the check.
   const policy =
     preferencesQuery.data?.invalidDataPolicy ??

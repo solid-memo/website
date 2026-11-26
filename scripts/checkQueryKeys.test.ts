@@ -5,15 +5,20 @@
 import { describe, expect, it, vi } from "vitest";
 import { checked, defaultIo, fileProblems, main, run } from "./checkQueryKeys.ts";
 
-const MADE = `import { queryKeys } from "./queryKeys";
+const MADE = `import { queries } from "./queries";
+import { queryKeys } from "./queryKeys";
 
-export function useDecks(instanceUrl: string) {
+export function useDecks(useCases: UseCases, instanceUrl: string) {
   const queryClient = useQueryClient();
-  const queryKey = queryKeys.decks(instanceUrl);
   queryClient.setQueryData<Deck[]>(queryKeys.decks(instanceUrl), []);
-  return useQuery({ queryKey, queryFn: () => [] });
+  void queryClient.invalidateQueries({ queryKey: queryKeys.decks(instanceUrl) });
+  return useQuery({ ...queries.decks(useCases, instanceUrl), enabled: true });
 }
 `;
+
+const READ =
+  "a read gives its queryKey here; take its options from a definition of the queries modules.";
+const WRITTEN = "writes its key out; make it with a function of queryKeys.";
 
 describe("checked", () => {
   it("reads the screens' TypeScript", () => {
@@ -51,11 +56,14 @@ useQuery({
 });
 `;
     expect(fileProblems("Decks.tsx", source)).toEqual([
-      "Decks.tsx:1: a queryKey writes its key out; make it with a function of queryKeys.",
-      "Decks.tsx:2: a queryKey writes its key out; make it with a function of queryKeys.",
-      "Decks.tsx:3: a mutationKey writes its key out; make it with a function of queryKeys.",
-      "Decks.tsx:5: a queryKey writes its key out; make it with a function of queryKeys.",
-      "Decks.tsx:9: a queryKey writes its key out; make it with a function of queryKeys.",
+      `Decks.tsx:1: a queryKey ${WRITTEN}`,
+      `Decks.tsx:1: ${READ}`,
+      `Decks.tsx:2: a queryKey ${WRITTEN}`,
+      `Decks.tsx:3: a mutationKey ${WRITTEN}`,
+      `Decks.tsx:5: a queryKey ${WRITTEN}`,
+      `Decks.tsx:5: ${READ}`,
+      `Decks.tsx:9: a queryKey ${WRITTEN}`,
+      `Decks.tsx:9: ${READ}`,
     ]);
   });
 
@@ -72,6 +80,50 @@ queryClient.getQueryState(["cards", url]);
       "Decks.tsx:2: a setQueryData writes its key out; make it with a function of queryKeys.",
       "Decks.tsx:6: a getQueryState writes its key out; make it with a function of queryKeys.",
     ]);
+  });
+
+  it("refuses a read's key given outside the queries modules", () => {
+    const source = `useQuery({
+  queryKey: queryKeys.decks(instanceUrl),
+  queryFn: () => useCases.listDecks(instanceUrl),
+});
+useQueries({ queries: decks.map((deck) => ({ queryKey: queryKeys.cards(deck.url) })) });
+void queryClient.prefetchQuery({ queryKey: queryKeys.library(), queryFn: skipToken });
+export const read = () => ({ queryKey: queryKeys.library(), staleTime: Infinity });
+`;
+    expect(fileProblems("Decks.tsx", source)).toEqual([
+      `Decks.tsx:2: ${READ}`,
+      `Decks.tsx:5: ${READ}`,
+      `Decks.tsx:6: ${READ}`,
+      `Decks.tsx:7: ${READ}`,
+    ]);
+    expect(fileProblems("packages/ui/src/ui/queries.ts", source)).toEqual([]);
+    expect(fileProblems("apps/studio/src/ui/queries.ts", source)).toEqual([]);
+  });
+
+  it("refuses a key written out in the queries modules too", () => {
+    expect(
+      fileProblems(
+        "packages/ui/src/ui/queries.ts",
+        `queryOptions({ queryKey: ["decks", url] });\n`,
+      ),
+    ).toEqual([`packages/ui/src/ui/queries.ts:1: a queryKey ${WRITTEN}`]);
+  });
+
+  it("accepts a QueryClient's filter of queries, and a key that is no property", () => {
+    const source = `void queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() });
+queryClient.removeQueries({
+  queryKey: queryKeys.releaseChecks(),
+  predicate: (query) => query.queryKey[3] !== revision,
+});
+await queryClient.cancelQueries ( { queryKey: treeKey } );
+matchQuery({ queryKey: treeKey, exact: true }, query);
+queryClient.getQueryCache().findAll({ queryKey: queryKeys.allCards() });
+export function hash(queryKey: QueryKey) {
+  return queryKey;
+}
+`;
+    expect(fileProblems("Decks.tsx", source)).toEqual([]);
   });
 
   it("leaves a comment's keys alone", () => {
@@ -103,7 +155,9 @@ describe("main", () => {
       "packages/ui/src/ui/Decks.test.tsx": `queryClient.setQueryData(["decks", url], []);\n`,
     });
     expect(main(io)).toBe(0);
-    expect(io.logs).toEqual(["None of the 1 source files writes a query key out."]);
+    expect(io.logs).toEqual([
+      "None of the 1 source files writes a query key out, nor a read's outside the queries modules.",
+    ]);
   });
 
   it("logs each key written out and returns 1", () => {
@@ -113,13 +167,14 @@ describe("main", () => {
     });
     expect(main(io)).toBe(1);
     expect(io.logs).toEqual([
-      "apps/studio/src/ui/Catalog.tsx:2: a queryKey writes its key out; make it with a function of queryKeys.",
+      `apps/studio/src/ui/Catalog.tsx:2: a queryKey ${WRITTEN}`,
+      `apps/studio/src/ui/Catalog.tsx:2: ${READ}`,
     ]);
   });
 });
 
 describe("the repository's screens", () => {
-  it("make every query key with queryKeys", () => {
+  it("make every query key with queryKeys, and take every read from the queries modules", () => {
     const log = vi.spyOn(console, "log").mockImplementation(() => {});
     const process = { exitCode: undefined as number | string | null | undefined };
     run(process);

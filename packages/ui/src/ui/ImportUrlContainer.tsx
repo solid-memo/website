@@ -9,7 +9,7 @@ import type { Instance } from "@solid-memo/domain/instance";
 import { isCopyOf, releaseUrlOf, type LibraryDeck } from "@solid-memo/domain/library";
 import { useI18n } from "./i18n";
 import { ImportUrlScreen } from "./ImportUrlScreen";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 import { changes, useWrite } from "./writeEffects";
 import { tryReleaseHref } from "./router";
 
@@ -42,26 +42,13 @@ export function ImportUrlContainer({
 }) {
   const { errorText } = useI18n();
 
-  const releaseQuery = useQuery({
-    queryKey: queryKeys.releaseFromLink(url),
-    queryFn: () => useCases.readReleaseFromLink(url!),
-    enabled: url !== undefined,
-    refetchOnWindowFocus: false,
-  });
+  const releaseQuery = useQuery(queries.releaseFromLink(useCases, url));
   const release = url === undefined ? undefined : releaseQuery.data;
 
   // A library release reached by its link is still the library's to fix (UseCases.reportPlace).
-  const reportQuery = useQuery({
-    queryKey: queryKeys.reportPlace(release?.url),
-    queryFn: () => useCases.reportPlace(release!.url),
-    enabled: release !== undefined,
-    staleTime: Infinity,
-  });
+  const reportQuery = useQuery(queries.reportPlace(useCases, release?.url));
 
-  const decksQuery = useQuery({
-    queryKey: queryKeys.decks(instance.url),
-    queryFn: () => useCases.listDecks(instance.url),
-  });
+  const decksQuery = useQuery(queries.decks(useCases, instance.url));
   const imported =
     release !== undefined && (decksQuery.data ?? []).some((deck) => isCopyOf(deck, release));
 

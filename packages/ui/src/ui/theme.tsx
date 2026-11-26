@@ -16,7 +16,7 @@ import {
 import { DEFAULT_PALETTE, type Palette } from "@solid-memo/domain/palette";
 import { DEFAULT_TEXT_SIZE, type TextSize } from "@solid-memo/domain/textSize";
 import { resolveTheme, type Theme, type ThemeChoice } from "@solid-memo/domain/theme";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 
 /** The browser's wish for a dark page. */
 export const DARK_QUERY = "(prefers-color-scheme: dark)";
@@ -216,28 +216,21 @@ export function useInstanceTheme(useCases: UseCases, instanceUrl: string | null)
     followInstance(instanceUrl);
     return () => followInstance(null);
   }, [instanceUrl]);
-  useInstanceSetting(instanceUrl, "theme", useCases.instanceTheme, adoptTheme);
-  useInstanceSetting(instanceUrl, "palette", useCases.instancePalette, adoptPalette);
-  useInstanceSetting(instanceUrl, "textSize", useCases.instanceTextSize, adoptTextSize);
+  useInstanceSetting(useQuery(queries.instanceTheme(useCases, instanceUrl)), adoptTheme);
+  useInstanceSetting(useQuery(queries.instancePalette(useCases, instanceUrl)), adoptPalette);
+  useInstanceSetting(useQuery(queries.instanceTextSize(useCases, instanceUrl)), adoptTextSize);
 }
 
 /**
- * Reads one part of how the open instance's preferences show the app,
- * and shows what each read holds: none outside an instance, and nothing
- * of a read that holds nothing to show (null: no preferences yet, or
- * a read a choice made out of date).
+ * Shows what each read of one part of how the open instance's
+ * preferences show the app holds: none outside an instance, and nothing
+ * of a read that holds nothing to show (null: no preferences yet, or a
+ * read a choice made out of date).
  */
 function useInstanceSetting<T>(
-  instanceUrl: string | null,
-  part: "theme" | "palette" | "textSize",
-  read: (instanceUrl: string) => Promise<T | null>,
+  { data, dataUpdatedAt }: { data: T | null | undefined; dataUpdatedAt: number },
   adopt: (value: T) => void,
 ) {
-  const { data, dataUpdatedAt } = useQuery({
-    queryKey: queryKeys.instanceAppearancePart(instanceUrl ?? "", part),
-    queryFn: () => read(instanceUrl!),
-    enabled: instanceUrl !== null,
-  });
   // Every read counts, an unchanged one too: after a failed write it puts back what the pod holds.
   useEffect(() => {
     if (data !== undefined && data !== null) adopt(data);

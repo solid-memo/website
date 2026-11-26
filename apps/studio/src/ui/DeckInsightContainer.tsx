@@ -10,7 +10,7 @@ import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { DeckInsightScreen } from "./DeckInsightScreen";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 
 /**
  * A deck's schedule screen's data: the instance's preferences (the
@@ -32,18 +32,10 @@ export function DeckInsightContainer({
   leechesHref: string;
 }) {
   const { t, errorText } = useI18n();
-  const preferencesQuery = useQuery({
-    queryKey: queryKeys.preferences(instance.url),
-    queryFn: () => useCases.getPreferences(instance.url),
-  });
-  const prefs = preferencesQuery.data;
-  const insightQuery = useQuery({
-    // The preferences and the deck's own pace are in the key: an insight
-    // read under another cap or study day is not shown as this one's.
-    queryKey: queryKeys.deckInsight(deck.url, deck.maxReviewsPerDay, prefs),
-    queryFn: () => useCases.deckInsight(instance.url, deck, new Date(), prefs!),
-    enabled: prefs !== undefined,
-  });
+  const preferencesQuery = useQuery(queries.preferences(useCases, instance.url));
+  const insightQuery = useQuery(
+    queries.deckInsight(useCases, instance.url, deck, preferencesQuery.data),
+  );
 
   const error = preferencesQuery.error ?? insightQuery.error;
   if (error) return <ErrorMessage error={errorText(error)} />;

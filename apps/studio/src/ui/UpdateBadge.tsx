@@ -7,22 +7,7 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { useSeen } from "./HealthBadge";
-import { queryKeys } from "./queryKeys";
-
-/**
- * The instance's copies of library releases (UseCases.listLibraryUpdates):
- * one read of the library's index for every deck. Its key is under the
- * instance's decks, so whatever reads them afresh (an upgrade, a deck
- * removed) reads this afresh too. The index changes only with the site,
- * so it is not read again on its own.
- */
-export function libraryUpdatesQuery(useCases: UseCases, instanceUrl: string) {
-  return {
-    queryKey: queryKeys.libraryUpdates(instanceUrl),
-    queryFn: () => useCases.listLibraryUpdates(instanceUrl),
-    staleTime: Infinity,
-  };
-}
+import { queries } from "./queries";
 
 /**
  * Whether the library has a newer release of a deck copied from it, as a
@@ -44,7 +29,7 @@ export function UpdateBadge({
 }) {
   const { t, readerText } = useI18n();
   const [ref, seen] = useSeen<HTMLSpanElement>();
-  const query = useQuery({ ...libraryUpdatesQuery(useCases, instanceUrl), enabled: seen });
+  const query = useQuery({ ...queries.libraryUpdates(useCases, instanceUrl), enabled: seen });
   const copy = query.data?.find((each) => each.deck.url === deck.url);
   return (
     <span ref={ref}>

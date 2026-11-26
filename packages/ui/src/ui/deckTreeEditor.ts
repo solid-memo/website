@@ -28,6 +28,7 @@ import { libraryCopyTest } from "@solid-memo/domain/libraryCopy";
 import { librarySeriesUrlOf } from "@solid-memo/domain/libraryLayout";
 import { useI18n, type ErrorText } from "./i18n";
 import { collapsedGroups, rememberCollapsed } from "./remembered";
+import { queries } from "./queries";
 import { queryKeys } from "./queryKeys";
 
 /**
@@ -103,11 +104,7 @@ export function useDeckTreeEditor(
   const { errorText } = useI18n();
   const queryClient = useQueryClient();
   const treeKey = queryKeys.deckTree(instance.url);
-  const treeQuery = useQuery({
-    queryKey: treeKey,
-    queryFn: () => useCases.listDeckTree(instance.url),
-    refetchOnWindowFocus: false,
-  });
+  const treeQuery = useQuery(queries.deckTree(useCases, instance.url));
   // Each instance's, once changed here; until then, as this device remembers it.
   const [collapsedBy, setCollapsedBy] = useState<Record<string, readonly string[]>>({});
   const [failure, setFailure] = useState<unknown>(null);
@@ -242,23 +239,6 @@ export function useDeckTreeEditor(
 }
 
 /**
- * The library's index of decks, as the deck list tells its copies by it
- * (useCopies), and as the library screen, a library deck's page and the
- * try page show it: every queryKeys.library() query is this one. The index
- * changes only with a deploy: read once a page, not each time a screen
- * shows or the window is focused, so the index Workspace reads beside
- * the deck list's arrangement serves the list.
- */
-export function libraryIndexQuery(useCases: UseCases) {
-  return {
-    queryKey: queryKeys.library(),
-    queryFn: () => useCases.listLibraryDecks(),
-    staleTime: Infinity,
-    refetchOnWindowFocus: false,
-  };
-}
-
-/**
  * What the decks that are copies are copies of: which are copies of a
  * course (docs/courses.md), and where those added from a link came from.
  * A copy that says it is a course's (Deck.course) is one, whatever is
@@ -297,7 +277,7 @@ export function useCopies(
   readsRefused: unknown;
 } {
   const isCopy = decks.some((deck) => deck.sourceUrl !== undefined);
-  const libraryQuery = useQuery({ ...libraryIndexQuery(useCases), enabled: isCopy });
+  const libraryQuery = useQuery({ ...queries.library(useCases), enabled: isCopy });
   const library = libraryQuery.data;
   const listed = useSameDecks(decks);
   const { linked, libraryCourses, behind } = useMemo(
@@ -307,13 +287,7 @@ export function useCopies(
   // A copy that says it is a course needs no release read to tell.
   const unknown = linked.filter((deck) => deck.course !== true);
   const releaseQueries = useQueries({
-    queries: unknown.map((deck) => ({
-      queryKey: queryKeys.releaseIsCourse(deck.sourceUrl!),
-      queryFn: () => useCases.releaseIsCourse(deck.sourceUrl!),
-      staleTime: Infinity,
-      gcTime: Infinity,
-      refetchOnWindowFocus: false,
-    })),
+    queries: unknown.map((deck) => queries.releaseIsCourse(useCases, deck.sourceUrl!)),
   });
   const linkedSources = new Set(linked.map((deck) => deck.sourceUrl!));
   const linkedCourses = new Set(

@@ -29,13 +29,11 @@ import { ChapterPlayerContainer } from "./ChapterPlayerContainer";
 import { ChapterReviewContainer } from "./ChapterReviewContainer";
 import { usePausedToday } from "./pausedToday";
 import { CourseContainer, type CompletedChapter } from "./CourseContainer";
-import { courseStripQuery } from "./CourseStrip";
 import { DeckCreatorContainer } from "./DeckCreatorContainer";
 import { DeckDetailContainer } from "./DeckDetailContainer";
 import { DeckPreferencesContainer } from "./DeckPreferencesContainer";
 import { DeckListContainer } from "./DeckListContainer";
-import { libraryIndexQuery, useCopies } from "./deckTreeEditor";
-import { studyCountsQuery } from "./DeckStudyAction";
+import { useCopies } from "./deckTreeEditor";
 import { ErrorMessage } from "./ErrorMessage";
 import { GuestStudyOffer } from "./GuestStudyOffer";
 import { InstanceBar } from "./InstanceBar";
@@ -88,6 +86,7 @@ import { useInstanceTheme } from "./theme";
 import { useDocumentTitle } from "./documentTitle";
 import { useScreenFocus } from "./screenFocus";
 import { MAIN_ID } from "./SkipLink";
+import { queries } from "./queries";
 import { queryKeys } from "./queryKeys";
 import { changes, useWrite } from "./writeEffects";
 
@@ -431,21 +430,16 @@ function useHomePrefetch(
   isSetAside: (deck: Deck) => boolean,
 ) {
   const queryClient = useQueryClient();
-  const homeTreeQuery = useQuery({
-    queryKey: queryKeys.deckTree(instanceUrl),
-    queryFn: () => useCases.listDeckTree(instanceUrl!),
-    enabled: onHome,
-    refetchOnWindowFocus: false,
-  });
+  const homeTreeQuery = useQuery({ ...queries.deckTree(useCases, instanceUrl), enabled: onHome });
   useEffect(() => {
-    if (onHome) void queryClient.prefetchQuery(libraryIndexQuery(useCases));
+    if (onHome) void queryClient.prefetchQuery(queries.library(useCases));
   }, [onHome]);
   useEffect(() => {
     if (instanceUrl === null || homeTreeQuery.data === undefined) return;
     const decks = decksOf(homeTreeQuery.data.children);
     queryClient.setQueryData(queryKeys.decks(instanceUrl), decks);
     for (const deck of decks) {
-      void queryClient.prefetchQuery(studyCountsQuery(useCases, instanceUrl, deck));
+      void queryClient.prefetchQuery(queries.studyCounts(useCases, instanceUrl, deck));
     }
   }, [homeTreeQuery.data, instanceUrl]);
   const homeDecks = decksOf(homeTreeQuery.data?.children ?? []);
@@ -456,7 +450,7 @@ function useHomePrefetch(
   );
   useEffect(() => {
     for (const deck of homeCourses) {
-      void queryClient.prefetchQuery(courseStripQuery(useCases, deck));
+      void queryClient.prefetchQuery(queries.courseStrip(useCases, deck));
     }
   }, [homeCourses.map((deck) => `${deck.url} ${deck.sourceUrl}`).join(" ")]);
 }
@@ -469,12 +463,11 @@ function useHomePrefetch(
  * play. Both of those wait for the redirect resolveRoute gives them.
  */
 function useRouteCourse(useCases: UseCases, route: RouteRef | null, activeDeck: Deck | null) {
-  const { deckUrl, chapterUrl } = routeAddresses(route);
+  const { chapterUrl } = routeAddresses(route);
   const onCourse = isCourseRoute(route);
   const needsCourse = onCourse && activeDeck !== null;
   const courseQuery = useQuery({
-    queryKey: queryKeys.course(deckUrl!),
-    queryFn: () => useCases.getCourse(activeDeck!),
+    ...queries.course(useCases, activeDeck),
     enabled: needsCourse && activeDeck.sourceUrl !== undefined,
   });
   const activeCourse = needsCourse ? (courseQuery.data ?? null) : null;
@@ -507,10 +500,7 @@ export function Workspace({
   const screenRef = useScreenFocus(route, change);
   const webId = session.webId;
 
-  const instancesQuery = useQuery({
-    queryKey: queryKeys.instances(webId),
-    queryFn: () => useCases.listInstances(session),
-  });
+  const instancesQuery = useQuery(queries.instances(useCases, session));
   const instances = instancesQuery.data;
 
   const { instanceUrl, deckUrl, cardUrl, libraryDeckUrl, libraryCardId, chapterUrl } =
@@ -523,20 +513,12 @@ export function Workspace({
 
   const needsDeck = deckUrl !== null && activeInstance !== null;
 
-  const decksQuery = useQuery({
-    queryKey: queryKeys.decks(instanceUrl),
-    queryFn: () => useCases.listDecks(instanceUrl!),
-    enabled: needsDeck,
-  });
+  const decksQuery = useQuery({ ...queries.decks(useCases, instanceUrl), enabled: needsDeck });
   const deckLookup = lookupOf(needsDeck, decksQuery, (d) => d.url === deckUrl);
   const activeDeck = found(deckLookup);
 
   const needsCard = cardUrl !== null && activeDeck !== null;
-  const cardsQuery = useQuery({
-    queryKey: queryKeys.cards(activeDeck?.cardsDocumentUrl),
-    queryFn: () => useCases.listCards(activeDeck!),
-    enabled: needsCard,
-  });
+  const cardsQuery = useQuery({ ...queries.cards(useCases, activeDeck), enabled: needsCard });
   const cardLookup = lookupOf(needsCard, cardsQuery, (c) => c.url === cardUrl);
   const activeCard = found(cardLookup);
 
@@ -544,7 +526,7 @@ export function Workspace({
   const onTry = route?.screen === "try";
   const needsLibraryDeck = libraryDeckUrl !== null && activeInstance !== null;
   const libraryQuery = useQuery({
-    ...libraryIndexQuery(useCases),
+    ...queries.library(useCases),
     enabled: needsLibraryDeck || onTry,
   });
   // A library deck's page is addressed by its series, which outlives
@@ -576,8 +558,7 @@ export function Workspace({
 
   const needsLibraryCard = libraryCardId !== null && activeLibraryDeck !== null;
   const libraryCardsQuery = useQuery({
-    queryKey: queryKeys.libraryCards(activeLibraryDeck?.url),
-    queryFn: () => useCases.listLibraryCards(activeLibraryDeck!),
+    ...queries.libraryCards(useCases, activeLibraryDeck),
     enabled: needsLibraryCard,
   });
   const libraryCardLookup = lookupOf(
@@ -615,8 +596,7 @@ export function Workspace({
   }, [route]);
 
   const preferencesQuery = useQuery({
-    queryKey: queryKeys.preferences(instanceUrl),
-    queryFn: () => useCases.getPreferences(instanceUrl!),
+    ...queries.preferences(useCases, instanceUrl),
     enabled: activeInstance !== null,
   });
   const developerMode = preferencesQuery.data?.developerMode === true;
@@ -639,8 +619,7 @@ export function Workspace({
     arrangementSetAside: arrangementIsSetAside,
   } = check;
   const decksOfCheck = useQuery({
-    queryKey: queryKeys.decks(instanceUrl),
-    queryFn: () => useCases.listDecks(instanceUrl!),
+    ...queries.decks(useCases, instanceUrl),
     enabled: invalidReport !== null && policy === "block-subject",
   });
   // Under "set invalid data aside" nothing is known to be set aside until
@@ -650,8 +629,7 @@ export function Workspace({
   const checkUnsettled = activeInstance !== null && policy === "block-subject" && check.unsettled;
 
   const storagesQuery = useQuery({
-    queryKey: queryKeys.storages(webId),
-    queryFn: () => useCases.listStorages(session),
+    ...queries.storages(useCases, session),
     enabled: readsStorages(route),
   });
   // The storages added by hand on the storage picker, which the instance creator may open with too;
@@ -678,8 +656,7 @@ export function Workspace({
   }, [route, redirect === null ? null : `${routeToHash(redirect.to)} ${redirect.triedUnknown}`]);
 
   const registrationOptionsQuery = useQuery({
-    queryKey: queryKeys.registrationOptions(webId),
-    queryFn: () => useCases.getRegistrationOptions(session),
+    ...queries.registrationOptions(useCases, session),
     enabled: route?.screen === "instanceCreator",
   });
   const registrationOptions = registrationOptionsQuery.data ?? null;
@@ -705,7 +682,7 @@ export function Workspace({
       const instance = await useCases.createInstance(session, args);
       // A new instance has no decks, so its list offers the library's course for
       // newcomers (NewcomerCourseContainer): read from now, it comes with the list.
-      void queryClient.prefetchQuery(libraryIndexQuery(useCases));
+      void queryClient.prefetchQuery(queries.library(useCases));
       return instance;
     },
     changes: () => [changes.instances(webId)],

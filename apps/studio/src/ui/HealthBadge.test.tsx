@@ -9,7 +9,8 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import type { DeckHealth } from "@solid-memo/domain/deckHealth";
 import { summarize } from "@solid-memo/domain/validation";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
-import { deckHealthQuery, HealthBadge } from "./HealthBadge";
+import { HealthBadge } from "./HealthBadge";
+import { queries } from "./queries";
 import { queryKeys } from "./queryKeys";
 import { instanceA, makeCard, makeDeck } from "../test/fixtures";
 
@@ -59,7 +60,7 @@ function renderBadge(useCases: UseCases, quiet = false) {
   );
 }
 
-describe("deckHealthQuery", () => {
+describe("queries.deckHealth", () => {
   it("gives the decks of one instance one text check, and another instance its own", async () => {
     const checkDeck = vi.fn(async () => healthy);
     const useCases = makeUseCasesFake({ checkDeck: checkDeck as UseCases["checkDeck"] });
@@ -73,7 +74,11 @@ describe("deckHealthQuery", () => {
       [elsewhere, deck],
       [elsewhere, other],
     ] as const)
-      await deckHealthQuery(useCases, queryClient, instanceUrl, each).queryFn({ signal });
+      await (
+        queries.deckHealth(useCases, queryClient, instanceUrl, each).queryFn as (context: {
+          signal: AbortSignal;
+        }) => Promise<DeckHealth>
+      )({ signal });
     const texts = checkDeck.mock.calls.map((call) => (call as unknown[])[2]);
     // One for both decks of an instance: what a document many decks name holds is read once.
     expect(texts[1]).toBe(texts[0]);
@@ -102,15 +107,11 @@ describe("deckHealthQuery", () => {
     // The badge's query first, so that it is made first when both are read afresh.
     const badge = new QueryObserver(
       queryClient,
-      deckHealthQuery(useCases, queryClient, instanceA.url, deck),
+      queries.deckHealth(useCases, queryClient, instanceA.url, deck),
     );
     const stopBadge = badge.subscribe(() => undefined);
     await waitFor(() => expect(lookedUp).toEqual([0]));
-    const check = new QueryObserver(queryClient, {
-      queryKey: queryKeys.validation(instanceA.url),
-      queryFn: () => useCases.checkInstance(instanceA.url),
-      staleTime: Infinity,
-    });
+    const check = new QueryObserver(queryClient, queries.instanceCheck(useCases, instanceA.url));
     const stopCheck = check.subscribe(() => undefined);
     await waitFor(() => expect(begun).toBe(1));
     await queryClient.invalidateQueries({ queryKey: queryKeys.validation(instanceA.url) });

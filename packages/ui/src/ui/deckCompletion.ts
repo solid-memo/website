@@ -6,8 +6,8 @@ import { useQueries } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
-import { courseFinished, courseStripQuery } from "./CourseStrip";
-import { studyCountsQuery } from "./DeckStudyAction";
+import { courseFinished } from "./CourseStrip";
+import { queries } from "./queries";
 import type { Completion } from "./RowFlair";
 
 /**
@@ -16,8 +16,8 @@ import type { Completion } from "./RowFlair";
  * (StudyCounts' learned); a course only once every chapter is done
  * (courseFinished) and every card of it learned too, never for its cards
  * alone; neither until it is known. Under the
- * keys the rows' counts (studyCountsQuery) and the course strip's
- * summaries (courseStripQuery) are read by, so nothing is read twice.
+ * keys the rows' counts (queries.studyCounts) and the course strip's
+ * summaries (queries.courseStrip) are read by, so nothing is read twice.
  */
 export function useDeckCompletion(
   useCases: UseCases,
@@ -28,10 +28,10 @@ export function useDeckCompletion(
 ): (deck: Deck) => Completion | undefined {
   const courses = decks.filter(isCourse);
   const counts = useQueries({
-    queries: decks.map((deck) => studyCountsQuery(useCases, instance.url, deck)),
+    queries: decks.map((deck) => queries.studyCounts(useCases, instance.url, deck)),
   });
   const summaries = useQueries({
-    queries: courses.map((deck) => courseStripQuery(useCases, deck)),
+    queries: courses.map((deck) => queries.courseStrip(useCases, deck)),
   });
   const learned = new Set(
     decks.filter((_, at) => counts[at]!.data?.learned).map((deck) => deck.url),

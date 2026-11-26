@@ -15,7 +15,7 @@ import type { CheckedAnswer } from "./CourseQuestion";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
 import { Loading } from "./Loading";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 
 /**
  * Fetches a library course's outline and cards (getLibraryCourse) and
@@ -49,10 +49,7 @@ export function CoursePreviewContainer({
   random?: () => number;
 }) {
   const { t, readerText, readerLang, errorText } = useI18n();
-  const courseQuery = useQuery({
-    queryKey: queryKeys.libraryCourse(deck.url),
-    queryFn: () => useCases.getLibraryCourse(deck),
-  });
+  const courseQuery = useQuery(queries.libraryCourse(useCases, deck));
 
   if (courseQuery.error) {
     return <ErrorMessage error={errorText(courseQuery.error)} />;

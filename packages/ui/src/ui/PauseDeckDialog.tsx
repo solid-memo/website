@@ -11,7 +11,7 @@ import type { Deck } from "@solid-memo/domain/deck";
 import { Dialog } from "./Dialog";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type ErrorText } from "./i18n";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 import { ReaderText } from "./ReaderText";
 
 /**
@@ -54,11 +54,7 @@ export function PauseDeckDialog({
   // A day the field holds that the pause would take: a day after today.
   const chosen = onDay ? (isCountableDay(day) && day > today ? day : undefined) : null;
 
-  const outlookQuery = useQuery({
-    queryKey: queryKeys.pauseOutlook(deck.url, chosen ?? null),
-    queryFn: () => useCases.getPauseOutlook(instanceUrl, deck, chosen!, new Date()),
-    enabled: chosen !== undefined,
-  });
+  const outlookQuery = useQuery(queries.pauseOutlook(useCases, instanceUrl, deck, chosen));
   const outlook = chosen === undefined ? undefined : outlookQuery.data;
 
   function outlookText() {

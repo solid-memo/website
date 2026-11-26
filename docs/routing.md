@@ -133,7 +133,7 @@ flowchart LR
   whatever refreshes the decks refreshes it too; on the home screen,
   its decks fill `queryKeys.decks(instanceUrl)`, so the catalog is read
   once. A library deck resolves from the library screen's
-  `queryKeys.library()` cache: every such query is `libraryIndexQuery`,
+  `queryKeys.library()` cache: every such query is `queries.library`,
   never stale and not read again on window focus. The index changes
   only with a deploy, so it's read once a page
   ([deck-library.md](deck-library.md#reading-it)). One module makes

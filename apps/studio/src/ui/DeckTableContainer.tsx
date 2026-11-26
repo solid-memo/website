@@ -20,7 +20,6 @@ import { decksOf, type DeckGroup } from "@solid-memo/domain/deckTree";
 import type { Instance } from "@solid-memo/domain/instance";
 import { deckSetAside } from "@solid-memo/domain/validation";
 import { useDataCheck } from "@solid-memo/ui/dataCheck";
-import { studyCountsQuery } from "@solid-memo/ui/DeckStudyAction";
 import { catalogScope, useCopies } from "@solid-memo/ui/deckTreeEditor";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
@@ -30,7 +29,7 @@ import { HealthBadge } from "./HealthBadge";
 import { UpdateBadge } from "./UpdateBadge";
 import type { HomeQuery, HomeView, SavedView } from "./shell/views";
 import { changes, useWrite } from "@solid-memo/ui/writeEffects";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 
 /** A paused deck's badge (DeckBadge): until it is resumed, or until the day it resumes on. */
 function pausedBadge(deck: Deck, today: string): DeckBadge[] {
@@ -116,29 +115,16 @@ export function DeckTableContainer({
 }) {
   const { t, errorText } = useI18n();
   const [failure, setFailure] = useState<unknown>(null);
-  const treeQuery = useQuery({
-    queryKey: queryKeys.deckTree(instance.url),
-    queryFn: () => useCases.listDeckTree(instance.url),
-    refetchOnWindowFocus: false,
-  });
-  const preferencesQuery = useQuery({
-    queryKey: queryKeys.preferences(instance.url),
-    queryFn: () => useCases.getPreferences(instance.url),
-  });
+  const treeQuery = useQuery(queries.deckTree(useCases, instance.url));
+  const preferencesQuery = useQuery(queries.preferences(useCases, instance.url));
   const check = useDataCheck(useCases, instance.url);
   const decks = decksOf(treeQuery.data?.children ?? []);
+  // In turns: a catalog may list many decks, and the table never reads all of their cards together.
   const cardQueries = useQueries({
-    queries: decks.map((deck) => ({
-      queryKey: queryKeys.deckTableCards(deck.cardsDocumentUrl),
-      // In turns: a catalog may list many decks, and the table never reads all of their cards together.
-      queryFn: ({ signal }: { signal: AbortSignal }) => useCases.listCardsInTurn(deck, signal),
-      // The read kept is the very one read, not a copy shared with the one before it
-      // (structural sharing): it stays frozen, so its count is counted once (activeCountOf).
-      structuralSharing: false,
-    })),
+    queries: decks.map((deck) => queries.deckTableCards(useCases, deck)),
   });
   const countQueries = useQueries({
-    queries: decks.map((deck) => studyCountsQuery(useCases, instance.url, deck)),
+    queries: decks.map((deck) => queries.studyCounts(useCases, instance.url, deck)),
   });
   const { isCourse, linkedHost, readsRefused } = useCopies(useCases, decks);
 
@@ -190,12 +176,12 @@ export function DeckTableContainer({
   const preferences = preferencesQuery.data;
   const report = check.report;
   const at = new Map(decks.map((deck, index) => [deck, index]));
-  const queries = (deck: Deck) => {
+  const readsOf = (deck: Deck) => {
     const index = at.get(deck)!;
     return { cards: cardQueries[index]!, counts: countQueries[index]! };
   };
   const rows = decks.map((deck): DeckTableRow => {
-    const { cards, counts } = queries(deck);
+    const { cards, counts } = readsOf(deck);
     const pace = deckPreferences(preferences, deck);
     return {
       deck,
@@ -211,7 +197,7 @@ export function DeckTableContainer({
     };
   });
   const pending = (deck: Deck, figure: DeckFigure) => {
-    const { cards, counts } = queries(deck);
+    const { cards, counts } = readsOf(deck);
     return (figure === "cards" ? cards : counts).isError ? "unreadable" : "loading";
   };
   // The screen asks for a row's badges several times a render: they are made once.
@@ -228,7 +214,7 @@ export function DeckTableContainer({
             ? [isCourse(deck) ? ("course" as const) : ("library" as const)]
             : [...(isCourse(deck) ? ["course" as const] : []), { from: host }]),
         ...(report !== null && deckSetAside(report, deck) ? ["invalid" as const] : []),
-        ...(queries(deck).cards.isError ? ["unreadable" as const] : []),
+        ...(readsOf(deck).cards.isError ? ["unreadable" as const] : []),
         ...pausedBadge(deck, today),
       ];
       badgesOf.set(deck, made);

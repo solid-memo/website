@@ -50,6 +50,8 @@ describe("queryKeys", () => {
       queryKeys.instanceAppearancePart(INSTANCE, "textSize"),
       queryKeys.palettes(INSTANCE),
       queryKeys.validation(INSTANCE),
+      queryKeys.instanceCheck(INSTANCE),
+      queryKeys.fullValidation(INSTANCE),
       queryKeys.allMigrations(),
       queryKeys.migration(INSTANCE),
       queryKeys.interruptedMove(INSTANCE),
@@ -104,6 +106,8 @@ describe("queryKeys", () => {
       ["instanceAppearance", INSTANCE, "textSize"],
       ["palettes", INSTANCE],
       ["validation", INSTANCE],
+      ["validation", INSTANCE, "opening"],
+      ["validation", INSTANCE, "full"],
       ["migration"],
       ["migration", INSTANCE],
       ["interruptedMove", INSTANCE],
@@ -154,6 +158,8 @@ describe("queryKeys", () => {
       queryKeys.instanceAppearancePart(INSTANCE, "theme"),
       queryKeys.instanceAppearance(INSTANCE),
     );
+    expectUnder(queryKeys.instanceCheck(INSTANCE), queryKeys.validation(INSTANCE));
+    expectUnder(queryKeys.fullValidation(INSTANCE), queryKeys.validation(INSTANCE));
     expectUnder(queryKeys.migration(INSTANCE), queryKeys.allMigrations());
     expectUnder(queryKeys.libraryUpgradePlan(DECK, RELEASE, CARDS), queryKeys.libraryUpgrade(DECK));
     expectUnder(queryKeys.courseStrip(DECK, RELEASE), queryKeys.course(DECK));

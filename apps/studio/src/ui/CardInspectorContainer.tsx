@@ -28,7 +28,7 @@ import { ReadOnlyScope } from "./ReadOnly";
 import type { CardTab } from "./router";
 import { useActivityLog } from "./shell/activity";
 import { changes, useWrite } from "@solid-memo/ui/writeEffects";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 
 /** How the card stands to the release (`release`, as useDeckRelease reads it): unknown while it is read, or when it cannot be. */
 export function releaseLinkOf(
@@ -106,8 +106,7 @@ export function CardInspectorContainer({
   const release = useDeckRelease(useCases, deck);
   const readOnly = useDataCheck(useCases, instanceUrlOfDeck(deck.url)).readOnly(deck);
   const answersQuery = useQuery({
-    queryKey: queryKeys.cardAnswers(deck.url, card.id),
-    queryFn: () => useCases.cardAnswers(instanceUrlOfDeck(deck.url), deck, card.id),
+    ...queries.cardAnswers(useCases, instanceUrlOfDeck(deck.url), deck, card.id),
     enabled: tab === "history" || tab === "distractors",
   });
   const answers = answersQuery.data;

@@ -14,18 +14,17 @@
  * and never reads it itself.
  */
 
-import { skipToken, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useContext, useState } from "preact/hooks";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Instance } from "@solid-memo/domain/instance";
-import type { InstanceGraph } from "@solid-memo/domain/instanceGraph";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { RevealAside } from "../shell/revealAside";
 import { GraphNodePane } from "./GraphNodePane";
 import { GraphScreen } from "./GraphScreen";
-import { queryKeys } from "../queryKeys";
+import { queries } from "../queries";
 
 export function GraphContainer({
   useCases,
@@ -45,14 +44,11 @@ export function GraphContainer({
   const { t, errorText } = useI18n();
   const revealAside = useContext(RevealAside);
   const [progress, setProgress] = useState<{ read: number; total: number } | null>(null);
-  const graphQuery = useQuery({
-    queryKey: queryKeys.instanceGraph(instance.url, webId),
-    queryFn: () =>
-      useCases.readInstanceGraph(instance.url, webId, {
-        onProgress: (read, total) => setProgress({ read, total }),
-      }),
-    refetchOnWindowFocus: false,
-  });
+  const graphQuery = useQuery(
+    queries.instanceGraph(useCases, instance.url, webId, (read, total) =>
+      setProgress({ read, total }),
+    ),
+  );
   if (graphQuery.error) return <ErrorMessage error={errorText(graphQuery.error)} />;
   if (graphQuery.data === undefined)
     return (
@@ -89,10 +85,7 @@ export function GraphNodeContainer({
   nodeId: string | null;
   onSelect: (id: string) => void;
 }) {
-  const graphQuery = useQuery<InstanceGraph>({
-    queryKey: queryKeys.instanceGraph(instance.url, webId),
-    queryFn: skipToken,
-  });
+  const graphQuery = useQuery(queries.foundInstanceGraph(instance.url, webId));
   return (
     <GraphNodePane
       instance={instance}

@@ -296,9 +296,9 @@ month, by server, for a learner who answers a hundred cards a day.
   Its result's `coverage` is the log's first month when the log begins
   inside the range, and `logBegins` the log's first month, for the
   empty range's message. The page's ranges are 30 days, 90 days (its
-  default), 12 months and `"all"` (`rangeRead` and `statisticsQuery` in
-  `studyFigures.ts`), each read once and kept apart. The today strip
-  has a key of its own (`todayFiguresQuery`). All time downloads the
+  default), 12 months and `"all"` (`rangeRead` in `studyFigures.ts`, and
+  `queries.statistics`), each read once and kept apart. The today strip
+  has a key of its own (`queries.todayFigures`). All time downloads the
   whole log, the same months, once a page load, as `loadAnswerLog`
   does.
 

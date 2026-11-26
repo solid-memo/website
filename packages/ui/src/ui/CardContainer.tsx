@@ -10,7 +10,7 @@ import { deckLanguages } from "@solid-memo/domain/deckLanguages";
 import { CardScreen, type CardEdits } from "./CardScreen";
 import { publishedDistractorIds, useDeckRelease } from "./deckRelease";
 import { useI18n } from "./i18n";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 import { changes, useWrite } from "./writeEffects";
 
 /**
@@ -53,10 +53,7 @@ export function CardContainer({
 }) {
   const { errorText } = useI18n();
 
-  const cardsQuery = useQuery({
-    queryKey: queryKeys.cards(deck.cardsDocumentUrl),
-    queryFn: () => useCases.listCards(deck),
-  });
+  const cardsQuery = useQuery(queries.cards(useCases, deck));
   const languages = useMemo(() => deckLanguages(cardsQuery.data ?? []), [cardsQuery.data]);
   const release = useDeckRelease(useCases, deck);
 

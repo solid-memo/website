@@ -23,12 +23,7 @@ import { useCopies } from "./deckTreeEditor";
 import { useI18n } from "./i18n";
 import { Loading } from "./Loading";
 import { ReaderText } from "./ReaderText";
-import { STATISTICS_STALE_MS } from "./studyFigures";
-import { queryKeys } from "./queryKeys";
-import { retryable } from "./retryable";
-
-/** How long the cards' progress waits to be read again when it left out a deck for a reason that may pass, in milliseconds. */
-const LEFT_OUT_RETRY_MS = 60_000;
+import { queries } from "./queries";
 
 /**
  * Where the cards stand now, read from the decks' cards and review states
@@ -77,12 +72,10 @@ export function CardProgressContainer({
 
 /**
  * The cards' progress of every deck of the instance, or of the one deck
- * given, as one query: CardProgressContainer and HardestCardsContainer
- * share what it reads. Not `enabled`, it is never read again, neither
- * on focus nor when invalidated, and keeps what it has. One that left a
- * deck out is stale at once, and read again every LEFT_OUT_RETRY_MS
- * while the page is shown when the reason may pass (retryable), keeping
- * what it has meanwhile.
+ * given, as one query (queries.cardProgress): CardProgressContainer and
+ * HardestCardsContainer share what it reads. Not `enabled`, it is never
+ * read again, neither on focus nor when invalidated, and keeps what it
+ * has.
  */
 export function useCardProgress(
   useCases: UseCases,
@@ -90,15 +83,7 @@ export function useCardProgress(
   deck?: Deck,
   enabled = true,
 ) {
-  return useQuery({
-    queryKey: queryKeys.deckCardProgress(instance.url, deck?.url),
-    queryFn: () =>
-      useCases.getCardProgress(instance.url, new Date(), deck === undefined ? {} : { deck }),
-    staleTime: (query) => (query.state.data?.leftOut === undefined ? STATISTICS_STALE_MS : 0),
-    refetchInterval: (query) =>
-      query.state.data?.leftOut?.some(retryable) ? LEFT_OUT_RETRY_MS : false,
-    enabled,
-  });
+  return useQuery({ ...queries.cardProgress(useCases, instance.url, deck), enabled });
 }
 
 /**

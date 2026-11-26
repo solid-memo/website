@@ -26,6 +26,7 @@ import { usePanelFocus } from "./panelFocus";
 import { RegistrationTargetChooser } from "./RegistrationTargetChooser";
 import { routeToHash } from "./router";
 import { StepProgress } from "./StepProgress";
+import { queries } from "./queries";
 import { queryKeys } from "./queryKeys";
 import { changes, useWrite } from "./writeEffects";
 
@@ -130,10 +131,7 @@ function GuestStudyOfferStage({
   const [returned, setReturned] = useState(false);
   const [progress, setProgress] = useState<KeepProgress | null>(null);
 
-  const studyQuery = useQuery({
-    queryKey: queryKeys.guestStudy(),
-    queryFn: () => useCases.findGuestStudy(),
-  });
+  const studyQuery = useQuery(queries.guestStudy(useCases));
 
   const discard = useWrite({
     mutationFn: () => useCases.discardGuest(),
@@ -405,10 +403,7 @@ function GuestKeepForm({
   onBack: () => void;
 }) {
   const { t } = useI18n();
-  const instancesQuery = useQuery({
-    queryKey: queryKeys.instances(session.webId),
-    queryFn: () => useCases.listInstances(session),
-  });
+  const instancesQuery = useQuery(queries.instances(useCases, session));
   // Back after a move that threw once under way: the steps gave way, and the
   // error, not the form's heading, is what takes their focus.
   const [cameWithError] = useState(error !== null);
@@ -514,10 +509,7 @@ function GuestMergeFields({
   const { t, errorText, readerText, readerLang } = useI18n();
   const [chosen, setChosen] = useState<string | null>(null);
   const target = instances.find((instance) => instance.url === chosen) ?? instances[0]!;
-  const planQuery = useQuery({
-    queryKey: queryKeys.guestMergePlan(guestInstance.url, target.url),
-    queryFn: () => useCases.planGuestMerge(guestInstance, target),
-  });
+  const planQuery = useQuery(queries.guestMergePlan(useCases, guestInstance, target));
   const [skipped, setSkipped] = useState<ReadonlySet<string>>(new Set());
   const [noneChosen, setNoneChosen] = useState(false);
   const idPrefix = useId();
@@ -637,14 +629,8 @@ function GuestTransferFields({
   onBack: () => void;
 }) {
   const { t } = useI18n();
-  const storagesQuery = useQuery({
-    queryKey: queryKeys.storages(session.webId),
-    queryFn: () => useCases.listStorages(session),
-  });
-  const optionsQuery = useQuery({
-    queryKey: queryKeys.registrationOptions(session.webId),
-    queryFn: () => useCases.getRegistrationOptions(session),
-  });
+  const storagesQuery = useQuery(queries.storages(useCases, session));
+  const optionsQuery = useQuery(queries.registrationOptions(useCases, session));
   const storages = storagesQuery.data ?? [];
   const [chosenStorage, setChosenStorage] = useState<string | null>(null);
   const storageUrl = chosenStorage ?? storages[0]?.url ?? null;

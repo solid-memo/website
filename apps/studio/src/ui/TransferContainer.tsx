@@ -16,7 +16,7 @@ import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { TransferScreen, type ExportRun } from "./TransferScreen";
 import { changes, useWrite } from "@solid-memo/ui/writeEffects";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 
 /**
  * The import and export screen's data: the instance's decks as the user
@@ -53,10 +53,7 @@ export function TransferContainer({
   const [exporting, setExporting] = useState<ExportRun | null>(null);
   const [file, setFile] = useState<DeckFile | null>(null);
   const check = useDataCheck(useCases, instance.url);
-  const treeQuery = useQuery({
-    queryKey: queryKeys.deckTree(instance.url),
-    queryFn: () => useCases.listDeckTree(instance.url),
-  });
+  const treeQuery = useQuery(queries.deckTree(useCases, instance.url));
 
   const exportMutation = useMutation({
     mutationFn: async ({

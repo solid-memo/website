@@ -26,11 +26,11 @@ import { boundedQueryKeyHash } from "@solid-memo/ui/queryKeys";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { StudyContainer } from "@solid-memo/ui/StudyContainer";
-import { releaseDraftQuery, useDraftEditor } from "./draftEditor";
+import { useDraftEditor } from "./draftEditor";
 import { answerChapter, answerQueue, jumpToChapter } from "./trialActions";
 import { TrialControls } from "./TrialControls";
 import { TrialScreen } from "./TrialScreen";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -92,7 +92,10 @@ export function TrialContainer({
     mutationFn: async (from: ReleaseDraft | null) => {
       const draft: ReleaseDraft =
         from ??
-        (await queryClient.fetchQuery({ ...releaseDraftQuery(useCases, draftUrl), staleTime: 0 }));
+        (await queryClient.fetchQuery({
+          ...queries.releaseDraft(useCases, draftUrl),
+          staleTime: 0,
+        }));
       return { draft, opening: await useCases.openTrial(draft, instanceUrl) };
     },
     onMutate: () => {
@@ -186,11 +189,7 @@ function TrialPlay({
   }, [chapter]);
   const clock = () => new Date(Date.now() + days * DAY_MS);
   const { useCases, instance, deck } = trial;
-  const courseQuery = useQuery({
-    queryKey: queryKeys.course(deck.url),
-    queryFn: () => useCases.getCourse(deck),
-    enabled: draft.course,
-  });
+  const courseQuery = useQuery({ ...queries.course(useCases, deck), enabled: draft.course });
   const course = courseQuery.data;
   const chapters = useMemo(
     () => course?.outline.chapters.map((one) => ({ id: one.id, title: one.title })) ?? [],

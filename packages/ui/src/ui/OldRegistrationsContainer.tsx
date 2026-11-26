@@ -9,6 +9,7 @@ import type { Instance } from "@solid-memo/domain/instance";
 import type { Session } from "@solid-memo/domain/session";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
+import { queries } from "./queries";
 import { queryKeys } from "./queryKeys";
 import { changes, useWrite } from "./writeEffects";
 
@@ -32,15 +33,12 @@ export function OldRegistrationsContainer({
   instance: Instance;
 }) {
   const { t, errorText } = useI18n();
-  const queryKey = queryKeys.oldRegistrations(session.webId, instance.url);
+
   const statusRef = useRef<HTMLParagraphElement>(null);
-  const { data } = useQuery({
-    queryKey,
-    queryFn: () => useCases.oldRegistrations(session, instance),
-  });
+  const { data } = useQuery(queries.oldRegistrations(useCases, session, instance));
   const removeMutation = useWrite({
     mutationFn: () => useCases.removeOldRegistrations(session, instance),
-    changes: () => [changes.reads(queryKey)],
+    changes: () => [changes.reads(queryKeys.oldRegistrations(session.webId, instance.url))],
   });
   const removed = removeMutation.isSuccess;
   useEffect(() => {

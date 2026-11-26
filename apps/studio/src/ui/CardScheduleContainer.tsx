@@ -25,7 +25,7 @@ import {
   type ScheduleEditMade,
 } from "./CardScheduleScreen";
 import { changes, useWrite } from "@solid-memo/ui/writeEffects";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 
 const BOTH: readonly StudyDirection[] = ["front-to-back", "back-to-front"];
 
@@ -111,15 +111,9 @@ export function CardScheduleContainer({
 }) {
   const { t, errorText } = useI18n();
   const [done, setDone] = useState<ScheduleEditMade | null>(null);
-  const reviewsQuery = useQuery({
-    queryKey: queryKeys.reviews(deck.reviewsDocumentUrl),
-    queryFn: () => useCases.listDeckReviewStates(deck),
-  });
+  const reviewsQuery = useQuery(queries.reviews(useCases, deck));
   const instanceUrl = instanceUrlOfDeck(deck.url);
-  const preferencesQuery = useQuery({
-    queryKey: queryKeys.preferences(instanceUrl),
-    queryFn: () => useCases.getPreferences(instanceUrl),
-  });
+  const preferencesQuery = useQuery(queries.preferences(useCases, instanceUrl));
   const editMutation = useWrite({
     mutationFn: (edit: ScheduleEditMade) =>
       edit.kind === "reset"

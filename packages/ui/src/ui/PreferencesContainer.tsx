@@ -15,7 +15,7 @@ import { Loading } from "./Loading";
 import { PreferencesScreen } from "./PreferencesScreen";
 import { SchedulerSwitchProgress, SchedulerSwitchResult } from "./SchedulerSwitch";
 import { useI18n } from "./i18n";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 import { changes, useWrite } from "./writeEffects";
 
 /** Whether a save was refused over stored preferences that do not fit their shape. */
@@ -59,24 +59,14 @@ export function PreferencesContainer({
   /** The preferences last submitted, which the form starts from when it shows again. */
   const [submitted, setSubmitted] = useState<StudyPreferences | null>(null);
 
-  const preferencesQuery = useQuery({
-    queryKey: queryKeys.preferences(instance.url),
-    queryFn: () => useCases.getPreferences(instance.url),
-  });
+  const preferencesQuery = useQuery(queries.preferences(useCases, instance.url));
   // A save refused over ones that do not fit says so too (misfitRefused), so the confirmation is always offered.
-  const misfitQuery = useQuery({
-    queryKey: queryKeys.preferencesMisfit(instance.url),
-    queryFn: () => useCases.preferencesMisfit(instance.url),
-  });
+  const misfitQuery = useQuery(queries.preferencesMisfit(useCases, instance.url));
   // The palettes the user designed: none offered while they cannot be read.
-  const palettesQuery = useQuery({
-    queryKey: queryKeys.palettes(instance.url),
-    queryFn: () => useCases.listPalettes(instance.url),
-  });
+  const palettesQuery = useQuery(queries.palettes(useCases, instance.url));
   // Not offered while it cannot be read.
   const connectedScreenQuery = useQuery({
-    queryKey: queryKeys.connectedScreenShown(instance.url),
-    queryFn: () => useCases.connectedScreenShown(instance.url),
+    ...queries.connectedScreenShown(useCases, instance.url),
     enabled: offersConnectedScreen,
   });
 

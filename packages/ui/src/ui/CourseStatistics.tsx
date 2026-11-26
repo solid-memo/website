@@ -14,8 +14,7 @@ import { useCopies } from "./deckTreeEditor";
 import { useI18n } from "./i18n";
 import { ReaderText } from "./ReaderText";
 import { courseHref } from "./router";
-import { STATISTICS_STALE_MS } from "./studyFigures";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 
 /**
  * How the learner's courses have gone: each course, a link to its page,
@@ -123,13 +122,8 @@ export function CourseStatisticsContainer({
   const { isCourse } = useCopies(useCases, decks);
   const courses = decks.filter(isCourse);
   const query = useQuery({
-    queryKey: queryKeys.courseStatistics(
-      instance.url,
-      courses.map((deck) => [deck.url, deck.sourceUrl, deck.completedChapters ?? []]),
-    ),
-    queryFn: () => useCases.getCourseStatistics(instance.url, new Date(), courses),
+    ...queries.courseStatistics(useCases, instance.url, courses),
     enabled: courses.length > 0,
-    staleTime: STATISTICS_STALE_MS,
   });
   if (query.data === undefined) return null;
   return <CourseStatisticsView instanceUrl={instance.url} courses={query.data} />;
