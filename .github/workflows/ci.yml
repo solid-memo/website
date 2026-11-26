@@ -310,18 +310,19 @@ jobs:
             --jq 'group_by(.key | split("-") | .[:-1]) | .[] | sort_by(.createdAt) | reverse | .[1:][].id' |
             xargs -r -n1 gh cache delete
       # The system libraries' (.github/actions/playwright-deps): an entry
-      # per runner image, the two newest kept, as both run while GitHub
-      # rolls a new image out.
-      - name: Keep only the newest system libraries of each browser
+      # per runner image and the cloud it runs on, the key's third and
+      # sixth parts, the two newest of each browser and cloud kept, as
+      # both images run while GitHub rolls a new one out.
+      - name: Keep only the newest system libraries of each browser and cloud
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          for browser in chromium firefox webkit; do
-            gh cache list --ref refs/heads/main --key "playwright-deps-$browser-" --sort created_at --order desc --limit 100 \
-              --json id --jq '.[2:][].id'
-          done | xargs -r -n1 gh cache delete
+          gh cache list --ref refs/heads/main --key playwright-deps- --limit 1000 \
+            --json id,key,createdAt \
+            --jq 'group_by(.key | split("-") | [.[2], .[5]]) | .[] | sort_by(.createdAt) | reverse | .[2:][].id' |
+            xargs -r -n1 gh cache delete
 
   # The site, built once for the whole run (npm run build): the journeys
   # test this build, which they download, rather than each building its
@@ -1154,12 +1155,15 @@ jobs:
           # under the chromium action's key, by site's playwright.
           shell=$(node -p "require('playwright/package.json').version")
           cached "playwright-headless-shell-$RUNNER_OS-$shell" || browsers+=("shell")
-          # The system libraries, under this runner's image: a job's may
-          # be another while GitHub rolls a new one out. A browser listed
+          # The system libraries, under this runner's image and cloud,
+          # read as playwright-deps reads them: a job's may be another
+          # while GitHub rolls a new image out, or run on the other cloud,
+          # whose entry its first job there saves. A browser listed
           # already gets them too; the headless shell's are Chromium's.
           core=$(node -p "require('playwright-core/package.json').version")
+          host=$(awk '{ print tolower($1) }' /sys/class/dmi/id/sys_vendor 2> /dev/null || true)
           for name in chromium firefox webkit; do
-            cached "playwright-deps-$name-$ImageOS-$ImageVersion-$RUNNER_ARCH-$core" ||
+            cached "playwright-deps-$name-$ImageOS-$ImageVersion-${host:-unknown}-$RUNNER_ARCH-$core" ||
               [[ " ${browsers[*]} " == *" $name "* ]] || browsers+=("$name")
           done
           echo "Browsers missing: ${browsers[*]:-none}"

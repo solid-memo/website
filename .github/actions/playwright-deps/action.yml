@@ -8,9 +8,11 @@
 # past a job's timeout, that a job should not have to reach it. The
 # cache holds the packages' .deb files, which apt-get installs with no
 # network. The key is the browser's, the runner image's (ImageOS,
-# ImageVersion), which fixes what is installed already and so which
-# files fit, and playwright-core's version, which fixes the list: a new
-# image or a new Playwright is a new entry.
+# ImageVersion) and the cloud it runs on (the machine's vendor), which
+# together fix what is installed already and so which files fit (the
+# same image differs between Azure and AWS, issue #1064), and
+# playwright-core's version, which fixes the list: a new image, another
+# cloud or a new Playwright is a new entry.
 #
 # On a miss, the job asks the mirror, each apt-get given four tries of
 # three minutes, each going on from what the last one downloaded, so a
@@ -19,8 +21,8 @@
 # on main only, saves what it downloaded (a pull request's or the merge
 # queue's copy would be kept under its own ref, never read again). Where
 # main's run skips the jobs that would save it, warm-browsers does
-# (ci.yml), and caches keeps main's newest two entries per browser, a
-# new image being rolled out over days. Run it after npm ci.
+# (ci.yml), and caches keeps main's newest two entries per browser and
+# cloud, a new image being rolled out over days. Run it after npm ci.
 #
 # With `cache: false`, it always asks the mirror, whose signed lists apt
 # checks each file against, and saves nothing (actions/chromium says
@@ -53,7 +55,10 @@ runs:
         BROWSER: ${{ inputs.browser }}
       run: |
         version=$(node -p "require('playwright-core/package.json').version")
-        echo "key=playwright-deps-$BROWSER-${ImageOS:?}-${ImageVersion:?}-$RUNNER_ARCH-$version" >> "$GITHUB_OUTPUT"
+        # The cloud the runner is hosted on, which ci.yml's warm job reads
+        # the same way: microsoft, amazon.
+        host=$(awk '{ print tolower($1) }' /sys/class/dmi/id/sys_vendor 2> /dev/null || true)
+        echo "key=playwright-deps-$BROWSER-${ImageOS:?}-${ImageVersion:?}-${host:-unknown}-$RUNNER_ARCH-$version" >> "$GITHUB_OUTPUT"
     - id: cache
       if: inputs.cache == 'true'
       uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
