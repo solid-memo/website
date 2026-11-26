@@ -1857,6 +1857,7 @@
     "deckFileLinksGuestPod": "Diese Datei verlinkt auf den Lernstand als Gast in diesem Browser, was kein Stapel darf, daher wurde sie nicht importiert. Wähle eine andere Datei.",
     "deckFileTooNew": "Diese Datei wurde von einer neueren Version von Solid Memo geschrieben, deshalb kann diese Version sie nicht importieren. Verwende stattdessen eine neuere Version von Solid Memo.",
     "deckFileTooLarge": "Diese Datei ist größer als jeder Stapel, den Solid Memo liest, deshalb wurde sie nicht gelesen. Wähle eine kleinere Datei.",
+    "cardIdTooLong": "Eine Karte oder falsche Antwortmöglichkeit in diesem Stapel hat eine ID, die länger als {limit} Zeichen ist, mehr als Solid Memo in einem Stapel annimmt, den es hinzufügt oder aktualisiert. Deshalb wurde nichts geändert. Frag die Person, die den Stapel erstellt hat.",
     "noGuestPod": "Auf diesem Gerät gibt es keinen Lernstand als Gast.",
     "guestPodStartFailed": "Der Lernstand als Gast auf diesem Gerät konnte nicht geöffnet werden. Lade die Seite neu und versuche es erneut.",
     "guestStorageAborted": "Dieser Browser hat sich geweigert, eine Änderung am Lernstand als Gast zu speichern. Prüfe, ob er genug Platz für Daten hat, und versuche es dann erneut.",

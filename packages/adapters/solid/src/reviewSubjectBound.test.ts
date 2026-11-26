@@ -17,7 +17,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { deckFileBaseOf, importedDeck } from "@solid-memo/domain/deckFile";
-import type { Deck } from "@solid-memo/domain/deck";
+import { CARD_FORMAT_VERSION, type Deck } from "@solid-memo/domain/deck";
 import { gradePrompt } from "@solid-memo/domain/grading";
 import { isIriPastBound } from "@solid-memo/domain/pathKeys";
 import type { ReviewKey } from "@solid-memo/domain/review";
@@ -98,22 +98,31 @@ const deckFileOf = (cardId: string) => `@prefix sm: <https://solid-memo.com/ns/v
   sm:firstReviewedAt ${AT} ; sm:lastReviewedAt ${AT} .
 `;
 
-/** The deck of the file, imported as importDeckFile (cards.ts) imports it, with its progress. */
+/**
+ * The deck of the file, imported as importDeckFile (cards.ts) imported it,
+ * with its progress, before a card's id was held to MAX_CARD_ID_LENGTH:
+ * an import now refuses it (GHSA-74pg-94wh-68xj), and a deck already in
+ * the pod is still read and studied.
+ */
 async function importedFromFile(cardId: string): Promise<{ deck: Deck } & ReturnType<typeof pod>> {
   const at = pod();
   const content = await createSolidDeckArchive({
     fetch: at.fetch,
     publicFetch: at.fetch,
   }).readDeckFile(deckFileOf(cardId), "turtle", deckFileBaseOf("deck.ttl"));
-  const imported = importedDeck(INSTANCE, content, {
-    withProgress: true,
-    decks: [],
-    freshId: "deck-fresh",
-    now: NOW.toISOString(),
-  });
+  const options = { withProgress: true, decks: [], freshId: "deck-fresh", now: NOW.toISOString() };
+  expect(() => importedDeck(INSTANCE, content, options)).toThrow(
+    expect.objectContaining({ code: "cardIdTooLong" }),
+  );
+  const imported = importedDeck(INSTANCE, { ...content, cards: [] }, options);
+  const cards = content.cards.map((card) => ({
+    ...card,
+    url: `${imported.deck.cardsDocumentUrl}#${card.id}`,
+    formatVersion: CARD_FORMAT_VERSION,
+  }));
   await at.decks.applyCardChanges(
     imported.deck,
-    { save: imported.cards, remove: [] },
+    { save: cards, remove: [] },
     { whole: true, version: "absent" as never },
   );
   await at.reviews.applyReviewChanges(imported.deck, {

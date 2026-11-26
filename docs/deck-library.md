@@ -1168,6 +1168,13 @@ flowchart LR
   Storage discovery (`hasStorageLink` in `solidStorageGateway.ts`)
   reads the `Link` header without a parser, in time linear in its
   length, so it's left unbounded on purpose.
+- A release is refused as it's copied, started as a course or upgraded
+  to (`cardIdTooLong`) when a card's or a wrong option's id is longer
+  than 256 characters (`MAX_CARD_ID_LENGTH` in `deck.ts`). So is a
+  course question as its card joins the deck. An answer
+  names its card and the option chosen in full, so longer ids would
+  make the answer log grow far faster than the answers
+  ([data-model.md](data-model.md#the-answer-log)).
 - Every document the app reads is refused when one of its terms is
   longer than 16,383 characters (`MAX_TERM_CHARACTERS` in
   `readLimits.ts`): a

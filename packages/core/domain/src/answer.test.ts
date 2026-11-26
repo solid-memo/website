@@ -15,7 +15,9 @@ import {
   recordedResponseTimes,
   shiftStudyDay,
   utcOffsetMinutesAt,
+  writableIriIn,
 } from "./answer";
+import { MAX_CARD_ID_LENGTH } from "./deck";
 
 describe("answers", () => {
   it("are named by their time and a random part", () => {
@@ -77,11 +79,22 @@ describe("answers", () => {
   it("name the wrong option chosen in the cards document, or none when that IRI could not be written", () => {
     const cards = "https://pod.example/solid-memo/instances/default/decks/d.ttl";
     expect(chosenDistractorIn(cards, "q-1-d1")).toBe(`${cards}#q-1-d1`);
-    // Just within the bound on a term, `<>` around it, and one past it.
-    const fits = "x".repeat(16_383 - 2 - cards.length - 1);
-    expect(chosenDistractorIn(cards, fits)).toBe(`${cards}#${fits}`);
-    expect(chosenDistractorIn(cards, `${fits}x`)).toBeUndefined();
     expect(chosenDistractorIn(cards, "q>1")).toBeUndefined();
+    // Just within the bound on a term, `<>` around it, and one past it: written, as a guest's card is.
+    const fits = "x".repeat(16_383 - 2 - cards.length - 1);
+    expect(writableIriIn(cards, fits)).toBe(`${cards}#${fits}`);
+    expect(writableIriIn(cards, `${fits}x`)).toBeUndefined();
+    expect(writableIriIn(cards, "q>1")).toBeUndefined();
+  });
+
+  it("name no wrong option whose id is longer than a deck taken in may have, so each answer stays small", () => {
+    const cards = "https://pod.example/solid-memo/instances/default/decks/d.ttl";
+    const longest = "x".repeat(MAX_CARD_ID_LENGTH);
+    expect(chosenDistractorIn(cards, longest)).toBe(`${cards}#${longest}`);
+    expect(chosenDistractorIn(cards, `${longest}x`)).toBeUndefined();
+    // Well within the bound on a term, as a deck added before that bound may have it.
+    const fits = "x".repeat(16_383 - 2 - cards.length - 1);
+    expect(chosenDistractorIn(cards, fits)).toBeUndefined();
   });
 
   it("remember the card from grade 3 up", () => {

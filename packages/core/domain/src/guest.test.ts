@@ -5,7 +5,13 @@
 import { describe, expect, it } from "vitest";
 import type { Answer } from "./answer";
 import { AppError } from "./appError";
-import { MAX_CATALOG_LINKS, type Card, type Deck, type Distractor } from "./deck";
+import {
+  MAX_CARD_ID_LENGTH,
+  MAX_CATALOG_LINKS,
+  type Card,
+  type Deck,
+  type Distractor,
+} from "./deck";
 import type { DeckTree } from "./deckTree";
 import type { LibraryDeckContent } from "./library";
 import { isIriPastBound } from "./pathKeys";
@@ -192,6 +198,30 @@ describe("adding a guest's study to an instance", () => {
       nextIntervalDays: 1,
       mode: "multiple-choice",
       chosenDistractor: `${from.cardsDocumentUrl}#${id}`,
+    };
+    const { chosenDistractor: _chosen, ...rest } = answer;
+    expect(mergedAnswer(answer, to)).toEqual({
+      ...rest,
+      id: "answer-1-deck-n",
+      deckUrl: to.url,
+      cardUrl: `${to.cardsDocumentUrl}#q-1`,
+    });
+  });
+
+  it("adds an answer without a wrong option whose id is longer than an answer names", () => {
+    const from = deck("deck-g1");
+    const to = deck("deck-n", TARGET);
+    const answer: Answer = {
+      id: "answer-1",
+      deckUrl: from.url,
+      cardUrl: `${from.cardsDocumentUrl}#q-1`,
+      direction: "front-to-back",
+      grade: 1,
+      answeredAt: "2026-10-01T10:00:00.000Z",
+      studyDay: "2026-10-01",
+      nextIntervalDays: 1,
+      mode: "multiple-choice",
+      chosenDistractor: `${from.cardsDocumentUrl}#${"d".repeat(MAX_CARD_ID_LENGTH + 1)}`,
     };
     const { chosenDistractor: _chosen, ...rest } = answer;
     expect(mergedAnswer(answer, to)).toEqual({

@@ -238,8 +238,9 @@ It runs these steps:
      added to the instance's log for its month, insert-only, unread
      (`appendAll`, one PATCH per month, more where one would pass 64
      KiB). Its deck, card and chosen wrong option are named in the new
-     deck's documents, by the same fragment ids; a chosen wrong option
-     whose IRI would be too long there is left out, not the answer. Its
+     deck's documents, by the same fragment ids. A chosen wrong option
+     whose IRI would be too long there, or whose id is longer than 256
+     characters, is left out, not the answer. Its
      grade, intervals and response times stay as given. Its id is the
      guest's followed by the new deck's
      (`answer-<time>-<random>-deck-<uuid>`). Answers of a deck the guest

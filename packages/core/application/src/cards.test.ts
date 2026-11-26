@@ -7,6 +7,7 @@ import { describe, expect, it, vi } from "vitest";
 import { createUseCases } from "./useCases";
 import {
   CARD_FORMAT_VERSION,
+  MAX_CARD_ID_LENGTH,
   MAX_CATALOG_LINKS,
   type Card,
   type Deck,
@@ -1551,6 +1552,27 @@ describe("cards", () => {
       ).rejects.toMatchObject({ code: "catalogFull", vars: { limit: MAX_CATALOG_LINKS } });
       expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
       expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
+      expect(deps.deckRepository.registerDeck).not.toHaveBeenCalled();
+    });
+
+    it("refuses a deck with a card or wrong option id longer than a deck taken in may have, writing nothing (GHSA-74pg-94wh-68xj)", async () => {
+      const { deps, useCases } = withFiles();
+      const long = "k".repeat(MAX_CARD_ID_LENGTH + 1);
+      const [first] = file.content.cards;
+      for (const cards of [
+        [{ ...first!, id: long }],
+        [{ ...first!, distractors: [{ id: long, text: { en: "Wrong" } }] }],
+      ]) {
+        await expect(
+          useCases.importDeckFile(
+            instance.url,
+            { ...file, content: { ...file.content, cards } },
+            { withProgress: true },
+          ),
+        ).rejects.toMatchObject({ code: "cardIdTooLong", vars: { limit: MAX_CARD_ID_LENGTH } });
+      }
+      expect(deps.reviewStateRepository.prepareReviewChanges).not.toHaveBeenCalled();
+      expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
       expect(deps.deckRepository.registerDeck).not.toHaveBeenCalled();
     });
 

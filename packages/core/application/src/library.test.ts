@@ -8,7 +8,7 @@ import { describe, expect, it, vi } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { createUseCases } from "./useCases";
 import { withLinkedReleasesChecked } from "./library";
-import type { Card, Deck } from "@solid-memo/domain/deck";
+import { MAX_CARD_ID_LENGTH, type Card, type Deck } from "@solid-memo/domain/deck";
 import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
 import {
   type DocumentReport,
@@ -1438,6 +1438,24 @@ describe("the deck library", () => {
       expect(deps.deckRepository.importDeck).toHaveBeenCalledTimes(1);
     });
   });
+  it("importLibraryDeck refuses, writing nothing, a release with a card or wrong option id longer than a deck taken in may have (GHSA-74pg-94wh-68xj)", async () => {
+    const long = "c".repeat(MAX_CARD_ID_LENGTH + 1);
+    for (const card of [
+      { ...libraryContent.cards[0]!, id: long },
+      { ...libraryContent.cards[0]!, distractors: [{ id: long, text: { en: "Oslo" } }] },
+    ]) {
+      const deps = makeDeps();
+      vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockResolvedValue({
+        ...libraryContent,
+        cards: [card],
+      });
+      const useCases = createUseCases(deps);
+      await expect(useCases.importLibraryDeck(instance.url, libraryDeck)).rejects.toMatchObject({
+        code: "cardIdTooLong",
+      });
+      expect(deps.deckRepository.importDeck).not.toHaveBeenCalled();
+    }
+  });
   it("importLibraryDeck fetches the deck's content and imports it", async () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);
@@ -1729,6 +1747,40 @@ describe("library deck upgrade", () => {
     await expect(useCases.applyLibraryUpgrade(copy, plan)).resolves.toMatchObject({ ok: true });
     expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
     expect(pod.written).toEqual([copy.url]);
+  });
+
+  it("refuses, writing nothing, a newer release that adds or changes a card with an id longer than a deck taken in may have (GHSA-74pg-94wh-68xj)", async () => {
+    const long = "n".repeat(MAX_CARD_ID_LENGTH + 1);
+    const cases: ((v2: LibraryDeckContent) => LibraryDeckContent)[] = [
+      // A card added with a long id.
+      (v2) => ({ ...v2, cards: [...v2.cards, libraryCard(long, "Long")] }),
+      // A card changed, a wrong option with a long id added to it.
+      (v2) => ({
+        ...v2,
+        cards: v2.cards.map((card) =>
+          card.id === "sweden"
+            ? { ...card, distractors: [{ id: long, text: { "": "Oslo" } }] }
+            : card,
+        ),
+      }),
+    ];
+    for (const made of cases) {
+      const { deps, pod, copy, useCases, v2 } = await world();
+      const newer = made(v2);
+      const v1 = await deps.deckLibrary.fetchLibraryDeck(copy.sourceUrl!);
+      vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) =>
+        url === v2.url ? newer : v1,
+      );
+      const plan = (await useCases.planLibraryUpgrade(copy))!;
+      await expect(useCases.applyLibraryUpgrade(copy, plan)).resolves.toEqual({
+        ok: false,
+        step: "read",
+        error: expect.objectContaining({ code: "cardIdTooLong" }),
+        changed: false,
+      });
+      expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
+      expect(pod.written).toEqual([]);
+    }
   });
 
   it("refuses, writing nothing, when the deck no longer calls for what the user agreed to, has moved, or is gone", async () => {

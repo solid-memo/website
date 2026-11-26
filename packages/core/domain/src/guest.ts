@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { longestAgentUrlOf } from "./agentRecord";
-import { chosenDistractorIn, type Answer } from "./answer";
+import { chosenDistractorIn, writableIriIn, type Answer } from "./answer";
 import { AppError } from "./appError";
 import { MAX_CATALOG_LINKS, type Deck, type Distractor } from "./deck";
 import type { DeckGroup, DeckTree, GraftNode, TreeNode } from "./deckTree";
@@ -234,7 +234,7 @@ export function authorFitsDeck(author: string, to: Pick<Deck, "url">): boolean {
 
 /**
  * Whether the guest's card `cardId` can be added to the deck `to`: its
- * IRI in `to`'s cards document can be written (chosenDistractorIn). Its
+ * IRI in `to`'s cards document can be written (writableIriIn). Its
  * id came from a release and fit under the guest's shorter address; a
  * card that does not fit is left out, with its review states and its
  * answers, as it could be neither written nor studied there. A review
@@ -244,13 +244,13 @@ export function authorFitsDeck(author: string, to: Pick<Deck, "url">): boolean {
  * card out.
  */
 export function cardFitsDeck(cardId: string, to: Pick<Deck, "cardsDocumentUrl">): boolean {
-  return chosenDistractorIn(to.cardsDocumentUrl, cardId) !== undefined;
+  return writableIriIn(to.cardsDocumentUrl, cardId) !== undefined;
 }
 
 /**
  * A card of the guest's deck as it is added to the deck whose cards
  * document is at `cardsDocumentUrl`: without a wrong option whose IRI
- * there could not be written (chosenDistractorIn). Its id came from a
+ * there could not be written (writableIriIn). Its id came from a
  * release and fit under the guest's shorter address; the rest of the
  * card, and every other option, is added as it is.
  */
@@ -260,9 +260,7 @@ export function movedCard<C extends { distractors?: readonly Distractor[] }>(
 ): C {
   const { distractors, ...rest } = card;
   if (distractors === undefined) return card;
-  const kept = distractors.filter(
-    ({ id }) => chosenDistractorIn(cardsDocumentUrl, id) !== undefined,
-  );
+  const kept = distractors.filter(({ id }) => writableIriIn(cardsDocumentUrl, id) !== undefined);
   if (kept.length === distractors.length) return card;
   return (kept.length === 0 ? rest : { ...rest, distractors: kept }) as C;
 }
@@ -274,9 +272,10 @@ export function movedCard<C extends { distractors?: readonly Distractor[] }>(
  * ids; its own id the guest's followed by `to`'s, so that the same answer
  * added to another deck (the guest's deck added again) is an entry of its
  * own, and added again to the same deck changes nothing. A wrong option
- * whose IRI in `to`'s cards document could not be written
- * (chosenDistractorIn), as one with an id that fit under the guest's
- * shorter address may be, is left out, not the answer. Everything else
+ * whose IRI in `to`'s cards document could not be written, as one with
+ * an id that fit under the guest's shorter address may be, or whose id
+ * is longer than an answer names (chosenDistractorIn), is left out, not
+ * the answer. Everything else
  * stays.
  */
 export function mergedAnswer(answer: Answer, to: Deck): Answer {

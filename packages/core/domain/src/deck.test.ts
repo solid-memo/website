@@ -12,16 +12,19 @@ import {
   boundedKeywords,
   cardLabel,
   cardLabelText,
+  isCardIdPastBound,
   isDeckDirection,
   promptSides,
   isMarkdown,
   promptsOf,
   studyDirections,
   validateCardContent,
+  MAX_CARD_ID_LENGTH,
   MAX_COMPLETED_CHAPTERS,
   MAX_DECK_KEYWORDS,
   MAX_DECK_METADATA,
   MAX_DECK_METADATA_CHARACTERS,
+  refuseLongCardIds,
   withBoundedMetadata,
   type Card,
 } from "./deck";
@@ -847,5 +850,36 @@ describe("activeCountOf", () => {
     cards.push({ retired: undefined } as never);
     expect(activeCountOf(cards)).toBe(3);
     expect(looks.count).toBe(6);
+  });
+});
+
+describe("card ids", () => {
+  it("are past the bound beyond MAX_CARD_ID_LENGTH characters", () => {
+    expect(isCardIdPastBound("c".repeat(MAX_CARD_ID_LENGTH))).toBe(false);
+    expect(isCardIdPastBound("c".repeat(MAX_CARD_ID_LENGTH + 1))).toBe(true);
+  });
+
+  it("refuse cards taken in with a card or wrong option id past the bound, naming its start", () => {
+    const longest = "c".repeat(MAX_CARD_ID_LENGTH);
+    expect(() =>
+      refuseLongCardIds([{ id: "q-1" }, { id: longest, distractors: [{ id: longest }] }]),
+    ).not.toThrow();
+    for (const cards of [
+      [{ id: "q-1" }, { id: `${longest}c` }],
+      [{ id: "q-1", distractors: [{ id: "d-1" }, { id: `${longest}c` }] }],
+    ]) {
+      const refused = (() => {
+        try {
+          refuseLongCardIds(cards);
+        } catch (error) {
+          return error;
+        }
+      })();
+      expect(refused).toBeInstanceOf(AppError);
+      expect(refused).toMatchObject({
+        code: "cardIdTooLong",
+        vars: { limit: MAX_CARD_ID_LENGTH },
+      });
+    }
   });
 });
