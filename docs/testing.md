@@ -1344,8 +1344,11 @@ checks of the repository as a whole, plain Node scripts in
 - `check:keys` ([checkQueryKeys.ts](../scripts/checkQueryKeys.ts)): no
   screen of Solid Memo or the Studio writes a query key out as an
   array; each is made by a function of the keys modules
-  ([architecture.md](architecture.md#query-keys)). Tests write theirs
-  out, and fail when a key changes.
+  ([architecture.md](architecture.md#query-keys)). Nor does a screen
+  give a `queryKey` property outside the `queries` modules, but in a
+  QueryClient's filter, such as an invalidation's: each read takes its
+  options from a definition there. Tests write their keys out, and
+  fail when a key changes.
 - `check:scripts`: these scripts' tests and types, at 100% coverage
   (`scripts/vitest.config.ts`).
 

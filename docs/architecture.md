@@ -447,12 +447,13 @@ cached: the instances, and the decks, cards, course or library deck
 the route needs (`lookupWaiting` in
 [packages/ui/src/ui/Workspace.tsx](../packages/ui/src/ui/Workspace.tsx)).
 
-A new key goes in a keys module, never into a screen as an array
-written out, which `npm run check:keys` refuses
-([testing.md](testing.md#the-repositorys-own-checks)). A new read goes
-in a `queries` module. A write's refresh, a removal, and a
-QueryClient's read or write of one query name the key by its function
-in a keys module.
+A new key goes in a keys module, and a new read in a `queries`
+module. `npm run check:keys` refuses a key written out as an array in
+a screen, and a `queryKey` property outside the `queries` modules
+([testing.md](testing.md#the-repositorys-own-checks)). A write's
+refresh, a removal, and a QueryClient's read or write of one query
+name the key by its function in a keys module, and only such a filter
+of queries gives a `queryKey` elsewhere.
 
 A key whose first items are another's sits under it, so refreshing or
 dropping the shorter key reaches it too: the decks' arrangement

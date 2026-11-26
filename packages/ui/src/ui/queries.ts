@@ -31,7 +31,8 @@ function hasUnreadable(report: ValidationReport | undefined): boolean {
  * what is its own: when it reads (`enabled`), and what it makes of the
  * data (`select`). A definition given no argument to read with (null or
  * undefined) reads nothing (skipToken). Reads only the Studio makes are
- * in apps/studio/src/ui/queries.ts, built on these.
+ * in apps/studio/src/ui/queries.ts, built on these. No read gives its
+ * key anywhere else (`npm run check:keys`).
  */
 export const queries = {
   /** A session's account (UseCases.discoverAccount). */
