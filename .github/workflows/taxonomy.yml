@@ -60,8 +60,15 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.15"
+      # The script's errors can quote the taxonomy's answer, so the step
+      # stops reading commands as the update job's steps do (see there).
+      # Only the script's stdout goes through tee to the step's outputs.
       - id: check
-        run: python3 scripts/taxonomy_deck.py --check | tee -a "$GITHUB_OUTPUT"
+        run: |
+          token="$(openssl rand -hex 16)"
+          echo "::stop-commands::$token"
+          trap 'printf "\n::%s::\n" "$token"' EXIT
+          python3 scripts/taxonomy_deck.py --check | tee -a "$GITHUB_OUTPUT"
       - id: open
         env:
           GH_TOKEN: ${{ github.token }}
@@ -110,10 +117,24 @@ jobs:
       # from the taxonomy versions it records, or the script, the Python it
       # runs on or a published taxonomy version has changed, and the next
       # version would say what it should not.
-      - run: python3 scripts/taxonomy_deck.py --verify --cache-dir ~/.cache/taxonomy
-      - run: >-
-          python3 scripts/taxonomy_deck.py --to "$NEWEST" --cache-dir ~/.cache/taxonomy
-          --notes-file "$RUNNER_TEMP/notes.txt"
+      # The script prints the taxonomy's names into the log, where the
+      # runner would read a line that starts with `::`, or holds `##[`, as
+      # a workflow command, so each step that prints them stops reading
+      # commands while it runs, with a token of the run's that no name can
+      # know. The token goes on a line of its own, as the last output may
+      # end mid-line. The steps below that format and check the new
+      # version print its text too.
+      - run: |
+          token="$(openssl rand -hex 16)"
+          echo "::stop-commands::$token"
+          trap 'printf "\n::%s::\n" "$token"' EXIT
+          python3 scripts/taxonomy_deck.py --verify --cache-dir ~/.cache/taxonomy
+      - run: |
+          token="$(openssl rand -hex 16)"
+          echo "::stop-commands::$token"
+          trap 'printf "\n::%s::\n" "$token"' EXIT
+          python3 scripts/taxonomy_deck.py --to "$NEWEST" --cache-dir ~/.cache/taxonomy \
+            --notes-file "$RUNNER_TEMP/notes.txt"
 
       # The checks of CI's library and crosscheck jobs; the pull request
       # then runs all of CI.
@@ -122,12 +143,28 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci --ignore-scripts
-      - run: npm run format:turtle
-      - run: npm run library
-      - run: npm run library:check -- --base HEAD
+      - run: |
+          token="$(openssl rand -hex 16)"
+          echo "::stop-commands::$token"
+          trap 'printf "\n::%s::\n" "$token"' EXIT
+          npm run format:turtle
+      - run: |
+          token="$(openssl rand -hex 16)"
+          echo "::stop-commands::$token"
+          trap 'printf "\n::%s::\n" "$token"' EXIT
+          npm run library
+      - run: |
+          token="$(openssl rand -hex 16)"
+          echo "::stop-commands::$token"
+          trap 'printf "\n::%s::\n" "$token"' EXIT
+          npm run library:check -- --base HEAD
       - run: pip install --require-hashes -r "$GITHUB_WORKSPACE/scripts/requirements-ci.txt"
         working-directory: ${{ runner.temp }}
-      - run: python scripts/shacl_crosscheck.py
+      - run: |
+          token="$(openssl rand -hex 16)"
+          echo "::stop-commands::$token"
+          trap 'printf "\n::%s::\n" "$token"' EXIT
+          python scripts/shacl_crosscheck.py
 
       # The new version, the only file a new version changes, with its
       # notes: the index is made from the releases, and git ignores it

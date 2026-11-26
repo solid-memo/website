@@ -388,13 +388,17 @@ naming its issue
 The [Taxonomy workflow](../.github/workflows/taxonomy.yml) does this
 every Monday, and by hand (Actions › Taxonomy › Run workflow):
 
-- Its `check` job runs `--check`.
+- Its `check` job runs `--check`, with the runner reading no workflow
+  commands while it runs, as in the `update` job.
 - For a taxonomy version the deck lacks, its `update` job runs
   `--verify`, makes the next version, and checks it as CI's `library`
   and `crosscheck` jobs do. It holds no secret, and its token only
   reads. It fails if anything in `decks/` changed but the new version.
   It hands that file and the version notes to the
-  `publish` job as an artifact of the run.
+  `publish` job as an artifact of the run. The steps that run the script,
+  and those that format and check the new version, print the taxonomy's
+  names, so they stop the runner from reading workflow commands while
+  they run, with a token that's new on every run.
 - The `publish` job takes that artifact from its own run, and refuses
   it if it holds any other file. It refuses notes that aren't one line
   as the script writes it, or that hold an issue reference, an address,
@@ -533,7 +537,11 @@ CI never reaches Wikidata. The
 [Wikidata workflow](../.github/workflows/wikidata.yml) runs `--verify`
 on every deck with a mapping each Tuesday, and by hand (Actions ›
 Wikidata › Run workflow). When Wikidata can't be reached, it warns and
-passes; when a deck's cards come out otherwise, it fails.
+passes; when a deck's cards come out otherwise, it fails. The step
+stops the runner from reading workflow commands while the script runs,
+as the taxonomy's do, and prints the script's warnings once it resumes.
+Each warning is one line, with any line break in Wikidata's text
+escaped.
 
 ## Authoring Markdown
 
