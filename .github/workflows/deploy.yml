@@ -213,8 +213,11 @@ jobs:
       # manifest, made again here as that job made it, must be attested
       # by CI's workflow in the merge queue or on main, for the release
       # commit or its parent (docs/deployment.md#the-build-ci-tested).
-      # Only the site job may attest, so a site any other job of a run
-      # uploaded in its place, or an older one, is refused. A version
+      # The attestation names the workflow, not the job: the site job is
+      # the only job of ci.yml granted the permission to attest, and it
+      # runs nothing after it attests and uploads the site
+      # (releaseWorkflow.test.ts holds both). So a site any other job of a
+      # run uploaded in its place, or an older one, is refused. A version
       # released before sites were attested fails here: deploy it by hand,
       # which builds it.
       - name: The site is the one CI's site job attested

@@ -336,10 +336,11 @@ jobs:
   # main's cache entries. In the merge queue and on main it attests the
   # site's manifest, and the deploy ships the artifact only if it matches
   # that attestation, so no other job of the run can stand in a site of
-  # its own. The Storybook of the UI's components is built here too, and
-  # kept a week as the storybook artifact: a pull request's to browse,
-  # and on main the one deploy.yml publishes on its own site
-  # (docs/storybook.md#where-it-is-published). Deterministic.
+  # its own. It is the only job of this workflow that can attest, and it
+  # runs nothing after the attestation and the site's upload: every
+  # step of a job can reach its means to attest, so nothing but the
+  # site's own build runs here (the Storybook is built in a job of its
+  # own, below). Deterministic.
   site:
     needs: gate
     if: needs.gate.outputs.jobs == 'all'
@@ -391,6 +392,33 @@ jobs:
           retention-days: 7
           if-no-files-found: error
           overwrite: true
+
+  # The Storybook of the UI's components (npm run storybook:build), kept
+  # a week as the storybook artifact: a pull request's to browse, and on
+  # main the one deploy.yml publishes on its own site
+  # (docs/storybook.md#where-it-is-published). A job of its own, apart
+  # from the site job, which attests the site: the packages that build
+  # the Storybook, which the site doesn't need, run where the token can
+  # only read and nothing can attest. Like the site, nothing in it comes
+  # from GitHub's cache. Deterministic.
+  storybook:
+    needs: gate
+    if: needs.gate.outputs.jobs == 'all'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Without npm's cache, which setup-node would restore for
+      # packageManager in package.json.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - run: npm ci --ignore-scripts
       - run: npm run storybook:build
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -1629,6 +1657,27 @@ jobs:
           RUN: ${{ github.run_id }}
         run: gh run cancel "$RUN"
 
+  # As fail-fast-check, for storybook. Deterministic.
+  fail-fast-storybook:
+    name: fail fast (storybook)
+    needs: storybook
+    if: >-
+      failure() && needs.storybook.result == 'failure' &&
+      github.ref != 'refs/heads/main' &&
+      (github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+    steps:
+      - name: Cancel the run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN: ${{ github.run_id }}
+        run: gh run cancel "$RUN"
+
   # As fail-fast-check, for library. Deterministic.
   fail-fast-library:
     name: fail fast (library)
@@ -1790,8 +1839,8 @@ jobs:
   ci-ok:
     if: always()
     needs:
-      [gate, check, growth, site, library, crosscheck, pod, contract, journeys, docs, workflows,
-       commits, reuse, release-files, dependency-review]
+      [gate, check, growth, site, storybook, library, crosscheck, pod, contract, journeys, docs,
+       workflows, commits, reuse, release-files, dependency-review]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -1801,7 +1850,7 @@ jobs:
           GATE: ${{ needs.gate.result }}
           TESTS: >-
             ${{ needs.check.result }} ${{ needs.growth.result }} ${{ needs.site.result }}
-            ${{ needs.library.result }}
+            ${{ needs.storybook.result }} ${{ needs.library.result }}
             ${{ needs.crosscheck.result }} ${{ needs.pod.result }} ${{ needs.contract.result }}
             ${{ needs.journeys.result }} ${{ needs.docs.result }}
             ${{ needs.workflows.result }} ${{ needs.commits.result }}

@@ -59,7 +59,7 @@ const MAIN = "refs/heads/main";
 export const JOURNEYS_BLOBS = "journeys-blob-";
 /** The site the run built (ci.yml's site job), which the deploy ships. */
 export const SITE = "site";
-/** The Storybook the run built (ci.yml's site job), which the deploy publishes. */
+/** The Storybook the run built (ci.yml's storybook job), which the deploy publishes. */
 export const STORYBOOK = "storybook";
 /**
  * Turbo's cache after a run's checks (ci.yml's check job): a pull
