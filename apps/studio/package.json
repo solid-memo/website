@@ -20,7 +20,7 @@
     "@solid-memo/domain": "*",
     "@solid-memo/ui": "*",
     "@solid-memo/vocab": "*",
-    "@tanstack/react-query": "^5.108.3",
+    "@tanstack/react-query": "^5.108.4",
     "preact": "^11.2.0"
   },
   "devDependencies": {
