@@ -133,6 +133,23 @@ describe("ReleasesScreen", () => {
     assign.mockRestore();
   });
 
+  it("links and opens a release at the address it was checked as, not at one of the app", () => {
+    const open = vi.spyOn(window, "open").mockImplementation(() => null);
+    // As written, the page would resolve it against its own address.
+    const planted = "https:x/../../#/try?url=https://pod.example/r.ttl";
+    const parsed = "https://x/#/try?url=https://pod.example/r.ttl";
+    renderScreen({ releases: [{ url: planted, public: null }] });
+    const row = screen.getByRole("rowheader");
+    expect(within(row).getByRole("link")).toHaveAttribute("href", parsed);
+    expect(row).toHaveTextContent("On another server: x");
+    document.body.focus();
+    fireEvent.keyDown(document.body, { key: "j" });
+    document.body.focus();
+    fireEvent.keyDown(document.body, { key: "Enter" });
+    expect(open).toHaveBeenCalledWith(parsed, "_blank", "noopener,noreferrer");
+    open.mockRestore();
+  });
+
   it("names the host of a release on another origin, which its name alone does not", () => {
     const planted = "https://other.example:8443/capitals/v2.ttl";
     renderScreen({

@@ -47,7 +47,9 @@ describe("PodConnectionScreen", () => {
     expect(screen.getByText(account.podUrl!)).toBeInTheDocument();
     expect(screen.getByText(account.oidcIssuer!)).toBeInTheDocument();
     for (const url of [account.webId, account.podUrl!, account.oidcIssuer!]) {
-      expect(screen.getByRole("link", { name: newTab(url) })).toHaveAttribute("href", url);
+      // Linked as the URL parser has it: an origin with its slash.
+      const href = new URL(url).href;
+      expect(screen.getByRole("link", { name: newTab(url) })).toHaveAttribute("href", href);
     }
 
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));

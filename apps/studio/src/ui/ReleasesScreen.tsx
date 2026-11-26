@@ -259,7 +259,9 @@ export function ReleasesScreen({
               sort={sort}
               onSort={(key) => setSort(nextSort(sort, key as ReleaseColumn))}
               onOpen={({ url }) => {
-                if (isLinkableUrl(url)) window.open(url, "_blank", "noopener,noreferrer");
+                // The address as checked, not as written (ExternalLink).
+                if (isLinkableUrl(url))
+                  window.open(new URL(url).href, "_blank", "noopener,noreferrer");
               }}
             />
           )}
