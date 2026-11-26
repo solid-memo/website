@@ -9,9 +9,12 @@
  * entry's `oidcIssuer`, exactly, as the login compares them, and its
  * sign-up page, if it has one, still answers. It needs the network, so
  * the Links workflow runs it weekly, not as a gate (docs/testing.md#pod-providers);
- * a failure is an entry to fix, or to remove.
+ * a failure is an entry to fix, or to remove. What it logs is made inert
+ * (workflowLog.ts), and an issuer it quotes is cut short: the issuer is
+ * the provider's text, not the repository's.
  */
 import { POD_PROVIDERS, type PodProvider } from "../packages/core/domain/src/podProvider.ts";
+import { inert } from "./workflowLog.ts";
 
 /** How often a request that failed or answered 5xx is tried, in all. */
 const ATTEMPTS = 3;
@@ -59,6 +62,17 @@ function issuerOf(text: string): unknown {
   }
 }
 
+/** At most how many characters of an issuer's JSON a problem quotes. */
+const QUOTED_MAX = 200;
+
+/** A value the provider gave, as JSON, cut short past QUOTED_MAX characters. */
+function quoted(value: unknown): string {
+  const text = JSON.stringify(value);
+  return text.length <= QUOTED_MAX
+    ? text
+    : `${text.slice(0, QUOTED_MAX)}… (${text.length} characters)`;
+}
+
 function reason(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
@@ -79,7 +93,7 @@ export async function providerProblems(
       if (issuer === NOT_JSON) problems.push(`${provider.name}: ${url} does not answer JSON.`);
       else if (issuer !== provider.oidcIssuer)
         problems.push(
-          `${provider.name}: its issuer is ${JSON.stringify(issuer ?? null)}, not ${JSON.stringify(provider.oidcIssuer)}.`,
+          `${provider.name}: its issuer is ${quoted(issuer ?? null)}, not ${JSON.stringify(provider.oidcIssuer)}.`,
         );
     }
   } catch (error) {
@@ -107,12 +121,15 @@ export type ProvidersIo = {
   log(message: string): void;
 };
 
-/** Exit code: 0 when every provider answers as its entry says. */
+/**
+ * Exit code: 0 when every provider answers as its entry says. Each line
+ * is logged inert, as the workflow's log would read a command in it.
+ */
 export async function main(io: ProvidersIo): Promise<number> {
   const problems = (
     await Promise.all(io.providers.map((provider) => providerProblems(provider, io.fetch)))
   ).flat();
-  for (const problem of problems) io.log(problem);
+  for (const problem of problems) io.log(inert(problem));
   if (problems.length > 0) return 1;
   io.log(`All ${io.providers.length} Pod providers answer with the issuer onboarding names.`);
   return 0;

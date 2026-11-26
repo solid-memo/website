@@ -11,7 +11,9 @@
 # replace the archive in the release can replace too. Renovate updates
 # the version and the hash together, and a person merges the update
 # (renovate.json5). Without a publiccode.yml there is nothing to check,
-# and the step says so.
+# and the step says so. With the network, what the parser prints can hold
+# the answers of the addresses the file names, so the runner reads no
+# workflow command while it runs, with a token that is new on every run.
 name: publiccode.yml
 description: Validates publiccode.yml with publiccode-parser-go.
 inputs:
@@ -23,7 +25,6 @@ runs:
   steps:
     - shell: bash
       env:
-        NETWORK: ${{ inputs.network }}
         # renovate: datasource=github-release-attachments depName=italia/publiccode-parser-go
         PUBLICCODE_PARSER_VERSION: v5.4.3
         PUBLICCODE_PARSER_SHA256: 211847305611417ac0b76af5169086232ea6c75ff6ae686227b6972a41599dd7
@@ -41,6 +42,17 @@ runs:
           echo "$PUBLICCODE_PARSER_SHA256  publiccode-parser-go_Linux_x86_64.tar.gz" | sha256sum -c -
           tar -xzf publiccode-parser-go_Linux_x86_64.tar.gz publiccode-parser
         )
+    - shell: bash
+      env:
+        NETWORK: ${{ inputs.network }}
+      run: |
+        if [ ! -f publiccode.yml ]; then
+          exit 0
+        fi
+        dir="$RUNNER_TEMP/publiccode-parser"
+        token="$(openssl rand -hex 16)"
+        echo "::stop-commands::$token"
+        trap 'printf "\n::%s::\n" "$token"' EXIT
         if [ "$NETWORK" = true ]; then
           "$dir/publiccode-parser" publiccode.yml
         else

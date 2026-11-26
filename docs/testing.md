@@ -1151,7 +1151,9 @@ runs Renovate on the checkout with `--platform=local --dry-run=lookup`,
 which reads no repository API and changes nothing. The job installs
 Renovate from its own lockfile in `scripts/renovate/`, without install
 scripts, checks its packages' signatures, and holds no secret: its
-token only reads. Its `comment` job, the only one that writes, runs
+token only reads. Renovate's log holds what the registries answer, so
+the runner reads no workflow command while it runs. Its `comment` job,
+the only one that writes, runs
 [scripts/pendingUpdates.ts](../scripts/pendingUpdates.ts), which needs no
 npm package, and restores nothing from GitHub's cache
 ([releasing.md](releasing.md#the-deploy-key)). The script reads the report's release dates and the wait in
@@ -1384,7 +1386,11 @@ the pages in `docs/`, and CI's `docs` job the rest:
   fixed, or excluded in `lychee.toml` with a reason. `CHANGELOG.md` is
   checked only there: the release writes it on `main`, so a link of a
   released entry that failed would fail every change after it
-  ([releasing.md](releasing.md#the-changelog)).
+  ([releasing.md](releasing.md#the-changelog)). There, lychee is
+  downloaded from its release and checked against the SHA-256 committed
+  beside its version, as the publiccode.yml parser is. What it prints
+  holds the web's answers, so the runner reads no workflow command
+  while it runs, with a token that's new on every run.
 - **publiccode.yml**: once the repository has one, the
   [publiccode.yml parser](https://github.com/italia/publiccode-parser-go)
   validates it against the standard, and the files it names. The Links
@@ -1396,7 +1402,9 @@ the pages in `docs/`, and CI's `docs` job the rest:
   against the SHA-256 committed beside its version, not against the
   checksums the release publishes, which could be replaced with the
   archive. Renovate updates the version and the hash together, and a
-  person merges that update.
+  person merges that update. The runner reads no workflow command
+  while the parser runs, as what it prints with the network can hold
+  the addresses' answers.
 - **Licenses**: [reuse](https://reuse.software/) (`npm run lint:reuse`,
   `reuse lint`) checks that every file in the repository states its
   copyright and license, in an SPDX header or in
@@ -1425,7 +1433,11 @@ compares them. Its `signUpUrl`, if any, must answer a request asking
 for HTML as a browser does. A request that fails or answers 5xx is
 tried three times. The [Links workflow](../.github/workflows/links.yml)
 runs the check weekly and by hand, in its own job, not as a gate. A
-failure means an entry to fix, with the new issuer, or to remove.
+failure means an entry to fix, with the new issuer, or to remove. The
+issuer a provider answers is its own text, so the check quotes at most
+200 characters of it as JSON and makes each line it logs inert
+([workflowLog.ts](../scripts/workflowLog.ts)). The runner reads no
+workflow command while the job's step runs.
 
 ## Without the network
 

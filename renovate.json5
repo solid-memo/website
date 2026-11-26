@@ -228,6 +228,15 @@
             ],
             versioning: 'semver',
         },
+        // lychee's releases are tagged lychee-v<version>, beside its
+        // library's, tagged lychee-lib-v<version>, which has no binary: only
+        // the tool's tags are versions (.github/workflows/links.yml).
+        {
+            matchDepNames: [
+                'lycheeverse/lychee',
+            ],
+            versioning: 'regex:^lychee-v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$',
+        },
         {
             matchFileNames: [
                 'e2e/pod/servers/css-6/compose.yml',
