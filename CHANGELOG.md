@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.5.8](https://github.com/solid-memo/website/compare/v8.5.7...v8.5.8) (2026-11-26)
+
+### Fixes
+
+* **ui:** cache the developer report's full check apart from the opening check ([5c521cb](https://github.com/solid-memo/website/commit/5c521cb45272e8f043ba32006c993003712c34fe)), closes [#1059](https://github.com/solid-memo/website/issues/1059)
+
 ## [8.5.7](https://github.com/solid-memo/website/compare/v8.5.6...v8.5.7) (2026-11-26)
 
 ### Fixes
