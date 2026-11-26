@@ -181,8 +181,8 @@ function runPrinting(
  * reads no command, resumes when it fails too, on a line of its own when
  * the output before it ends mid-line, and then prints `after`, which the
  * runner reads as commands again. The token is new on every run. When
- * `piped`, stdout goes through a pipe, so its lines may come in another
- * order than stderr's. What the step wrote to its outputs and to the
+ * `piped`, stdout goes through a pipe, so it may come after stderr's
+ * text instead of before it. What the step wrote to its outputs and to the
  * job's summary, on each run, is returned.
  */
 function expectStopsCommands(
@@ -210,7 +210,9 @@ function expectStopsCommands(
     expect(lines[resume]).toBe(`::${token}::`);
     const printed = lines.slice(1, resume).join("\n");
     if (piped) {
-      expect(printed.split("\n").sort()).toEqual(inside(ending).split("\n").sort());
+      // The pipe's text, the WARNING line, comes in one write, before
+      // stderr's or after it, on the line stderr's ends on.
+      expect([inside(ending), `${COMMANDS}${ending}${WARNING}\n`]).toContain(printed);
     } else {
       expect(printed).toBe(inside(ending));
     }
