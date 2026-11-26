@@ -15,10 +15,15 @@
  * start the next and every name the states give, sixteen times as many
  * with ids sixteen times as long: finding how they read the document
  * goes through its names a few times over at most (SCANS_OF_NAMES), and
- * the decks past that are refused.
+ * the decks past that are refused. And so must decks of long ids, all
+ * of one length, in a folder with a long name: each lookup of how a deck
+ * reads the document is keyed by the path of its terms (PathMap), not by
+ * one string joined from them, which V8 hashes by its length alone past
+ * HASHED_CHARACTERS, so each key would be compared with every other.
  */
 import { expect, it } from "vitest";
 import type { Deck } from "@solid-memo/domain/deck";
+import { HASHED_CHARACTERS } from "@solid-memo/domain/pathKeys";
 import { growthAfterSetup } from "@solid-memo/domain/testing/growth";
 import { SCANS_OF_NAMES, sharedReviewStatesOf } from "./mappers/reviewStateMapper";
 import { datasetOfTurtle } from "./testing/datasets";
@@ -98,6 +103,34 @@ it("gives decks whose ids start each other one reviews document's states in time
     },
     100,
     16,
+    4,
+  );
+  expect(ratio).toBeLessThan(4);
+}, 180_000);
+
+/** A folder whose name is most of a term long, and a cards document in it. */
+const LONG_FOLDER = `${INSTANCE}decks/${"f".repeat(10_000)}/`;
+const LONG_CARDS = `${LONG_FOLDER}shared.ttl`;
+
+/** A deck of the long folder whose id is as long as any other's, so that its start in the folder is past what V8 hashes all of. */
+const longDeckOf = (n: number): Deck => ({
+  ...deckOf(n),
+  id: `${"a".repeat(HASHED_CHARACTERS - LONG_FOLDER.length)}${String(n).padStart(6, "0")}`,
+  cardsDocumentUrl: LONG_CARDS,
+});
+
+it("gives decks of long ids one reviews document and one cards document in time that grows with them, not their square", async () => {
+  const ratio = await growthAfterSetup(
+    (count) => async () => {
+      const read = await datasetOfTurtle(REVIEWS, reviews(0));
+      const decks = Array.from({ length: count }, (_, n) => longDeckOf(n));
+      return async () => {
+        const states = decks.map((deck) => sharedReviewStatesOf(read, deck));
+        expect(states.at(-1)).toBe(states[0]);
+      };
+    },
+    125,
+    8,
     4,
   );
   expect(ratio).toBeLessThan(4);

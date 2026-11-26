@@ -35,7 +35,7 @@ import {
   type ReviewLinks,
 } from "@solid-memo/domain/reviewRecord";
 import { AppError } from "@solid-memo/domain/appError";
-import { isIriPastBound } from "@solid-memo/domain/pathKeys";
+import { isIriPastBound, PathMap, pathKeys } from "@solid-memo/domain/pathKeys";
 import { isCardsDocumentOf } from "@solid-memo/domain/deckUpgrade";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
@@ -250,18 +250,23 @@ export const MAX_READINGS = 8;
  */
 export const SCANS_OF_NAMES = 4;
 
-/** The ways one read of a reviews document was mapped: see sharedReviewStatesOf. */
+/**
+ * The ways one read of a reviews document was mapped: see
+ * sharedReviewStatesOf. Each is keyed by the path of the terms it is
+ * found by (PathMap), never by one string joined from them, which could
+ * be longer than V8 hashes all of (pathKeys.ts).
+ */
 interface Readings {
   /** The documents the states name their cards in (sm:reviewOf), each once, in the order of `<`. */
   named: readonly string[];
-  /** The named documents a deck's id makes its cards documents, by where their names start (startOf). */
-  byStart: Map<string, Found>;
-  /** Each list of such documents found, by its text, numbered. */
-  lists: Map<string, number>;
-  /** The way each deck read it, by its start and cards document (readingOf). */
-  byDeck: Map<string, string>;
-  /** The states read, by the way they were read. */
-  byReading: Map<string, ReviewStates>;
+  /** The named documents a deck's id makes its cards documents, by its cards document's folder and its id (startOf). */
+  byStart: PathMap<Found>;
+  /** The number of each list of such documents found, by its documents. */
+  numberOf: (urls: readonly string[]) => number;
+  /** The way each deck read it, by its id and cards document (readingOf). */
+  byDeck: PathMap<string>;
+  /** The states read, by the way they were read and the cards document. */
+  byReading: PathMap<ReviewStates>;
   /** The characters of named documents startOf may still go through (SCANS_OF_NAMES). */
   budget: number;
 }
@@ -296,16 +301,16 @@ export function sharedReviewStatesOf(dataset: Dataset, documents: ReviewDocument
     const named = namedCardsDocuments(dataset, documents);
     read = {
       named,
-      byStart: new Map(),
-      lists: new Map(),
-      byDeck: new Map(),
-      byReading: new Map(),
+      byStart: new PathMap(),
+      numberOf: pathKeys(),
+      byDeck: new PathMap(),
+      byReading: new PathMap(),
       budget: SCANS_OF_NAMES * named.reduce((sum, url) => sum + url.length, 0),
     };
     byDocument.set(documents.reviewsDocumentUrl, read);
   }
   // A state's card is read by the deck's cards document and those of the named ones that are the deck's.
-  const reading = `${readingOf(read, documents)} ${documents.cardsDocumentUrl}`;
+  const reading = [readingOf(read, documents), documents.cardsDocumentUrl];
   const known = read.byReading.get(reading);
   if (known !== undefined) return known;
   if (read.byReading.size >= MAX_READINGS) throw tooManyWays(documents);
@@ -323,28 +328,23 @@ export function sharedReviewStatesOf(dataset: Dataset, documents: ReviewDocument
  * document: the named documents its id makes its cards documents
  * (isCardsDocumentOf), its own left out, as a number. Those are the ones
  * whose names start with its id in its cards document's folder, next to
- * each other in the sorted names: found by a search, once for each start
- * a read (startOf), so a deck costs a lookup, not a pass over all the
- * named documents. Its own is left out while they are few (MAX_READINGS
+ * each other in the sorted names: found by a search, once for each
+ * folder and id a read (startOf), so a deck costs a lookup, not a pass
+ * over all the named documents. Its own is left out while they are few (MAX_READINGS
  * at most); past that, a deck whose own is among them reads it apart, as
- * one more way. Found once for each start and cards document a read.
+ * one more way. Found once for each id and cards document a read.
  */
 function readingOf(read: Readings, documents: ReviewDocuments): string {
-  const { cardsDocumentUrl } = documents;
-  const { start, found } = startOf(read, documents);
-  const key = `${start} ${cardsDocumentUrl}`;
+  const { cardsDocumentUrl, id } = documents;
+  // The cards document gives the folder, so its id and cards document give its start too.
+  const key = [id, cardsDocumentUrl];
   const known = read.byDeck.get(key);
   if (known !== undefined) return known;
-  const { urls, number } = found;
+  const { urls, number } = startOf(read, documents);
   const reading =
     urls.length > MAX_READINGS || !urls.includes(cardsDocumentUrl)
       ? String(number)
-      : String(
-          numberOf(
-            read,
-            urls.filter((url) => url !== cardsDocumentUrl),
-          ),
-        );
+      : String(read.numberOf(urls.filter((url) => url !== cardsDocumentUrl)));
   read.byDeck.set(key, reading);
   return reading;
 }
@@ -352,16 +352,16 @@ function readingOf(read: Readings, documents: ReviewDocuments): string {
 /**
  * The named documents whose names start with the deck's id in its cards
  * document's folder and that its id makes its cards documents
- * (isCardsDocumentOf), and their number, by that start. Each name gone
+ * (isCardsDocumentOf), and their number, by that folder and id. Each name gone
  * through is taken from the read's budget; a deck that would go past it
  * is refused (SCANS_OF_NAMES).
  */
-function startOf(read: Readings, documents: ReviewDocuments): { start: string; found: Found } {
+function startOf(read: Readings, documents: ReviewDocuments): Found {
   const { cardsDocumentUrl, id } = documents;
   const folder = cardsDocumentUrl.slice(0, cardsDocumentUrl.lastIndexOf("/") + 1);
+  const known = read.byStart.get([folder, id]);
+  if (known !== undefined) return known;
   const start = folder + id;
-  const known = read.byStart.get(start);
-  if (known !== undefined) return { start, found: known };
   const { named } = read;
   let low = 0;
   let high = named.length;
@@ -378,9 +378,9 @@ function startOf(read: Readings, documents: ReviewDocuments): { start: string; f
     if (read.budget < 0) throw tooManyWays(documents);
     if (isCardsDocumentOf(named[at]!, byName)) urls.push(named[at]!);
   }
-  const found = { urls, number: numberOf(read, urls) };
-  read.byStart.set(start, found);
-  return { start, found };
+  const found = { urls, number: read.numberOf(urls) };
+  read.byStart.set([folder, id], found);
+  return found;
 }
 
 /** The refusal of a deck that would read a reviews document in yet another way. */
@@ -389,14 +389,6 @@ function tooManyWays(documents: ReviewDocuments): AppError {
     limit: MAX_READINGS,
     document: documents.reviewsDocumentUrl,
   });
-}
-
-/** The number of a list of named documents, the same for the same list. */
-function numberOf(read: Readings, urls: readonly string[]): number {
-  const text = JSON.stringify(urls);
-  let number = read.lists.get(text);
-  if (number === undefined) read.lists.set(text, (number = read.lists.size));
-  return number;
 }
 
 /** The documents the states of a reviews document name their cards in (sm:reviewOf), each once, in the order of `<`. */
