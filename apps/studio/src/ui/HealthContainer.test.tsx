@@ -119,7 +119,7 @@ describe("HealthContainer", () => {
 
   it("lets a deck set aside go when its health, read afresh as the screen opens, finds it mended", async () => {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    queryClient.setQueryData(["validation", instanceA.url], invalidReport([deck]));
+    queryClient.setQueryData(["validation", instanceA.url, "opening"], invalidReport([deck]));
     const checkDeck = vi.fn(async () => deckHealth(deck, conforming, [], [], deckTextCheck()));
     const useCases = makeUseCasesFake({ checkDeck: checkDeck as UseCases["checkDeck"] });
     renderContainer(useCases, deck, queryClient);
@@ -131,7 +131,7 @@ describe("HealthContainer", () => {
   it("does not hold a deck again by a check made before a newer one that ends after it", async () => {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const broken = deckHealth(deck, invalidReport([deck]), [], [], deckTextCheck());
-    queryClient.setQueryData(["validation", instanceA.url], invalidReport([deck]));
+    queryClient.setQueryData(["validation", instanceA.url, "opening"], invalidReport([deck]));
     queryClient.setQueryData(
       ["validation", instanceA.url, "deck", deck.url, deck.cardsDocumentUrl],
       broken,
@@ -155,7 +155,8 @@ describe("HealthContainer", () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(screen.queryByText(/Nothing in this deck can be changed/)).not.toBeInTheDocument();
     expect(
-      queryClient.getQueryData<ValidationReport>(["validation", instanceA.url])!.conforms,
+      queryClient.getQueryData<ValidationReport>(["validation", instanceA.url, "opening"])!
+        .conforms,
     ).toBe(true);
   });
 

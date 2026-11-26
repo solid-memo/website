@@ -25,7 +25,7 @@ export function ValidationContainer({
 }) {
   const { t, errorText } = useI18n();
   const reportQuery = useQuery({
-    queryKey: queryKeys.validation(instance.url),
+    queryKey: queryKeys.fullValidation(instance.url),
     queryFn: () => useCases.validateInstance(instance.url),
     staleTime: Infinity,
   });

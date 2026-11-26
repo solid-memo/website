@@ -136,7 +136,7 @@ function InstanceHealthContainer({
 }) {
   const { t, errorText } = useI18n();
   const reportQuery = useQuery({
-    queryKey: queryKeys.validation(instance.url),
+    queryKey: queryKeys.instanceCheck(instance.url),
     queryFn: () => useCases.checkInstance(instance.url),
     staleTime: Infinity,
   });

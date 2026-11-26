@@ -490,9 +490,11 @@ any number of results, so each lists at most `LIST_LIMIT` of them.
 
 ## The invalid data policy
 
-`validateInstance` runs when an instance is opened (`Workspace`, query
-`["validation", instance]`, shared with the developer view), and after
-a format update. What happens when the report doesn't
+`checkInstance` runs when an instance is opened (`useDataCheck`, query
+`["validation", instance, "opening"]`), and `validateInstance` after a
+format update. The developer view's full check is cached apart
+(`["validation", instance, "full"]`), so neither report stands in for
+the other; refreshing `["validation", instance]` makes both again. What happens when the report doesn't
 conform is a preference, `sm:invalidDataPolicy`, a concept of
 `sm:InvalidDataPolicies` ([vocab.md](vocab.md#concept-schemes)):
 

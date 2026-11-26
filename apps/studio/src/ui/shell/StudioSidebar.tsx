@@ -246,13 +246,14 @@ export function StudioSidebar({
 }
 
 /**
- * The instance's check (the query of queryKeys.validation(url), useDataCheck)
+ * The instance's check (the query of queryKeys.instanceCheck(url), useDataCheck)
  * as the screens made it, as it changes: undefined until one has. It is
  * read from the cache, never asked for.
  */
 function useInstanceCheck(instanceUrl: string): ValidationReport | undefined {
   const queryClient = useQueryClient();
-  const read = () => queryClient.getQueryData<ValidationReport>(queryKeys.validation(instanceUrl));
+  const read = () =>
+    queryClient.getQueryData<ValidationReport>(queryKeys.instanceCheck(instanceUrl));
   const [report, setReport] = useState(read);
   useEffect(() => {
     setReport(read());

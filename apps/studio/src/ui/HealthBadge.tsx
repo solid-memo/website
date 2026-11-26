@@ -53,7 +53,7 @@ export function deckHealthQuery(
       const health = await useCases.checkDeck(instanceUrl, deck, textCheckOf(instanceUrl));
       if (signal.aborted) return health;
       queryClient.setQueryData<ValidationReport>(
-        queryKeys.validation(instanceUrl),
+        queryKeys.instanceCheck(instanceUrl),
         (report) => report && withDeckReport(report, deck, health.report),
       );
       return health;

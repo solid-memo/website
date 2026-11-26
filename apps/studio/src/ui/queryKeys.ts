@@ -17,7 +17,7 @@ export const queryKeys = {
 
   /** The library's newer releases of an instance's copies: under decks, so whatever refreshes them refreshes it too. */
   libraryUpdates: (instanceUrl: string) => [...sharedKeys.decks(instanceUrl), "libraryUpdates"],
-  /** A deck's health, as of its cards document: under the instance's check (validation), so checking it again checks the deck. */
+  /** A deck's health, as of its cards document: under the instance's checks (validation), so checking the instance again checks the deck. */
   deckHealth: (instanceUrl: string, deckUrl: string, cardsDocumentUrl: string) => [
     ...sharedKeys.validation(instanceUrl),
     "deck",

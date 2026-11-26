@@ -107,7 +107,7 @@ describe("deckHealthQuery", () => {
     const stopBadge = badge.subscribe(() => undefined);
     await waitFor(() => expect(lookedUp).toEqual([0]));
     const check = new QueryObserver(queryClient, {
-      queryKey: queryKeys.validation(instanceA.url),
+      queryKey: queryKeys.instanceCheck(instanceA.url),
       queryFn: () => useCases.checkInstance(instanceA.url),
       staleTime: Infinity,
     });

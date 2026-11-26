@@ -60,7 +60,7 @@ function hasUnreadable(report: ValidationReport | undefined): boolean {
 
 /**
  * The check of the instance at `instanceUrl` (null: none open), the same
- * query as Solid Memo's workspace makes (queryKeys.validation(url)), so it is
+ * query as Solid Memo's workspace makes (queryKeys.instanceCheck(url)), so it is
  * made once; and the policy it is held to.
  */
 export function useDataCheck(useCases: UseCases, instanceUrl: string | null): DataCheck {
@@ -70,7 +70,7 @@ export function useDataCheck(useCases: UseCases, instanceUrl: string | null): Da
     enabled: instanceUrl !== null,
   });
   const checkQuery = useQuery({
-    queryKey: queryKeys.validation(instanceUrl),
+    queryKey: queryKeys.instanceCheck(instanceUrl),
     queryFn: () => useCases.checkInstance(instanceUrl!),
     enabled: instanceUrl !== null,
     staleTime: Infinity,

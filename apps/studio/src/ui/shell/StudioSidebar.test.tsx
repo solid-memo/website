@@ -203,14 +203,14 @@ describe("StudioSidebar", () => {
       violationCount,
       conforms: violationCount === 0,
     });
-    queryClient.setQueryData(["validation", instanceUrl], report(3));
+    queryClient.setQueryData(["validation", instanceUrl, "opening"], report(3));
     const useCases = renderSidebar({ screen: "home", instanceUrl }, {}, queryClient);
     const health = sections().getByRole("link", { name: "Health" }).closest("li")!;
     expect(health).toHaveTextContent("Health33 problems");
     expect(within(health).getByText("3", { selector: "[aria-hidden]" })).toBeInTheDocument();
     expect(within(health).getByText("3 problems")).toHaveClass("visually-hidden");
     expect(useCases.checkInstance).not.toHaveBeenCalled();
-    queryClient.setQueryData(["validation", instanceUrl], report(0));
+    queryClient.setQueryData(["validation", instanceUrl, "opening"], report(0));
     await waitFor(() => expect(health).toHaveTextContent(/^Health$/));
   });
 

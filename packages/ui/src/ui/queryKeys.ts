@@ -98,8 +98,16 @@ export const queryKeys = {
   /** The palettes the user designed in an instance. */
   palettes: (instanceUrl: string) => ["palettes", instanceUrl],
 
-  /** An instance's check (useDataCheck), and its decks' health under it. */
+  /** An instance's checks: the one made as it is opened, the full one, and its decks' health, each under it. */
   validation: (instanceUrl: string | null) => ["validation", instanceUrl],
+  /**
+   * The check made as an instance is opened (checkInstance, useDataCheck),
+   * which leaves out the answer log and what the digest says conformed:
+   * under validation.
+   */
+  instanceCheck: (instanceUrl: string | null) => [...queryKeys.validation(instanceUrl), "opening"],
+  /** The developer report's check of every document (validateInstance): under validation, apart from the opening check. */
+  fullValidation: (instanceUrl: string) => [...queryKeys.validation(instanceUrl), "full"],
   /** Every instance's format update plan. */
   allMigrations: () => ["migration"],
   /** An instance's format update plan: under allMigrations. */
