@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.5.4](https://github.com/solid-memo/website/compare/v8.5.3...v8.5.4) (2026-11-26)
+
+### Fixes
+
+* **ci:** build the storybook in a job that cannot attest ([6e5cd4a](https://github.com/solid-memo/website/commit/6e5cd4ad0d15a3e4cf93fed36c4c1e1a250492b3))
+* **ci:** read no workflow commands from upstream text in data job logs ([10bfd21](https://github.com/solid-memo/website/commit/10bfd219d3bdaa85eb33b60f8e2a9ed3d25cff53))
+
 ## [8.5.3](https://github.com/solid-memo/website/compare/v8.5.2...v8.5.3) (2026-11-25)
 
 ### Fixes
