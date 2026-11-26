@@ -664,11 +664,12 @@ system libraries the runner image lacks are kept as the `.deb` files
 installed from them
 ([playwright-deps](../.github/actions/playwright-deps/action.yml)). The
 mirror often stalls for minutes, at times past a job's timeout.
-Their key is the runner image's (`ImageOS`, `ImageVersion`) with
-playwright-core's version. A job asks the mirror only when the cache
-has none, each `apt-get` given four tries of three minutes, and
+Their key is the runner image's (`ImageOS`, `ImageVersion`), the
+cloud the runner is hosted on (the same image has other packages
+installed on Azure than on AWS), and playwright-core's version. A job asks the mirror only when the cache
+has none, or when the files lack a library its runner hasn't, each `apt-get` given four tries of three minutes, and
 saves the download only on `main`. The `caches` job keeps
-`main`'s two newest entries per browser (GitHub rolls a new image out
+`main`'s two newest entries per browser and cloud (GitHub rolls a new image out
 over days). The release workflow's jobs restore nothing from the cache
 and always ask the mirror
 ([releasing.md](releasing.md#the-deploy-key)), as do CI's `site` job
