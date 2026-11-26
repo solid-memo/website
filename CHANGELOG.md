@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.5.10](https://github.com/solid-memo/website/compare/v8.5.9...v8.5.10) (2026-11-26)
+
+### Fixes
+
+* **application:** keep a failed check of a linked release for the page ([4d39125](https://github.com/solid-memo/website/commit/4d391254203a0a3a7742fd0718dac5f0dd155dbd))
+* **domain:** refuse card and wrong-option ids longer than 256 characters ([2542245](https://github.com/solid-memo/website/commit/2542245e978168a1bfc8df8d82aad633f99b860b))
+
 ## [8.5.9](https://github.com/solid-memo/website/compare/v8.5.8...v8.5.9) (2026-11-26)
 
 ### Fixes
