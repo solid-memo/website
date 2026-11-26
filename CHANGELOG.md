@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.5.9](https://github.com/solid-memo/website/compare/v8.5.8...v8.5.9) (2026-11-26)
+
+### Fixes
+
+* **application:** read every list a few at a time through mapAtOnce ([9ec2756](https://github.com/solid-memo/website/commit/9ec27568bba0ca17d15d50470e824210c49e2b7e)), closes [#1062](https://github.com/solid-memo/website/issues/1062)
+* **ci:** ask the mirror when the cached system libraries lack one ([3a9c798](https://github.com/solid-memo/website/commit/3a9c798c1f7d15e1f25d5b4e71672e1794abfdd0)), closes [#1064](https://github.com/solid-memo/website/issues/1064)
+* **ci:** keep Playwright's system libraries per cloud ([49a18aa](https://github.com/solid-memo/website/commit/49a18aa468147ad24be781d32c8d07527fb768bb)), closes [#1064](https://github.com/solid-memo/website/issues/1064)
+
 ## [8.5.8](https://github.com/solid-memo/website/compare/v8.5.7...v8.5.8) (2026-11-26)
 
 ### Fixes
