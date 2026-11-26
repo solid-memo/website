@@ -2956,9 +2956,10 @@ its catalog links them. Each shows:
 
 It changes no release. The table is a [`DataTable`](#card-workbench),
 a column's name sorting it, then the other way, then as the catalog
-lists them, and **Enter** opening the release at the cursor. That does
-as its link does, or nothing when it has no link: **j** and **k** then
-leave the focus on the page's body, and go on from that row. A filter
+lists them, and **Enter** opening the release at the cursor. That opens
+the address its link does, as the URL parser has it, or nothing when it
+has no link: **j** and **k** then leave the focus on the page's body,
+and go on from that row. A filter
 keeps the releases whose name or address holds its text in its first
 200 characters, case and accents aside. A column sorts by the first 200
 characters of its text, as every Studio table does (`sortedRows`).

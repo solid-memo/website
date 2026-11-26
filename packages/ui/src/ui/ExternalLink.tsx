@@ -20,11 +20,15 @@ import { useI18n } from "./i18n";
  * the host it opens as the URL parser reads it (namesItsHost), such as one
  * with a look-alike slash or an international host, reads as the parser
  * has it instead, punycode kept, so the text names the host the link
- * opens. A web link opens in a new tab, as it points outside the app,
- * and says so, seen and heard, so nobody is left wondering why Back does
- * nothing; a mailto: link opens the mail app and no tab at all. A
- * WebLink hands over its address as liveLink checked and parsed it, so
- * it is neither checked nor parsed again here.
+ * opens. Either kind links to its address as the parser has it, the one
+ * that was checked, never to the text as written: a browser resolves an
+ * `https:` address without `//` against the page's own, so as written it
+ * could lead elsewhere than the host the check and the text name. A web
+ * link opens in a new tab, as it points outside the app, and says so,
+ * seen and heard, so nobody is left wondering why Back does nothing; a
+ * mailto: link opens the mail app and no tab at all. A WebLink hands
+ * over its address as liveLink checked and parsed it, so it is neither
+ * checked nor parsed again here.
  */
 export function ExternalLink({
   url,
@@ -52,12 +56,12 @@ export function ExternalLink({
   }
   if (typeof url === "string" && !isHttpUrl(url)) {
     return (
-      <a class={className} href={url} title={title} dir={dir}>
+      <a class={className} href={new URL(url).href} title={title} dir={dir}>
         {children ?? visibleControls(url)}
       </a>
     );
   }
-  const href = typeof url === "string" ? url : url.href;
+  const [written, href] = typeof url === "string" ? [url, new URL(url).href] : [url.href, url.href];
   return (
     <a
       class={className}
@@ -67,7 +71,7 @@ export function ExternalLink({
       target="_blank"
       rel="noopener noreferrer"
     >
-      {children ?? shownAddress(href)}
+      {children ?? shownAddress(written, href)}
       <ExternalIcon />
       <span class="visually-hidden"> {t("common.opensInNewTab")}</span>
     </a>
@@ -77,10 +81,9 @@ export function ExternalLink({
 /**
  * A web address as its link reads it: as written, its hidden characters
  * shown, when it names the host it opens as the URL parser reads it;
- * otherwise as the parser has it (punycode kept), so its text cannot
- * name another host than the one it opens.
+ * otherwise as the parser has it (`href`, punycode kept), the address
+ * the link opens, so its text cannot name another host than that one.
  */
-function shownAddress(url: string): string {
-  const parsed = new URL(url);
-  return namesItsHost(url, parsed.host) ? visibleControls(url) : parsed.href;
+function shownAddress(written: string, href: string): string {
+  return namesItsHost(written, new URL(href).host) ? visibleControls(written) : href;
 }

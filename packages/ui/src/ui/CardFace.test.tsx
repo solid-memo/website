@@ -170,6 +170,12 @@ describe("CardFace", () => {
     expect(image).toHaveClass("card-image");
   });
 
+  it("loads a picture from the address it was checked as, not from one of the app", () => {
+    // As written, the page would resolve it against its own address.
+    render(<CardFace side="back" text={{ "": "" }} imageUrl="https:x/../#/a.png" />);
+    expect(screen.getByRole("img")).toHaveAttribute("src", "https://x/#/a.png");
+  });
+
   it("shows a picture above its text, still announcing the picture", () => {
     const { container } = render(
       <CardFace side="front" text={{ "": "Afghanistan" }} imageUrl={FLAG} />,
@@ -256,6 +262,8 @@ describe("CardThumbnail", () => {
     expect(image).toHaveAttribute("src", FLAG);
     expect(image).toHaveAttribute("alt", "");
 
+    rerender(<CardThumbnail imageUrl="https:.#/a.png" />);
+    expect(container.querySelector("img")).toHaveAttribute("src", "https://./#/a.png");
     rerender(<CardThumbnail imageUrl="data:image/png;base64,AAAA" />);
     expect(container.querySelector("img")).toBeNull();
     rerender(<CardThumbnail />);

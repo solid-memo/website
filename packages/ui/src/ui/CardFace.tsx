@@ -87,7 +87,7 @@ export function CardFace({
       {imageUrl !== undefined &&
         (isHttpUrl(imageUrl) ? (
           <CardPicture
-            src={imageUrl}
+            src={new URL(imageUrl).href}
             alt={
               description !== ""
                 ? description
@@ -116,7 +116,8 @@ export function CardFace({
  * and the learner has not chosen: then its name, what showing it means,
  * and the choice, with no request made. The picture's button takes the
  * focus from the choice's, which goes as the picture comes. While the
- * library's index is read, nothing yet.
+ * library's index is read, nothing yet. `src` is the address as the
+ * URL parser has it, the one that was checked, not as written.
  */
 function CardPicture({ src, alt, lang }: { src: string; alt: string; lang: string | undefined }) {
   const { t } = useI18n();
@@ -154,7 +155,7 @@ export function CardThumbnail({
   lang?: string;
 }) {
   if (imageUrl === undefined || !isHttpUrl(imageUrl)) return null;
-  return <Thumbnail url={imageUrl} alt={alt} lang={lang} />;
+  return <Thumbnail url={new URL(imageUrl).href} alt={alt} lang={lang} />;
 }
 
 function Thumbnail({ url, alt, lang }: { url: string; alt: string; lang: string | undefined }) {

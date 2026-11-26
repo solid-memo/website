@@ -68,7 +68,7 @@ describe("ExternalLink", () => {
     const link = screen.getByRole("link", {
       name: "https://pod.example/⟨U+202E⟩kcab/x (opens in a new tab)",
     });
-    expect(link).toHaveAttribute("href", "https://pod.example/\u202Ekcab/x");
+    expect(link).toHaveAttribute("href", "https://pod.example/%E2%80%AEkcab/x");
   });
 
   it.each([
@@ -80,7 +80,31 @@ describe("ExternalLink", () => {
   ])("reads %j, whose text names another host, as the parser has it", (url, shown) => {
     render(<ExternalLink url={url} />);
     const link = screen.getByRole("link", { name: `${shown} (opens in a new tab)` });
-    expect(link).toHaveAttribute("href", url);
+    expect(link).toHaveAttribute("href", shown);
+  });
+
+  it.each([
+    [
+      "https:x/../#/try?url=https://pod.example/r.ttl",
+      "https://x/#/try?url=https://pod.example/r.ttl",
+    ],
+    ["https:.#/library", "https://./#/library"],
+  ])(
+    "links %j to the address it was checked as and reads, not to one of the app",
+    (url, parsed) => {
+      // As written, the page would resolve it against its own address.
+      render(<ExternalLink url={url} />);
+      const link = screen.getByRole("link", { name: `${parsed} (opens in a new tab)` });
+      expect(link).toHaveAttribute("href", parsed);
+    },
+  );
+
+  it("links a mailto: address as the parser has it, the one it checked", () => {
+    render(<ExternalLink url="mailto:anton@example.org " />);
+    expect(screen.getByRole("link", { name: "mailto:anton@example.org" })).toHaveAttribute(
+      "href",
+      "mailto:anton@example.org",
+    );
   });
 
   it("never links an address with a user name before its host", () => {
