@@ -118,7 +118,9 @@ const SCRIPTS = ["python3", "python", "npm"];
  * with `fakes` (names in the PATH, or paths from the checkout, which is
  * also RUNNER_TEMP) that print WARNING to stdout, then COMMANDS and
  * `ending` to stderr, as the tools print their reports, and exit with
- * `status`. What the step printed, stdout and stderr together in the
+ * `status`. When `piped`, stdout goes through a pipe on its way to the
+ * log, so the fakes wait for WARNING to reach the log before they print
+ * to stderr: without that, the two land in either order, or mixed. What the step printed, stdout and stderr together in the
  * order printed, line by line, its status, and what it wrote to its
  * outputs and to the job's summary.
  */
@@ -127,11 +129,13 @@ function runPrinting(
   status: number,
   ending: string,
   fakes: readonly string[],
+  piped: boolean,
 ): { lines: string[]; status: number | null; output: string; summary: string } {
   const root = mkdtempSync(join(tmpdir(), "solid-memo-data-job-logs-"));
   try {
     const bin = join(root, "bin");
     mkdirSync(bin);
+    const log = join(root, "log.txt");
     writeFileSync(join(root, "report.txt"), `${COMMANDS}${ending}`);
     writeFileSync(join(root, "publiccode.yml"), "");
     for (const fake of fakes) {
@@ -139,11 +143,10 @@ function runPrinting(
       mkdirSync(dirname(path), { recursive: true });
       writeFileSync(
         path,
-        `#!/bin/sh\necho '${WARNING}'\ncat "${join(root, "report.txt")}" >&2\nexit ${status}\n`,
+        `#!/bin/sh\necho '${WARNING}'\n${piped ? `until grep -qF -- '${WARNING}' "${log}"; do sleep 0.01; done\n` : ""}cat "${join(root, "report.txt")}" >&2\nexit ${status}\n`,
         { mode: 0o755 },
       );
     }
-    const log = join(root, "log.txt");
     const output = join(root, "output.txt");
     const summary = join(root, "summary.md");
     writeFileSync(output, "");
@@ -160,6 +163,7 @@ function runPrinting(
           GITHUB_STEP_SUMMARY: summary,
         },
         stdio: ["ignore", fd, fd],
+        timeout: 30_000,
       });
       return {
         lines: readFileSync(log, "utf8").trimEnd().split("\n"),
@@ -180,10 +184,10 @@ function runPrinting(
  * COMMANDS ends in) where the runner
  * reads no command, resumes when it fails too, on a line of its own when
  * the output before it ends mid-line, and then prints `after`, which the
- * runner reads as commands again. The token is new on every run. When
- * `piped`, stdout goes through a pipe, so it may come after stderr's
- * text instead of before it. What the step wrote to its outputs and to the
- * job's summary, on each run, is returned.
+ * runner reads as commands again. The token is new on every run.
+ * `piped` says the step sends stdout through a pipe (see runPrinting).
+ * What the step wrote to its outputs and to the job's summary, on each
+ * run, is returned.
  */
 function expectStopsCommands(
   step: Step,
@@ -199,7 +203,12 @@ function expectStopsCommands(
     [1, "\n"],
     [0, ""],
   ] as const) {
-    const { lines, status: exit, output, summary } = runPrinting(step, status, ending, fakes);
+    const {
+      lines,
+      status: exit,
+      output,
+      summary,
+    } = runPrinting(step, status, ending, fakes, piped);
     outputs.push(output);
     summaries.push(summary);
     expect(exit).toBe(status);
@@ -209,13 +218,7 @@ function expectStopsCommands(
     const resume = lines.length - after.length - 1;
     expect(lines[resume]).toBe(`::${token}::`);
     const printed = lines.slice(1, resume).join("\n");
-    if (piped) {
-      // The pipe's text, the WARNING line, comes in one write, before
-      // stderr's or after it, on the line stderr's ends on.
-      expect([inside(ending), `${COMMANDS}${ending}${WARNING}\n`]).toContain(printed);
-    } else {
-      expect(printed).toBe(inside(ending));
-    }
+    expect(printed).toBe(inside(ending));
     expect(lines.slice(resume + 1)).toEqual(after);
     expect(lines.filter((line) => line.includes(token))).toHaveLength(2);
   }
