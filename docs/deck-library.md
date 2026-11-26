@@ -827,7 +827,9 @@ The index is read once a page
 deck list, the upgrade offers, the Studio's update badges and a
 release's place share that read and its decks; the index changes only
 with a deploy. A failed read isn't kept, so the next one retries. Each
-release is kept the same way.
+release the index lists is kept the same way. A failed read of any
+other release, one from a link, is kept until the page is loaded again
+([From a link](#from-a-link)).
 
 A release's cards, chapters, steps and distractors are the subjects of
 its own document, the deck's: the one at the address it was read from,
@@ -1265,11 +1267,20 @@ flowchart LR
   check of a release read comes after and isn't counted, so a large
   release that takes long to check still passes. Either
   way it fails with `podNoAnswer`, so the learner sees that the server
-  didn't answer in time and that trying again may work. The read isn't
-  kept, and the next read tries again. A slow but honest host fails the
-  same way, as a slow pod does. A slow read gives up its turn after 30
-  seconds and goes on. Hosts take turns, and a read still waiting for
-  its turn after two minutes fails. So a server that answers slowly or
+  didn't answer in time and that trying again may work. A read the
+  learner asks for, such as adding the deck again, tries again. The
+  screens that read the release, such as Study, Cram, a card's page,
+  the card list and the course screen, don't. The first read of the
+  release in a page session, whichever screen makes it, is its check
+  (`withLinkedReleasesChecked`), and a check that fails is kept for the
+  page session, as one that passes is. It answers the screens' reads
+  and their retries until a read the learner asks for passes and takes
+  its place. When the deck library has let go of a read that passed and
+  reads the release again, a failure of that read is kept the same way.
+  A slow but honest host fails with `podNoAnswer` too, as a slow pod
+  does. A slow read gives up its turn after 30 seconds and goes on.
+  Hosts take turns, and a read still waiting for its turn after two
+  minutes fails. So a server that answers slowly or
   not at all holds up neither the rest for long nor a screen that waits
   on it with others, such as a course's statistics or the deck's check.
   In one page session, they take in at

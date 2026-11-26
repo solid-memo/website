@@ -6,7 +6,8 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it, onTestFinished, vi } from "vitest";
 import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
-import { createLibraryUseCases } from "@solid-memo/application/library";
+import { createLibraryUseCases, withLinkedReleasesChecked } from "@solid-memo/application/library";
+import { createMistakeReportUseCases } from "@solid-memo/application/mistakeReports";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { DocumentReport } from "@solid-memo/domain/validation";
 import { RELEASE_LIMITS } from "@solid-memo/solid-client/readLimits";
@@ -253,6 +254,22 @@ describe("readRelease", () => {
     await expect(failed).rejects.toThrow();
     await expect(library.fetchLibraryDeck(V2)).resolves.toMatchObject({ url: V2 });
     expect(asked).toEqual([V2, V2]);
+  });
+
+  it("keeps a failed read of the release for its cards and outline, until a read checked takes its place (GHSA-mm73-77ch-xjr4)", async () => {
+    const documents: Record<string, string | number> = { [V2]: 500 };
+    const fetch = serving(documents);
+    const library = libraryOver(fetch);
+    await expect(library.fetchLibraryDeck(V2)).rejects.toThrow();
+    // Its server is not asked again, whatever it would answer now.
+    documents[V2] = STANDALONE;
+    await expect(library.fetchLibraryDeck(V2)).rejects.toThrow();
+    await expect(library.fetchCourseOutline(V2)).rejects.toThrow();
+    expect(fetch.asked).toEqual([V2]);
+    // Read again as the learner asks, and checked, it is the release's from then on.
+    await library.readRelease(V2, () => undefined);
+    await expect(library.fetchLibraryDeck(V2)).resolves.toMatchObject({ url: V2 });
+    expect(fetch.asked).toEqual([V2, V2]);
   });
 
   it("gives up a read whose body has not come in two minutes, and reads the release again later", async () => {
@@ -804,5 +821,103 @@ ${padding === 0 ? "" : paddingOf(padding, "sm:padding")}
       { series: { version: "2" }, version: "2", newer: false, fromLink: true },
     ]);
     expect(newest.fetch.asked.filter((url) => decks.includes(url))).toEqual(decks.slice(0, 4));
+  });
+});
+
+describe("a release from a link whose read failed, through the use cases (GHSA-mm73-77ch-xjr4)", () => {
+  const INDEX = "https://solid-memo.com/decks/index.ttl";
+  const LISTED = "https://solid-memo.com/decks/capitals/v1.ttl";
+
+  /** A fetch whose server answers each address as `answer` says now: its document, a 500, or no answer at all. */
+  function failing() {
+    const answers: Record<string, "500" | "unreachable" | "release"> = {};
+    const asked: string[] = [];
+    const fetch = (async (input: RequestInfo | URL) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+      asked.push(url);
+      const answer = answers[url];
+      if (answer === "unreachable") throw new TypeError("Failed to fetch");
+      const response =
+        answer === "release"
+          ? new Response(STANDALONE, { status: 200, headers: { "Content-Type": "text/turtle" } })
+          : new Response("", { status: answer === "500" ? 500 : 404 });
+      Object.defineProperty(response, "url", { value: url });
+      return response;
+    }) as typeof globalThis.fetch;
+    return {
+      fetch,
+      answers,
+      times: (url: string) => asked.filter((other) => other === url).length,
+    };
+  }
+
+  /** The deck library as the app has it, its index listing LISTED, and the use cases that read a deck's release. */
+  function useCasesOver(fetch: typeof globalThis.fetch) {
+    const deckLibrary = withLinkedReleasesChecked({
+      ...libraryOver(fetch),
+      readLibraryIndex: async () => ({ url: INDEX, publisher: null, releases: [LISTED] }),
+    });
+    const library = createLibraryUseCases({
+      deckLibrary,
+      deckRepository: {} as never,
+      reviewStateRepository: {} as never,
+      courses: {} as never,
+      cardsTurn: (work) => work(),
+    });
+    return { deckLibrary, library, reports: createMistakeReportUseCases({ deckLibrary }) };
+  }
+
+  it.each(["500", "unreachable"] as const)(
+    "asks its server once, whatever screens read it and however often, until the learner reads it again (%s)",
+    async (answer) => {
+      const { fetch, answers, times } = failing();
+      answers[V2] = answer;
+      const { deckLibrary, library, reports } = useCasesOver(fetch);
+      const copy = { sourceUrl: V2 } as Deck;
+      for (let read = 0; read < 3; read++) {
+        await expect(library.deckRelease(copy)).rejects.toThrow();
+        await expect(reports.reportPlace(V2)).rejects.toThrow();
+        await expect(library.releaseIsCourse(V2)).rejects.toThrow();
+        await expect(deckLibrary.fetchCourseOutline(V2)).rejects.toThrow();
+      }
+      expect(times(V2)).toBe(1);
+      // The server answers again, but only a read the learner asks for, checked, reads it.
+      answers[V2] = "release";
+      await expect(library.deckRelease(copy)).rejects.toThrow();
+      expect(times(V2)).toBe(1);
+      await expect(deckLibrary.readRelease(V2, () => undefined)).resolves.toMatchObject({
+        url: V2,
+      });
+      expect(times(V2)).toBe(2);
+      await expect(library.deckRelease(copy)).resolves.toMatchObject({ url: V2 });
+      await expect(reports.reportPlace(V2)).resolves.toMatchObject({ library: false });
+      await expect(library.releaseIsCourse(V2)).resolves.toBe(false);
+      expect(times(V2)).toBe(2);
+    },
+  );
+
+  it("leaves a learner's read that fails as it found what was kept", async () => {
+    const { fetch, answers, times } = failing();
+    answers[V2] = "release";
+    const { deckLibrary, library } = useCasesOver(fetch);
+    const copy = { sourceUrl: V2 } as Deck;
+    await library.deckRelease(copy);
+    answers[V2] = "500";
+    await expect(deckLibrary.readRelease(V2, () => undefined)).rejects.toThrow();
+    await expect(library.deckRelease(copy)).resolves.toMatchObject({ url: V2 });
+    expect(times(V2)).toBe(2);
+  });
+
+  it("reads a release the index lists again after a failure", async () => {
+    const { fetch, answers, times } = failing();
+    answers[LISTED] = "500";
+    const { library } = useCasesOver(fetch);
+    const copy = { sourceUrl: LISTED } as Deck;
+    await expect(library.deckRelease(copy)).rejects.toThrow();
+    await expect(library.deckRelease(copy)).rejects.toThrow();
+    expect(times(LISTED)).toBe(2);
+    answers[LISTED] = "release";
+    await expect(library.deckRelease(copy)).resolves.toMatchObject({ url: LISTED });
+    expect(times(LISTED)).toBe(3);
   });
 });

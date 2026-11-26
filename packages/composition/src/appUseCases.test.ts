@@ -1917,7 +1917,7 @@ describe("createAppUseCases", () => {
     expect(login.sent).not.toContain(release);
   });
 
-  it("gives up a release from a link whose host never answers, holding up neither a course's statistics nor the deck's check, and reads it again later", {
+  it("gives up a release from a link whose host never answers, holding up neither a course's statistics nor the deck's check, and reads it again only when the learner asks", {
     timeout: 180_000,
   }, async () => {
     const carol = "https://carol.example/";
@@ -1947,10 +1947,14 @@ describe("createAppUseCases", () => {
     await expect(statistics).resolves.toEqual([]);
     // The release unknown, the rest of the check still made.
     expect(await health).toMatchObject({ unstated: null });
-    // Once the host answers, the release is read again, not left as the read given up.
+    // The read given up is kept for the page: once the host answers, the deck's check still does not ask it.
     const sent = podsNetwork({ [carol]: pod });
+    expect((await useCases.checkDeck(instance!.url, course, text)).unstated).toBeNull();
+    expect(sent.map(({ url }) => url)).not.toContain(release);
+    // A read the learner asks for reads it again, and the check has it from then on.
+    await expect(useCases.readReleaseFromLink(release)).resolves.toMatchObject({ url: release });
     expect((await useCases.checkDeck(instance!.url, course, text)).unstated).toEqual([]);
-    expect(sent.map(({ url }) => url)).toContain(release);
+    expect(sent.filter(({ url }) => url === release)).toHaveLength(1);
   });
 
   it("gives up a release from a link whose host answers but never sends it all, holding up neither a course's statistics nor the deck's check", {
