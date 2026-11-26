@@ -42,4 +42,16 @@ jobs:
           path: ~/.cache/wikidata
           key: wikidata-${{ hashFiles('decks/**/*.ttl') }}
           restore-keys: wikidata-
-      - run: python3 scripts/wikidata_labels.py --verify --cache-dir ~/.cache/wikidata
+      # The script prints Wikidata's text into the log, where the runner
+      # would read a line that starts with `::`, or holds `##[`, as a
+      # workflow command, so the step stops reading commands while it runs,
+      # with a token of the run's that no answer can know. The token goes on
+      # a line of its own, as the last output may end mid-line. Its stdout
+      # holds only its warnings, each one line with Wikidata's text escaped,
+      # and is printed once commands resume, so they still become
+      # annotations.
+      - run: |
+          token="$(openssl rand -hex 16)"
+          echo "::stop-commands::$token"
+          trap 'printf "\n::%s::\n" "$token"; cat "$RUNNER_TEMP/warnings.txt"' EXIT
+          python3 scripts/wikidata_labels.py --verify --cache-dir ~/.cache/wikidata > "$RUNNER_TEMP/warnings.txt"

@@ -36,6 +36,9 @@ from unittest import mock
 
 import wikidata_labels as wl
 
+# The real request, which the tests of a library stand in for.
+FETCH_JSON = wl.fetch_json
+
 DECK = "capitals"
 BASE = f"{wl.SITE}/{DECK}"
 
@@ -406,6 +409,12 @@ class Verify(Library):
         self.assertIn("v2.ttl of capitals: its 5 cards come out byte for byte the same from 6 Wikidata "
                       "revisions", err)
 
+    def test_prints_nothing_but_its_warnings_to_stdout(self) -> None:
+        # The workflow prints stdout where the runner reads commands again.
+        with mock.patch.dict("os.environ", {"GITHUB_ACTIONS": "true"}):
+            out, _ = self.run_script("--verify")
+        self.assertEqual(out, "")
+
     def test_reads_an_older_revision_of_an_item_edited_since(self) -> None:
         WIKIDATA["Q40"][502] = {**WIKIDATA["Q40"][501], "fr": "Autriche (pays)"}
         self.addCleanup(WIKIDATA["Q40"].pop, 502)
@@ -441,6 +450,19 @@ class Verify(Library):
             out, err = self.run_script("--verify")
         self.assertIn("capitals not verified: Wikidata could not be reached (HTTP 503, after 5 tries)", err)
         self.assertIn("::warning::capitals not verified", out)
+
+    def test_the_warning_is_one_line_whatever_wikidata_answered(self) -> None:
+        answer = {"error": {"code": "x", "info": "100%\r\n::warning title=Deck check passed::all good"}}
+        with mock.patch.object(wl, "fetch_json", FETCH_JSON), \
+                mock.patch.object(wl.urllib.request, "urlopen", return_value=Response(answer)), \
+                mock.patch.dict("os.environ", {"GITHUB_ACTIONS": "true"}):
+            out, _ = self.run_script("--verify")
+        self.assertEqual(out.splitlines(), [
+            "::warning::capitals not verified: Wikidata could not be reached (Wikidata answered x: "
+            "100%25%0D%0A::warning title=Deck check passed::all good)"])
+
+    def test_command_data_escapes_line_breaks_and_the_percent_sign(self) -> None:
+        self.assertEqual(wl.command_data("a%0A\rb\nc"), "a%250A%0Db%0Ac")
 
     def test_says_so_of_a_deck_the_script_has_not_made_a_version_of(self) -> None:
         self.v2.unlink()

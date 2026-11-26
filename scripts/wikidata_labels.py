@@ -181,6 +181,13 @@ class Unreachable(Exception):
     """Wikidata did not answer, or not with what was asked."""
 
 
+def command_data(text: str) -> str:
+    """Text as the message of a workflow command (`::warning::<message>`): the
+    runner ends a command at a line break, so a line break, and the `%` that
+    escapes it, are escaped, and text from Wikidata cannot start a new line."""
+    return text.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+
+
 # --------------------------------------------------------------------------- Wikidata
 
 
@@ -892,7 +899,7 @@ def main() -> None:
             except Unreachable as error:
                 print(f"warning: {deck} not verified: Wikidata could not be reached ({error})", file=sys.stderr)
                 if os.environ.get("GITHUB_ACTIONS") == "true":
-                    print(f"::warning::{deck} not verified: Wikidata could not be reached ({error})")
+                    print("::warning::" + command_data(f"{deck} not verified: Wikidata could not be reached ({error})"))
         if failed:
             sys.exit(f"not the same: {', '.join(failed)}")
         return
