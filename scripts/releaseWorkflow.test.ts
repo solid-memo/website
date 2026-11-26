@@ -5,6 +5,7 @@
 import { execFileSync, spawnSync } from "node:child_process";
 import {
   appendFileSync,
+  existsSync,
   linkSync,
   mkdirSync,
   mkdtempSync,
@@ -75,6 +76,73 @@ function code(job: string): string {
     .split("\n")
     .filter((line) => !/^\s*#/.test(line))
     .join("\n");
+}
+
+/**
+ * The permissions in a workflow or job that let a job attest, in order,
+ * quoted or not. `write-all` grants them all, so it counts as each.
+ */
+function attestingGrants(yaml: string): string[] {
+  const grant =
+    /["']?(id-token|attestations|artifact-metadata|write-all)["']?(?:\s*:\s*["']?write\b)?/g;
+  return [...code(yaml).matchAll(grant)]
+    .filter(([match, name]) => name === "write-all" || /write$/.test(match))
+    .flatMap(([, name]) =>
+      name === "write-all" ? ["id-token", "attestations", "artifact-metadata"] : [name],
+    );
+}
+
+/**
+ * The tasks `turbo run build` runs: build and what it depends on, in the
+ * root turbo.json or in a workspace's own turbo.json in `directories`.
+ */
+function buildTasks(directories: Iterable<string>): string[] {
+  type Tasks = Record<string, { dependsOn?: string[] }>;
+  const configs: Tasks[] = [JSON.parse(read("turbo.json")).tasks];
+  for (const directory of directories) {
+    const path = join(directory, "turbo.json");
+    if (existsSync(join(ROOT, path))) configs.push(JSON.parse(read(path)).tasks ?? {});
+  }
+  const seen = new Set<string>();
+  const queue = ["build"];
+  for (let task = queue.shift(); task !== undefined; task = queue.shift()) {
+    if (seen.has(task)) continue;
+    seen.add(task);
+    for (const dependency of configs.flatMap((tasks) => tasks[task]?.dependsOn ?? [])) {
+      if (dependency !== "$TURBO_EXTENDS$")
+        queue.push(dependency.replace(/^\^/, "").replace(/^.*#/, ""));
+    }
+  }
+  return [...seen];
+}
+
+/** Each workspace's npm scripts, by the workspace's directory. */
+function workspaceScripts(): Map<string, Record<string, string>> {
+  const byDirectory = new Map<string, Record<string, string>>();
+  const globs: string[] = JSON.parse(read("package.json")).workspaces;
+  const directories = globs.flatMap((glob) =>
+    glob.split("/").reduce<string[]>(
+      (found, part) =>
+        found.flatMap((parent) =>
+          part === "*"
+            ? readdirSync(join(ROOT, parent), { withFileTypes: true })
+                .filter((entry) => entry.isDirectory())
+                .map((entry) => join(parent, entry.name))
+            : [join(parent, part)],
+        ),
+      [""],
+    ),
+  );
+  for (const directory of directories) {
+    let manifest: string;
+    try {
+      manifest = read(join(directory, "package.json"));
+    } catch {
+      continue;
+    }
+    byDirectory.set(directory, JSON.parse(manifest).scripts ?? {});
+  }
+  return byDirectory;
 }
 
 /** A step's `run: |` script, as bash runs it. */
@@ -878,8 +946,8 @@ describe("the site the deploy ships", () => {
   });
 
   it("is attested by the site job, the only job of ci.yml that can attest", () => {
-    expect(ci.match(/^\s+id-token: write$/gm)).toHaveLength(1);
-    expect(ci.match(/^\s+attestations: write$/gm)).toHaveLength(1);
+    expect(attestingGrants(ci)).toEqual(["id-token", "attestations", "artifact-metadata"]);
+    expect(attestingGrants(ciJobs.get("site") ?? "")).toEqual(attestingGrants(ci));
     expect(ciJobs.get("site")).toMatch(/^ {6}id-token: write$/m);
     const listed = at(site, manifest);
     const attested = at(site, "uses: actions/attest@");
@@ -889,6 +957,49 @@ describe("the site the deploy ships", () => {
     expect(listed).toBeGreaterThan(-1);
     expect(attested).toBeGreaterThan(listed);
     expect(uploaded).toBeGreaterThan(attested);
+  });
+
+  // Every step of a job can reach its means to attest, so the site job
+  // runs nothing but the site's own build: nothing after it attests and
+  // uploads, and not the Storybook's build, whose packages the site
+  // doesn't need (docs/deployment.md#the-build-ci-tested).
+  it("is attested and uploaded by the site job's last steps", () => {
+    expect(site.slice(-2).map((step) => step.match(/uses: (actions\/[\w-]+)@/)?.[1])).toEqual([
+      "actions/attest",
+      "actions/upload-artifact",
+    ]);
+    expect(site.at(-1)).toMatch(/^\s+name: site$/m);
+  });
+
+  it("is built in a job that runs no Storybook", () => {
+    expect(code(ciJobs.get("site") ?? "")).not.toMatch(/storybook/i);
+    expect(code(ciJobs.get("site") ?? "")).toMatch(/^\s+- run: npm run build$/m);
+    expect(JSON.parse(read("package.json")).scripts.build).toBe("turbo run build");
+    const workspaces = workspaceScripts();
+    const tasks = buildTasks(workspaces.keys());
+    expect(tasks).toContain("build");
+    expect(tasks).toContain("library:index");
+    expect(tasks).not.toContain("build:storybook");
+    for (const [name, scripts] of workspaces) {
+      for (const task of tasks) expect(`${name}: ${scripts[task] ?? ""}`).not.toMatch(/storybook/i);
+    }
+  });
+
+  it("leaves the Storybook to a job that can only read", () => {
+    const job = ciJobs.get("storybook") ?? "";
+    const storybook = steps(job, 6);
+    expect(storybook.map((step) => step.trim())).toContain("run: npm run storybook:build");
+    expect(storybook.at(-1)).toMatch(/uses: actions\/upload-artifact@/);
+    expect(storybook.at(-1)).toMatch(/^\s+name: storybook$/m);
+    expect(job).toMatch(/^ {4}permissions:\n {6}contents: read\n {4}\S/m);
+    expect(storybook.filter((step) => /uses:\s*actions\/cache/.test(step))).toEqual([]);
+    const setup = storybook.filter((step) => /uses:\s*actions\/setup-node@/.test(step));
+    expect(setup).toHaveLength(1);
+    expect(setup[0]).toMatch(/^\s+package-manager-cache: false$/m);
+    const ok = ciJobs.get("ci-ok") ?? "";
+    expect(ok).toMatch(/needs:\s*\[[^\]]*\bstorybook\b/);
+    expect(ok).toContain("${{ needs.storybook.result }}");
+    expect(ciJobs.get("fail-fast-storybook")).toMatch(/^ {4}needs: storybook$/m);
   });
 
   it("is checked against that attestation before the deploy states its version", () => {

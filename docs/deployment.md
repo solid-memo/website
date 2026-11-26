@@ -134,7 +134,12 @@ least trusted of those jobs into the site. The deploy workflow sets
 caches, and any job of a run can replace one of the run's artifacts.
 So in the merge queue and on `main`, the `site` job lists every file
 of the site with its SHA-256 and attests that list
-(`actions/attest`). It's the only job in CI that may attest. Before the
+(`actions/attest`). It's the only job in CI granted the permission to
+attest, and it runs nothing after it attests and uploads the site.
+Every step of a job can reach that permission, so the job runs only
+the site's own build: the Storybook is built in a job of its own that
+can only read ([storybook.md](storybook.md#where-it-is-published)). The
+attestation names CI's workflow, not the job. Before the
 deploy states the version, it makes the same list from the artifact it
 downloaded and checks it with `gh attestation verify`. CI's workflow
 in the merge queue or on `main` must have attested it, for the release
@@ -145,7 +150,8 @@ instead. A test
 ([releaseWorkflow.test.ts](../scripts/releaseWorkflow.test.ts)) checks
 that the two builds restore no cache, that only the `site` and `reuse`
 jobs upload the `site` artifact, and that the deploy checks the
-attestation.
+attestation. It also checks that the `site` job alone can attest, runs
+no Storybook and ends with the attestation and the upload.
 
 That site states the version before the release, and only its pages
 state it; the scripts' files are named by a hash of their content

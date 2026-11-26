@@ -106,10 +106,14 @@ exports to be used elsewhere.
 
 ## Where it is published
 
-The CI's `site` job builds the Storybook on every run and keeps it a
-week as the `storybook` artifact, so a pull request's Storybook can be
-downloaded from its run. On a release, the deploy workflow's `storybook`
-job publishes the artifact of the CI run it deploys from at
+The CI's `storybook` job builds the Storybook on every run and keeps it
+a week as the `storybook` artifact, so a pull request's Storybook can be
+downloaded from its run. It's a job of its own, whose token can only
+read: the packages that build the Storybook don't run in the `site`
+job, which attests the site that's deployed
+([deployment.md](deployment.md#the-build-ci-tested)). On a release,
+the deploy workflow's `storybook` job publishes the artifact of the CI
+run it deploys from at
 <https://storybook.solid-memo.com/>, a site of its own. Storybook's
 scripts don't run on the app's origin, which holds a learner's session,
 the reason the journeys' report has a site of its own too
