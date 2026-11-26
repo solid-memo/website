@@ -14,7 +14,8 @@
 #
 # On a miss, the job asks the mirror, each apt-get given four tries of
 # three minutes, each going on from what the last one downloaded, so a
-# stall costs minutes rather than the job, and,
+# stall costs minutes rather than the job, as it does on a hit whose
+# files lack a library the runner has not, and,
 # on main only, saves what it downloaded (a pull request's or the merge
 # queue's copy would be kept under its own ref, never read again). Where
 # main's run skips the jobs that would save it, warm-browsers does
@@ -59,22 +60,34 @@ runs:
       with:
         path: ~/.cache/playwright-deps
         key: ${{ steps.key.outputs.key }}
-    # Playwright's list, less what the image has, which it names after
-    # asking apt (`--dry-run`, which exits 1 when it names any), then
-    # those packages downloaded, the files kept apart from apt's own.
-    # Apt answers from the image's package lists, so the mirror is asked
-    # for fresh ones only when something is to be downloaded, or when
-    # those lists can't answer: a job missing nothing, as one without
-    # the fonts is, never reaches it.
-    - if: steps.cache.outputs.cache-hit != 'true'
-      shell: bash
+    # On a miss, Playwright's list, less what the image has, which it
+    # names after asking apt (`--dry-run`, which exits 1 when it names
+    # any), then those packages downloaded, the files kept apart from
+    # apt's own. Apt answers from the image's package lists, so the
+    # mirror is asked for fresh ones only when something is to be
+    # downloaded, or when those lists can't answer: a job missing
+    # nothing, as one without the fonts is, never reaches it.
+    #
+    # Then the files installed by apt-get, not dpkg -i, so a package
+    # another must be installed before (Pre-Depends) is. The files named
+    # are what it installs, their dependencies installed already or among
+    # them. Its sources are hidden from it: the image's lists name many
+    # of the same versions, and apt would fetch those from the mirror
+    # first, falling back to the file only once that failed.
+    # (--no-download would refuse even the files when the lists are
+    # missing.) A runner with the same image need not have the same
+    # packages installed (one hosted elsewhere, issue #1064), so where
+    # the files lack a dependency it has not, apt is given its sources
+    # back and fetches it from the mirror.
+    - shell: bash
       env:
         BROWSER: ${{ inputs.browser }}
         FONTS: ${{ inputs.fonts }}
+        HIT: ${{ steps.cache.outputs.cache-hit }}
       run: |
         apt() {
           for try in 1 2 3 4; do
-            sudo timeout 180 apt-get -q -o Acquire::Retries=3 "$@" && return
+            sudo DEBIAN_FRONTEND=noninteractive timeout 180 apt-get -q -o Acquire::Retries=3 "$@" && return
             echo "::warning::apt-get $1 failed or took over three minutes (try $try of 4)"
           done
           return 1
@@ -88,40 +101,36 @@ runs:
             *) return 1 ;;
           esac
         }
-        if ! missing; then
-          apt update
-          updated=true
-          missing || { echo "$listed"; exit 1; }
+        if [[ $HIT != true ]]; then
+          if ! missing; then
+            apt update
+            updated=true
+            missing || { echo "$listed"; exit 1; }
+          fi
+          if [[ $FONTS == false ]]; then
+            mapfile -t packages < <(printf '%s\n' "${packages[@]}" | grep -Ev '^(x?fonts-|$)' || true)
+          fi
+          echo "Missing: ${#packages[@]} packages"
+          sudo apt-get clean
+          if (( ${#packages[@]} )); then
+            [[ $updated == true ]] || apt update
+            updated=true
+            apt install -y --no-install-recommends --download-only "${packages[@]}"
+          fi
+          mkdir -p ~/.cache/playwright-deps
+          find /var/cache/apt/archives -maxdepth 1 -name '*.deb' -exec cp -t ~/.cache/playwright-deps {} +
+          # So the entry is never empty, and says what it holds.
+          printf '%s\n' "${packages[@]}" > ~/.cache/playwright-deps/packages.txt
         fi
-        if [[ $FONTS == false ]]; then
-          mapfile -t packages < <(printf '%s\n' "${packages[@]}" | grep -Ev '^(x?fonts-|$)' || true)
-        fi
-        echo "Missing: ${#packages[@]} packages"
-        sudo apt-get clean
-        if (( ${#packages[@]} )); then
-          [[ $updated == true ]] || apt update
-          apt install -y --no-install-recommends --download-only "${packages[@]}"
-        fi
-        mkdir -p ~/.cache/playwright-deps
-        find /var/cache/apt/archives -maxdepth 1 -name '*.deb' -exec cp -t ~/.cache/playwright-deps {} +
-        # So the entry is never empty, and says what it holds.
-        printf '%s\n' "${packages[@]}" > ~/.cache/playwright-deps/packages.txt
-    # apt-get, not dpkg -i, so a package another must be installed before
-    # (Pre-Depends) is. The files named are what it installs, their
-    # dependencies installed already or among them. Its sources are
-    # hidden from it: the image's lists name many of the same versions,
-    # and apt would fetch those from the mirror first, falling back to the
-    # file only once that failed. (--no-download would refuse even the
-    # files when the lists are missing.)
-    - shell: bash
-      run: |
         shopt -s nullglob
         debs=(~/.cache/playwright-deps/*.deb)
         echo "Installing ${#debs[@]} packages"
-        if (( ${#debs[@]} )); then
-          sudo DEBIAN_FRONTEND=noninteractive apt-get -o Dir::Etc::SourceList=/dev/null -o Dir::Etc::SourceParts=/dev/null \
-            install -y -q --no-install-recommends "${debs[@]}"
-        fi
+        (( ${#debs[@]} )) || exit 0
+        sudo DEBIAN_FRONTEND=noninteractive apt-get -o Dir::Etc::SourceList=/dev/null -o Dir::Etc::SourceParts=/dev/null \
+          install -y -q --no-install-recommends "${debs[@]}" && exit 0
+        echo "::warning::The files lack a library this runner has not; asking Ubuntu's mirror for it."
+        [[ $updated == true ]] || apt update
+        apt install -y --no-install-recommends "${debs[@]}"
     - if: inputs.cache == 'true' && steps.cache.outputs.cache-hit != 'true' && github.ref == 'refs/heads/main'
       uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
