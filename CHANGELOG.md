@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.5.5](https://github.com/solid-memo/website/compare/v8.5.4...v8.5.5) (2026-11-26)
+
+### Fixes
+
+* **ci:** read no workflow commands from outside text in link job logs ([1f6aad6](https://github.com/solid-memo/website/commit/1f6aad647902769f84d95cfbbf930bbeeab42048))
+* **solid:** key the shared reviews-read lookups by the path of their terms ([e8f0bee](https://github.com/solid-memo/website/commit/e8f0beec0e7ae707194c8405b69fa2b8dc5dc403))
+
 ## [8.5.4](https://github.com/solid-memo/website/compare/v8.5.3...v8.5.4) (2026-11-26)
 
 ### Fixes
