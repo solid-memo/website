@@ -14,7 +14,7 @@ import {
   type LibraryCopy,
 } from "@solid-memo/domain/library";
 import { libraryCopyTest } from "@solid-memo/domain/libraryCopy";
-import type { Card, Deck } from "@solid-memo/domain/deck";
+import { refuseLongCardIds, type Card, type Deck } from "@solid-memo/domain/deck";
 import type { LibraryCard, LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
 import {
   applyLibraryUpgrade,
@@ -44,7 +44,11 @@ import { stepReporter } from "./progress";
 export interface LibraryUseCases {
   /** The ready-made decks the app offers for import. */
   listLibraryDecks(): Promise<LibraryDeck[]>;
-  /** Copy a library deck, cards included, into an instance as a new deck. */
+  /**
+   * Copy a library deck, cards included, into an instance as a new deck;
+   * refused (cardIdTooLong) before anything is written when a card or
+   * wrong option has an id longer than MAX_CARD_ID_LENGTH.
+   */
   importLibraryDeck(instanceUrl: string, deck: LibraryDeck): Promise<Deck>;
   /** A library deck's cards, to look through before importing it. */
   listLibraryCards(deck: LibraryDeck): Promise<LibraryCard[]>;
@@ -137,7 +141,9 @@ export interface LibraryUseCases {
    * back: the deck is
    * readable, still names the release it came from, and is offered the
    * upgrade again, which finishes it. Refuses (deckChangedSinceOffer) when
-   * the deck's cards no longer call for the changes the user agreed to.
+   * the deck's cards no longer call for the changes the user agreed to,
+   * and (cardIdTooLong) when a card the newer release adds or changes, or
+   * one of its wrong options, has an id longer than MAX_CARD_ID_LENGTH.
    */
   applyLibraryUpgrade(
     deck: Deck,
@@ -433,6 +439,8 @@ export function createLibraryUseCases({
   }
   async function importLibraryDeck(instanceUrl: string, deck: LibraryDeck): Promise<Deck> {
     const content = await deckLibrary.fetchLibraryDeck(deck.url);
+    // Each answer names its card, and a wrong option chosen, in full: a release with longer ids is refused.
+    refuseLongCardIds(content.cards);
     return deckRepository.importDeck(instanceUrl, content);
   }
   /**
@@ -628,6 +636,8 @@ export function createLibraryUseCases({
         const plan = await planUpgrade(deck, async () => cards.value);
         if (plan === null || !sameCardChanges(plan, offeredPlan))
           throw new AppError("deckChangedSinceOffer");
+        // The cards the newer release adds or changes are held to the bound on ids a release added is.
+        refuseLongCardIds([...plan.add, ...plan.change]);
         releaseUrl = plan.releaseUrl;
         // The states of the cards the release removes go with them, and those left of any it removed already.
         const removed = new Set([...plan.remove.map((card) => card.id), ...plan.gone]);

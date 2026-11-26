@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { StudyDirection } from "./deck";
+import { isCardIdPastBound, type StudyDirection } from "./deck";
 import type { ReviewQuality } from "./review";
 import { isIriPastBound } from "./pathKeys";
 import { isStudyDay } from "./reviewStateEdits";
@@ -208,18 +208,32 @@ export function utcOffsetMinutesAt(instant: Date): number {
 }
 
 /**
+ * The IRI of the subject `id` in the cards document at
+ * `cardsDocumentUrl`, when it can be written: within the bound on a term
+ * (isIriPastBound) and one Turtle writes as it is (isWritableIri). The
+ * id comes from a release, whose own address may be much shorter, and
+ * a document that names a longer one could never be written. Undefined
+ * otherwise.
+ */
+export function writableIriIn(cardsDocumentUrl: string, id: string): string | undefined {
+  const iri = `${cardsDocumentUrl}#${id}`;
+  return isIriPastBound(iri) || !isWritableIri(iri) ? undefined : iri;
+}
+
+/**
  * The wrong option chosen, as an answer names it: the distractor
  * `distractorId` in the cards document at `cardsDocumentUrl`. Undefined
- * when that IRI could not be written, past the bound on a term
- * (isIriPastBound) or not one Turtle writes as it is (isWritableIri):
- * the id comes from a release, whose own address may be much shorter, and
- * an answer that names it could never be added to the log. The answer is
- * then logged without it.
+ * when that IRI could not be written (writableIriIn), or the id is
+ * longer than a deck taken in may have (isCardIdPastBound): an answer is
+ * added to its month's log as it is given, and a deck already in the
+ * pod from before that bound could otherwise make each answer far larger.
+ * The answer is then logged without it.
  */
 export function chosenDistractorIn(
   cardsDocumentUrl: string,
   distractorId: string,
 ): string | undefined {
-  const iri = `${cardsDocumentUrl}#${distractorId}`;
-  return isIriPastBound(iri) || !isWritableIri(iri) ? undefined : iri;
+  return isCardIdPastBound(distractorId)
+    ? undefined
+    : writableIriIn(cardsDocumentUrl, distractorId);
 }

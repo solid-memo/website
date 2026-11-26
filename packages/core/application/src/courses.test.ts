@@ -5,7 +5,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { AnswerLog } from "./ports/pod";
 import { createUseCases } from "./useCases";
-import type { Deck } from "@solid-memo/domain/deck";
+import { MAX_CARD_ID_LENGTH, type Deck } from "@solid-memo/domain/deck";
 import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { fsrsReview } from "@solid-memo/domain/fsrs";
@@ -249,6 +249,22 @@ describe("courses", () => {
     vi.mocked(deps.deckRepository.listDecks).mockResolvedValueOnce([deck, courseDeck]);
     await expect(useCases.startCourse(instance.url, course)).resolves.toBe(courseDeck);
     expect(deps.deckRepository.importDeck).toHaveBeenCalledOnce();
+  });
+
+  it("startCourse refuses, writing nothing, a release with a card or wrong option id longer than a deck taken in may have (GHSA-74pg-94wh-68xj)", async () => {
+    const long = "q".repeat(MAX_CARD_ID_LENGTH + 1);
+    for (const card of [
+      { ...question, id: long },
+      { ...question, distractors: [{ id: long, text: { en: "Only web pages" } }] },
+    ]) {
+      const { deps, useCases } = setup();
+      vi.mocked(deps.deckRepository.listDecks).mockResolvedValueOnce([deck]);
+      vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockResolvedValue({ ...release, cards: [card] });
+      await expect(useCases.startCourse(instance.url, course)).rejects.toMatchObject({
+        code: "cardIdTooLong",
+      });
+      expect(deps.deckRepository.importDeck).not.toHaveBeenCalled();
+    }
   });
 
   it("getCourse reads the deck as it is now, the release's outline and cards, and the progress its review states and completed chapters make", async () => {
@@ -512,6 +528,56 @@ describe("courses", () => {
     await useCases.refreshStudyDigest(instance.url, courseDeck);
     expect(appended).toEqual([expect.objectContaining({ grade: 1, mode: "multiple-choice" })]);
     expect(appended[0]).not.toHaveProperty("chosenDistractor");
+  });
+
+  it("answerCourseQuestion logs a wrong answer without a wrong option whose id is longer than a deck taken in may have", async () => {
+    const { useCases, appended } = setup();
+    // A course added before that bound: still studied, its answers kept small.
+    const distractorId = "x".repeat(MAX_CARD_ID_LENGTH + 1);
+    await useCases.answerCourseQuestion(
+      instance.url,
+      courseDeck,
+      question,
+      { correct: false, distractorId },
+      noon,
+    );
+    await useCases.refreshStudyDigest(instance.url, courseDeck);
+    expect(appended).toEqual([expect.objectContaining({ grade: 1, mode: "multiple-choice" })]);
+    expect(appended[0]).not.toHaveProperty("chosenDistractor");
+  });
+
+  it("answerCourseQuestion refuses, writing nothing, to introduce a card whose id or wrong option's id is longer than a deck taken in may have (GHSA-74pg-94wh-68xj)", async () => {
+    const long = "q".repeat(MAX_CARD_ID_LENGTH + 1);
+    for (const card of [
+      { ...question, id: long },
+      { ...question, distractors: [{ id: long, text: { en: "Only web pages" } }] },
+    ]) {
+      const { deps, useCases, appended } = setup();
+      await expect(
+        useCases.answerCourseQuestion(instance.url, courseDeck, card, { correct: true }, noon),
+      ).rejects.toMatchObject({ code: "cardIdTooLong" });
+      expect(deps.deckRepository.addCardIfAbsent).not.toHaveBeenCalled();
+      expect(deps.reviewStateRepository.gradeReviewState).not.toHaveBeenCalled();
+      await useCases.refreshStudyDigest(instance.url, courseDeck);
+      expect(appended).toEqual([]);
+    }
+  });
+
+  it("answerCourseQuestion still grades a card with a long id that the course's deck already studies", async () => {
+    const { deps, useCases } = setup();
+    const id = "q".repeat(MAX_CARD_ID_LENGTH + 1);
+    const morning = { ...stateOf(new Date(2026, 9, 7, 9, 0), "2026-10-08"), cardId: id };
+    vi.mocked(deps.reviewStateRepository.getReviewState).mockResolvedValue(promptOf(morning));
+    await expect(
+      useCases.answerCourseQuestion(
+        instance.url,
+        courseDeck,
+        { ...question, id },
+        { correct: false },
+        noon,
+      ),
+    ).resolves.toMatchObject({ effect: "review", state: { repetitions: 0 } });
+    expect(deps.deckRepository.addCardIfAbsent).not.toHaveBeenCalled();
   });
 
   it("answerCourseQuestion says a card the deck already had was reviewed, not added", async () => {

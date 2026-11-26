@@ -1947,6 +1947,7 @@
     "deckFileLinksGuestPod": "Ese archivo enlaza con los datos de estudio en modo invitado de este navegador, algo que ningún mazo puede hacer, así que no se importó. Elige otro archivo.",
     "deckFileTooNew": "Ese archivo lo escribió una versión más reciente de Solid Memo, así que esta no puede importarlo. Usa en su lugar una versión más reciente de Solid Memo.",
     "deckFileTooLarge": "Ese archivo es más grande que cualquier mazo que Solid Memo lee, así que no se ha leído. Elige un archivo más pequeño.",
+    "cardIdTooLong": "Una tarjeta o una opción incorrecta de este mazo tiene un id de más de {limit} caracteres, más de lo que Solid Memo acepta en un mazo que añade o actualiza, así que no se cambió nada. Pregunta a quien creó el mazo.",
     "noGuestPod": "No hay datos de estudio en modo invitado en este dispositivo.",
     "guestPodStartFailed": "No se pudieron abrir los datos de estudio en modo invitado de este dispositivo. Vuelve a cargar la página e inténtalo de nuevo.",
     "guestStorageAborted": "Este navegador se negó a guardar un cambio en los datos de estudio en modo invitado. Comprueba que tiene espacio para guardar datos e inténtalo de nuevo.",

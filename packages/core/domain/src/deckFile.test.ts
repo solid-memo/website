@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest";
 import {
   CARD_FORMAT_VERSION,
   DECK_FORMAT_VERSION,
+  MAX_CARD_ID_LENGTH,
   MAX_COMPLETED_CHAPTERS,
   MAX_DECK_METADATA,
   type Card,
@@ -150,6 +151,19 @@ describe("importedDeck", () => {
     expect(imported.authors).toEqual(many.slice(0, MAX_DECK_METADATA));
     expect(imported.themes).toEqual(many.slice(0, MAX_DECK_METADATA));
     expect(imported.keywords).toEqual({ ko: many.slice(0, MAX_DECK_METADATA) });
+  });
+
+  it("refuses a file with a card or wrong option whose id is longer than a deck taken in may have", () => {
+    const longest = "c".repeat(MAX_CARD_ID_LENGTH);
+    const fits = content({ cards: [{ ...card, id: longest }] });
+    expect(importedDeck(INSTANCE, fits, options).cards[0]!.id).toBe(longest);
+    expect(() =>
+      importedDeck(INSTANCE, content({ cards: [{ ...card, id: `${longest}c` }] }), options),
+    ).toThrow(expect.objectContaining({ code: "cardIdTooLong" }));
+    const option = { id: `${longest}d`, text: { en: "Oslo" } };
+    expect(() =>
+      importedDeck(INSTANCE, content({ cards: [{ ...card, distractors: [option] }] }), options),
+    ).toThrow(expect.objectContaining({ code: "cardIdTooLong" }));
   });
 
   it("never brings a deck in paused", () => {

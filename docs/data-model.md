@@ -1747,7 +1747,25 @@ nothing could rebuild it.
   deck's cards document). It's left out when that IRI couldn't be
   written: longer than a term may be, or not one Turtle writes as it is
   (`chosenDistractorIn`). A release's own address may be much shorter
-  than the deck's, and the answer is logged without it. An answer given
+  than the deck's, and the answer is logged without it. It's left out
+  too when the option's id is longer than 256 characters
+  (`MAX_CARD_ID_LENGTH` in `deck.ts`).
+
+  Each answer is added to its month's document as it's given, and
+  names its card, and the option chosen, in full. So a deck taken in
+  from elsewhere is refused (`cardIdTooLong`) before anything is
+  written when a card's or a wrong option's id is longer than 256
+  characters. That holds for a release copied from the library or a
+  link, a course started and each course question as it joins the
+  deck, an upgrade to a newer release, and a deck file imported. A
+  character here is a UTF-16 code unit, so an id at the bound is at
+  most 768 bytes in Turtle's UTF-8.
+  Otherwise such a deck could make a month's document larger than a
+  read of it takes in. The library's ids are far shorter. A deck
+  already in the pod with longer ids is still read and studied, and a
+  course question it already studies is still graded. It can't be
+  upgraded to a release that adds or changes a card with such an id.
+  An answer given
   in study says neither, which means recalled. Since vocabulary 1.19 an
   answer may say how long it took, in milliseconds the app was shown.
   That's from the prompt to the answer revealed, or to the option chosen

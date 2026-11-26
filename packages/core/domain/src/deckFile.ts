@@ -8,6 +8,7 @@ import {
   DECK_FORMAT_VERSION,
   type Card,
   type Deck,
+  refuseLongCardIds,
   withBoundedMetadata,
 } from "./deck";
 import { catalogUrlOf, documentsInUse, ensureTrailingSlash } from "./instanceLayout";
@@ -134,7 +135,9 @@ const DECK_ID = /^deck-[A-Za-z0-9_-]+$/;
  * are written as withWritableDueDays has them. Cards keep their ids,
  * their creation times and whether they are retired. A deck the file
  * says nothing of the creation of is created `now`. It keeps no more of
- * the deck's metadata than a deck may have (withBoundedMetadata).
+ * the deck's metadata than a deck may have (withBoundedMetadata). A file
+ * with a card or wrong option whose id is longer than a deck taken in
+ * may have is refused (refuseLongCardIds).
  */
 export function importedDeck(
   instanceUrl: string,
@@ -146,6 +149,7 @@ export function importedDeck(
     now,
   }: { withProgress: boolean; decks: readonly Deck[]; freshId: string; now: string },
 ): { deck: Deck; cards: Card[]; reviews: ReviewState[]; fsrsReviews: FsrsState[] } {
+  refuseLongCardIds(content.cards);
   const base = ensureTrailingSlash(instanceUrl);
   const documentsOf = (id: string) => [`${base}decks/${id}.ttl`, `${base}reviews/${id}.ttl`];
   const used = documentsInUse(decks);

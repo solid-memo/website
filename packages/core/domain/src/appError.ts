@@ -224,6 +224,8 @@ export const ERROR_TEMPLATES = {
     "That file was written by a newer version of Solid Memo, so this one cannot import it. Use a newer version of Solid Memo instead.",
   deckFileTooLarge:
     "That file is larger than any deck Solid Memo reads, so it was not read. Choose a smaller file.",
+  cardIdTooLong:
+    "A card or wrong option in this deck has an id longer than {limit} characters, more than Solid Memo accepts in a deck it adds or upgrades, so nothing was changed. Ask the deck's creator about it.",
   noGuestPod: "There is no guest study on this device.",
   guestPodStartFailed:
     "The guest study on this device could not be opened. Reload the page and try again.",

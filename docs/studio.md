@@ -1643,7 +1643,9 @@ reads of one document outside the user's storages. A deck whose cards
 or review states would make a larger document is refused
 (`deckFileTooLarge`) before anything is written, wherever the instance
 is, as an instance in the user's storage may be read from outside it
-too. The document is measured as the import writes it and, by its
+too. So is a deck with a card or wrong option whose id is longer than
+256 characters (`cardIdTooLong`,
+[data-model.md](data-model.md#the-answer-log)). The document is measured as the import writes it and, by its
 bytes, as a server may serve it back, one triple a line. Its cards
 document goes first, only if none is at its URL yet, then its review
 states, then its entry in the catalog, so the deck shows only once

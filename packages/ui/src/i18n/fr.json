@@ -1947,6 +1947,7 @@
     "deckFileLinksGuestPod": "Ce fichier renvoie au travail du mode invité de ce navigateur, ce qu’aucun paquet ne peut faire, il n’a donc pas été importé. Choisissez un autre fichier.",
     "deckFileTooNew": "Ce fichier a été écrit par une version plus récente de Solid Memo : celle-ci ne peut donc pas l’importer. Utilisez plutôt une version plus récente de Solid Memo.",
     "deckFileTooLarge": "Ce fichier est plus volumineux que tout paquet que Solid Memo lit : il n’a donc pas été lu. Choisissez un fichier plus petit.",
+    "cardIdTooLong": "Une carte ou une mauvaise réponse de ce paquet a un identifiant de plus de {limit} caractères, plus que ce que Solid Memo accepte dans un paquet qu’il ajoute ou met à jour : rien n’a donc été modifié. Demandez à la personne qui a créé le paquet.",
     "noGuestPod": "Il n’y a pas de travail en mode invité sur cet appareil.",
     "guestPodStartFailed": "Le travail en mode invité sur cet appareil n’a pas pu être ouvert. Rechargez la page et réessayez.",
     "guestStorageAborted": "Ce navigateur a refusé d’enregistrer une modification du travail en mode invité. Vérifiez qu’il a assez de place pour conserver des données, puis réessayez.",

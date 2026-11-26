@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { isCopyOf } from "@solid-memo/domain/library";
-import type { Deck } from "@solid-memo/domain/deck";
+import { refuseLongCardIds, type Deck } from "@solid-memo/domain/deck";
 import { isPaused } from "@solid-memo/domain/deckPause";
 import { studyDayOf } from "@solid-memo/domain/scheduling";
 import type { LibraryCard, LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
@@ -35,7 +35,9 @@ export interface CourseUseCases {
    * release with its title, description, authors and the rest, but no
    * cards — a card joins it when its question is first answered
    * (answerCourseQuestion). The copy the instance already has, of any
-   * release (isCopyOf), when it has one: a course is started once.
+   * release (isCopyOf), when it has one: a course is started once. A new
+   * one is refused (cardIdTooLong) before anything is written when a card
+   * or wrong option of the release has an id longer than MAX_CARD_ID_LENGTH.
    */
   startCourse(instanceUrl: string, course: LibraryDeck): Promise<Deck>;
   /**
@@ -67,6 +69,10 @@ export interface CourseUseCases {
    * long choosing took (`times`; a multiple-choice answer is not graded,
    * so it has no grading time). A course whose deck is paused today is
    * paused with it: its answers are refused (deckPaused) before any write.
+   * A card to be introduced is refused (cardIdTooLong) before any write
+   * when its id, or a wrong option's, is longer than MAX_CARD_ID_LENGTH:
+   * the release may have changed since the course was started. A card
+   * already studied is graded as it is.
    */
   answerCourseQuestion(
     instanceUrl: string,
@@ -216,6 +222,8 @@ export function createCourseUseCases({
     );
     if (started !== undefined) return started;
     const release = await deckLibrary.fetchLibraryDeck(course.url);
+    // Its questions join the deck as they are reached, each answer naming its card: a course with longer ids is refused.
+    refuseLongCardIds(release.cards);
     // The deck says it is a course, so no screen has to read the library to tell.
     return deckRepository.importDeck(instanceUrl, { ...release, isCourse: true, cards: [] });
   }
@@ -265,6 +273,8 @@ export function createCourseUseCases({
       // The card joins the deck before its first state, so no state is ever without its card.
       // It names the release it is taken from, the one the deck names: the series' card, which an upgrade may change.
       // No state doesn't mean no card: one the deck has at that id is graded as it stands, its mark or lack of one too.
+      // A course started before ids were bounded may still offer one past the bound: its card is not taken in.
+      if (effect.kind === "introduce") refuseLongCardIds([card]);
       const added =
         effect.kind === "introduce" &&
         (await deckRepository.addCardIfAbsent(deck, { ...card, fromRelease: sourceOf(deck) }));

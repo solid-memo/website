@@ -403,6 +403,39 @@ export interface Card extends CardContent {
 export const MAX_CATALOG_LINKS = 1000;
 
 /**
+ * The most characters of a card's id, or of a wrong option's, that a
+ * deck taken in from elsewhere may have: a release, a deck file or a
+ * course. Every answer names its card, and a wrong option chosen, by
+ * its IRI in the deck's cards document, so the id is written again with
+ * each answer to the month's answer log; past this bound a deck could
+ * make that log far larger than its answers are. The library's ids are
+ * much shorter. A deck already in the pod with longer ids is still read
+ * and studied (chosenDistractorIn).
+ */
+export const MAX_CARD_ID_LENGTH = 256;
+
+/** Whether a card's or a wrong option's id is longer than a deck taken in may have (MAX_CARD_ID_LENGTH). */
+export function isCardIdPastBound(id: string): boolean {
+  return id.length > MAX_CARD_ID_LENGTH;
+}
+
+/**
+ * Refuse cards taken in from elsewhere (a release, a deck file, a
+ * course's question) when one of them, or one of their wrong options,
+ * has an id past MAX_CARD_ID_LENGTH (cardIdTooLong), before anything is
+ * written.
+ */
+export function refuseLongCardIds(
+  cards: readonly { id: string; distractors?: readonly { id: string }[] }[],
+): void {
+  for (const card of cards) {
+    for (const { id } of [card, ...(card.distractors ?? [])]) {
+      if (isCardIdPastBound(id)) throw new AppError("cardIdTooLong", { limit: MAX_CARD_ID_LENGTH });
+    }
+  }
+}
+
+/**
  * How many deck groups a catalog may have that the app reads. The deck
  * list draws each one, so a catalog anyone may have written is bounded
  * here as its decks are (MAX_CATALOG_LINKS): past this many, its

@@ -1857,6 +1857,7 @@
     "deckFileLinksGuestPod": "Den filen länkar till gästens studier i den här webbläsaren, vilket ingen kortlek får göra, så den importerades inte. Välj en annan fil.",
     "deckFileTooNew": "Den filen skrevs av en nyare version av Solid Memo, så den här versionen kan inte importera den. Använd en nyare version av Solid Memo i stället.",
     "deckFileTooLarge": "Den filen är större än någon kortlek Solid Memo läser, så den lästes inte. Välj en mindre fil.",
+    "cardIdTooLong": "Ett kort eller felaktigt alternativ i den här kortleken har ett id som är längre än {limit} tecken, mer än Solid Memo godtar i en kortlek som läggs till eller uppgraderas, så inget ändrades. Fråga den som skapade kortleken om det.",
     "noGuestPod": "Det finns inga gäststudier på den här enheten.",
     "guestPodStartFailed": "Gäststudierna på den här enheten gick inte att öppna. Läs in sidan igen och försök på nytt.",
     "guestStorageAborted": "Webbläsaren vägrade spara en ändring i gäststudierna. Kontrollera att den har plats att spara data och försök sedan igen.",
