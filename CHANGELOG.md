@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.5.7](https://github.com/solid-memo/website/compare/v8.5.6...v8.5.7) (2026-11-26)
+
+### Fixes
+
+* **ui:** link and load the address that was checked, not as written ([bdb6afb](https://github.com/solid-memo/website/commit/bdb6afb5d0abb1158d6daf0b696f0448aa7e021e))
+
 ## [8.5.6](https://github.com/solid-memo/website/compare/v8.5.5...v8.5.6) (2026-11-26)
 
 ### Fixes
