@@ -19,6 +19,7 @@ import type { ReleaseDraftRepository, ReleasePublisher } from "./ports/library";
 import type { DeckRepository, InstanceGraphReader } from "./ports/pod";
 import type { StorageGateway } from "./ports/session";
 import type { AnswerStore } from "./answerStore";
+import { mapAtOnce } from "./atOnce";
 
 /**
  * An instance read as a graph (domain/instanceGraph.ts), for the Studio
@@ -35,9 +36,6 @@ import type { AnswerStore } from "./answerStore";
  * pod apart, are found from their WebID as at login; none, when they
  * cannot be.
  */
-
-/** How many documents are read at once: as many as a browser asks one server for over HTTP/1.1. */
-const READS_AT_ONCE = 6;
 
 export interface InstanceGraphUseCases {
   /**
@@ -94,23 +92,18 @@ export function createInstanceGraphUseCases({
         documentUrls(instanceUrl),
         storageGateway.discoverStorages(webId).catch(() => []),
       ]);
-      const documents: GraphDocument[] = new Array(urls.length);
-      let next = 0;
       let read = 0;
       onProgress(read, urls.length);
       // A few at a time, in turn: a large log's months are not all asked for at once.
-      const reader = async () => {
-        while (next < urls.length) {
-          const at = next++;
-          const url = urls[at]!;
-          documents[at] = await instanceGraphReader.readDocument(url).then(
-            (triples) => ({ url, found: triples !== null, triples: triples ?? [] }),
-            () => ({ url, found: false, unreadable: true, triples: [] }),
-          );
-          onProgress(++read, urls.length);
-        }
-      };
-      await Promise.all(Array.from({ length: READS_AT_ONCE }, reader));
+      // A document that cannot be read is drawn as such, so no read fails the graph.
+      const documents = await mapAtOnce(urls, async (url) => {
+        const document = await instanceGraphReader.readDocument(url).then(
+          (triples): GraphDocument => ({ url, found: triples !== null, triples: triples ?? [] }),
+          (): GraphDocument => ({ url, found: false, unreadable: true, triples: [] }),
+        );
+        onProgress(++read, urls.length);
+        return document;
+      });
       return instanceGraphOf({
         instanceUrl,
         storages: storages.map((storage) => storage.url),

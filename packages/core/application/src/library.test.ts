@@ -737,14 +737,22 @@ describe("the deck library", () => {
         { deck: copy, series: linked(2), version: "1", newer: true, fromLink: true },
         { deck: lakes, series: elsewhere, version: "3", newer: false, fromLink: true },
       ]);
-      // Each release's lookup reads them on its own, under limits of its own: none read for the other is shared.
-      expect(vi.mocked(deps.deckLibrary.readRelease).mock.calls.map(([url]) => url)).toEqual([
-        `${RELEASES}v1.ttl`,
-        elsewhere.url,
-        `${RELEASES}v9.ttl`,
-        `${RELEASES}v2.ttl`,
-        `${RELEASES}v9.ttl`,
-      ]);
+      // Each release's lookup reads them on its own, under limits of its own: none read for the other is shared. The
+      // two lookups run at once, so only what each read is asserted, not how their reads interleave.
+      expect(
+        vi
+          .mocked(deps.deckLibrary.readRelease)
+          .mock.calls.map(([url]) => url)
+          .sort(),
+      ).toEqual(
+        [
+          `${RELEASES}v1.ttl`,
+          elsewhere.url,
+          `${RELEASES}v9.ttl`,
+          `${RELEASES}v2.ttl`,
+          `${RELEASES}v9.ttl`,
+        ].sort(),
+      );
     });
 
     it("takes no newer release from outside the instance the copied release was published from (GHSA-hx4f-4hjp-g2f3)", async () => {
@@ -1204,6 +1212,43 @@ describe("the deck library", () => {
           .slice(2),
       ).toEqual(newest);
       expect(most).toBeLessThanOrEqual(4);
+    });
+
+    it("planLibraryUpgrade checks no release in between once one breaks the library's shapes", async () => {
+      const deps = makeDeps();
+      const listed = Array.from({ length: 40 }, (_, at) => ({
+        url: `${RELEASES}v${at + 2}.ttl`,
+        version: String(at + 2),
+      }));
+      const series = linked(42, {
+        releases: [{ url: `${RELEASES}v1.ttl`, version: "1" }, ...listed],
+      });
+      const bad = `${RELEASES}v26.ttl`;
+      vi.mocked(deps.deckLibrary.readRelease).mockImplementation(async (url, accept) => {
+        if (url !== bad) await new Promise((resolve) => setTimeout(resolve, 1));
+        accept?.(url === bad ? breaking(url) : conforming(url));
+        return url === series.url ? series : linked(1, { url });
+      });
+      vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) => ({
+        ...libraryContent,
+        url,
+        version: url === series.url ? "42" : (/v(\d+)\.ttl$/.exec(url)?.[1] ?? ""),
+      }));
+      vi.mocked(deps.deckRepository.listCards).mockResolvedValue([]);
+      const copy: Deck = { ...deck, sourceUrl: `${RELEASES}v1.ttl` };
+      await expect(
+        createUseCases(deps).planLibraryUpgrade(copy, {
+          deck: copy,
+          series,
+          version: "1",
+          newer: true,
+          fromLink: true,
+        }),
+      ).rejects.toMatchObject({ code: "releaseNotConforming" });
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      // The first four of the sixteen newest, read at once; none begun after the first broke.
+      const started = [26, 27, 28, 29].map((version) => `${RELEASES}v${version}.ttl`);
+      expect(checked(deps)).toEqual([series.url, `${RELEASES}v1.ttl`, ...started]);
     });
 
     it("planLibraryUpgrade reads a linked copy's own release, its newer release and those in between through reads of the plan's own, each checked", async () => {
