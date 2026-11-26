@@ -1346,7 +1346,7 @@ describe("the deck library", () => {
       expect(deps.deckLibrary.fetchCourseOutline).toHaveBeenCalledWith(release.url);
     });
 
-    it("a copy whose release now breaks the library's shapes is refused where it is read, nothing of it shown or written, and checked again on the next read", async () => {
+    it("a copy whose release now breaks the library's shapes is refused where it is read, nothing of it shown or written, and that refusal kept for the page session, its host not asked again", async () => {
       const deps = makeDeps();
       const release = linked(1);
       reading(deps, [release], breaking);
@@ -1361,7 +1361,7 @@ describe("the deck library", () => {
       await expect(useCases.deckRelease(copy)).rejects.toMatchObject({
         code: "releaseNotConforming",
       });
-      expect(deps.deckLibrary.readRelease).toHaveBeenCalledTimes(2);
+      expect(deps.deckLibrary.readRelease).toHaveBeenCalledTimes(1);
       expect(deps.deckLibrary.fetchLibraryDeck).not.toHaveBeenCalled();
       expect(deps.deckLibrary.fetchCourseOutline).not.toHaveBeenCalled();
       expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();

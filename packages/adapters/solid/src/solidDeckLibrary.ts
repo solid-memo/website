@@ -413,10 +413,15 @@ function turnsOf(atOnce: number, turnMs: number, waitMs: number) {
  * (getSolidDatasetLinear): a release of 3,000 cards otherwise takes
  * seconds to read, each time. A release never changes, so each is read
  * once and what is made of it — its content, a course's outline — kept,
- * shared by every reader of it, concurrent or later; a failed read is not
- * kept, so the next one tries again. The index is read afresh each time
- * it is asked for, as new releases come with the site; the deck list asks
- * once a page (useCopies), since the index changes only with a deploy.
+ * shared by every reader of it, concurrent or later; a failed read of
+ * the index or of a release in its folder, which come with the site, is
+ * not kept, so the next one tries again. A failed read of any other
+ * release is kept as a successful one is, for the page's life, so its
+ * server, its creator's to choose, is asked once whatever screens open:
+ * only a read checked (readRelease with `accept`) takes its place. The
+ * index is read afresh each time it is asked for, as new releases come
+ * with the site; the deck list asks once a page (useCopies), since the
+ * index changes only with a deploy.
  *
  * A release added from a link (readRelease) is read on its own, afresh
  * each time, with no index: its address may hold anything, now or later,
@@ -460,8 +465,12 @@ export function createSolidDeckLibrary({
   const budget = linkedReadsBudget(fetch);
   const turn = turnsOf(LINKED_READS_AT_ONCE, LINKED_READ_TURN_MS, LINKED_READ_WAIT_MS);
   const limited = limitedFetch(fetch, RELEASE_LIMITS);
+  // The library's own releases come with the site, from the index's folder.
+  const library = new URL(".", indexUrl).href;
+  const keepsFailed = (url: string) => !url.startsWith(library);
   const reads = releaseReads({
     unchecked: (url) => documents.release(url, limited, false),
+    keepsFailed,
     linked: (url, work) => budget.reads()(url, work),
     documents,
     tooLarge: budget.tooLarge(),
@@ -496,6 +505,7 @@ export function createSolidDeckLibrary({
       return releaseReads({
         unchecked: (url) =>
           turn(url, () => linked(url, ({ fetch }) => documents.release(url, fetch, false))),
+        keepsFailed,
         linked,
         documents,
         tooLarge: budget.tooLarge(linkedReleasesTooLarge),
@@ -518,6 +528,7 @@ export function createSolidDeckLibrary({
  */
 function releaseReads({
   unchecked,
+  keepsFailed,
   linked,
   documents,
   tooLarge,
@@ -525,6 +536,7 @@ function releaseReads({
   keptQuads,
 }: {
   unchecked: (url: string) => Promise<ReleaseRead>;
+  keepsFailed: (url: string) => boolean;
   linked: LinkedReads;
   documents: ReleaseDocuments;
   tooLarge: TooLarge;
@@ -602,15 +614,24 @@ function releaseReads({
     );
   }
 
-  /** The release's document, read once, and with its check again when it was accepted and has been let go. */
+  /**
+   * The release's document, read once, and with its check again when it was accepted and has been let go. A failed
+   * read of a release not the site's (`keepsFailed`) is kept as a successful one is, until a read checked
+   * (readRelease) takes its place: its address is its creator's to log each read of.
+   */
   function release(url: string): Promise<ReleaseRead> {
-    return kept(releases, url, () => {
-      const accept = accepts.get(url);
-      if (accept !== undefined) return readLinked(url, accept).then(({ release }) => release);
-      return unchecked(url).catch((error: unknown) => {
-        throw shownReadError(url, error, tooLarge);
-      });
-    });
+    return kept(
+      releases,
+      url,
+      () => {
+        const accept = accepts.get(url);
+        if (accept !== undefined) return readLinked(url, accept).then(({ release }) => release);
+        return unchecked(url).catch((error: unknown) => {
+          throw shownReadError(url, error, tooLarge);
+        });
+      },
+      keepsFailed(url),
+    );
   }
 
   return {
@@ -682,7 +703,8 @@ function readDocument(url: string, fetch: typeof globalThis.fetch): Promise<Data
 /**
  * `read` of the document at `url` with `fetch`, within RELEASE_READ_MS:
  * a read not done by then, its body read too, fails with podNoAnswer, so
- * that what is kept of it is let go (kept), and its requests are aborted.
+ * that what is kept of it is let go, or kept failed (kept), and its
+ * requests are aborted.
  * Only the read is timed: the check of what was read (validate) comes
  * after, however long it takes. The reads here pass no signal of their
  * own.
@@ -708,16 +730,22 @@ function readWithin<T>(
 /**
  * What `make` makes for the URL, made once and kept; a failure is
  * forgotten, so the next call tries again, unless what is kept is
- * another by then (a release's read checked, kept in its place).
+ * another by then (a release's read checked, kept in its place), or it
+ * is kept as well (`keepFailure`).
  */
-function kept<T>(cache: Map<string, Promise<T>>, url: string, make: () => Promise<T>): Promise<T> {
+function kept<T>(
+  cache: Map<string, Promise<T>>,
+  url: string,
+  make: () => Promise<T>,
+  keepFailure = false,
+): Promise<T> {
   let made = cache.get(url);
   if (made === undefined) {
     const making = make();
     made = making;
     cache.set(url, making);
     making.catch(() => {
-      if (cache.get(url) === making) cache.delete(url);
+      if (!keepFailure && cache.get(url) === making) cache.delete(url);
     });
   }
   return made;

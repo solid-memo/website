@@ -166,7 +166,13 @@ The browser contacts these, each when it's needed:
 - **The address of a deck or release added by link**, and, to look
   for its newer version, the folders above it up to its instance and
   a storage description one of them links to
-  ([deck-library.md](deck-library.md#from-a-link)).
+  ([deck-library.md](deck-library.md#from-a-link)). The first read of
+  the release in a page load is checked. When that read fails, the
+  failure is kept until the page is loaded again. The screens that read
+  the release, such as Study, Cram, a card's page, the card list and the
+  course screen, then send that address nothing more, retries included.
+  Only a read the learner asks for, such as adding the deck again, asks
+  it again, and one that passes takes the failure's place.
 - **The server of a release a Studio draft follows**, or whose next
   version the Studio starts, once a page load. It's asked as no one,
   unless it's the learner's own pod. Starting a next version also asks,

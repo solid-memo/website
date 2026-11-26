@@ -226,15 +226,20 @@ function refuseNonConforming(url: string, report: DocumentReport): void {
  * (checkLinkedRelease): its cards and outline are then read from that
  * checked read. A release whose address answers otherwise after it was
  * added is refused (releaseNotConforming) where it would have been
- * shown or its cards copied. A check that fails is not kept, so the next
- * read checks again; one that passes is kept for the page session, and
- * the read it accepted for as long as the adapter holds it
- * (DeckLibrary.readRelease), then read and held to the check again. A
- * release read with a check of the caller's own (`accept`), which is what
- * is shown before it is added, is held to the library's shapes too, before
- * that check, so only a read they pass counts as checked, and is pinned,
- * so what is added is what was shown. Releases the index lists are read
- * as they are: they come with the site, checked when they were published.
+ * shown or its cards copied. A check is kept for the page session,
+ * whether it passes or fails: the release's address is its creator's to
+ * choose, and may log each read, so a check that failed, its read or the
+ * library's shapes, is not asked again by the screens that read the
+ * release, nor by their retries. Only a read with a check of the caller's
+ * own (`accept`), one the learner asks for, reads the release again; one
+ * that passes takes the place of what was kept. The read a check accepted
+ * is kept for as long as the adapter holds it (DeckLibrary.readRelease),
+ * then read and held to the check again. A release read with a check of
+ * the caller's own, which is what is shown before it is added, is held to
+ * the library's shapes too, before that check, so only a read they pass
+ * counts as checked, and is pinned, so what is added is what was shown.
+ * Releases the index lists are read as they are: they come with the
+ * site, checked when they were published, and read again after a failure.
  */
 export function withLinkedReleasesChecked(deckLibrary: DeckLibrary): DeckLibrary {
   const checked = new Map<string, Promise<unknown>>();
@@ -243,11 +248,9 @@ export function withLinkedReleasesChecked(deckLibrary: DeckLibrary): DeckLibrary
     if ((await deckLibrary.readLibraryIndex()).releases.includes(url)) return;
     let check = checked.get(url);
     if (check === undefined) {
-      const checking = deckLibrary.readRelease(url, (report) => refuseNonConforming(url, report));
-      check = checking;
-      checked.set(url, checking);
-      // A check refused is forgotten, so the next read checks again.
-      checking.catch(() => checked.delete(url));
+      // Kept failed too: only a read the learner asks for (readRelease with `accept`) reads the release again.
+      check = deckLibrary.readRelease(url, (report) => refuseNonConforming(url, report));
+      checked.set(url, check);
     }
     await check;
   }
@@ -264,7 +267,8 @@ export function withLinkedReleasesChecked(deckLibrary: DeckLibrary): DeckLibrary
     async readRelease(url, accept) {
       if (accept === undefined) return deckLibrary.readRelease(url);
       // The library's shapes refuse first, whatever `accept` does: only a read they pass counts as checked.
-      // A read checked as it is added is the one its cards are copied from: it is not read again.
+      // A read checked as it is added is the one its cards are copied from: it is not read again, and it takes the
+      // place of a check kept before, failed or not. One that fails leaves what was kept.
       const read = await deckLibrary.readRelease(
         url,
         (report) => {

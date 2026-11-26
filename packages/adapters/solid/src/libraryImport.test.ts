@@ -822,7 +822,8 @@ describe("a release added from a link", () => {
     await expect(later.deckRelease(deck)).rejects.toMatchObject({
       code: "releaseNotConforming",
     });
-    expect(site.asked()).toBe(4);
+    // Read once as it was added, once to be checked in the later page: the refusal is kept there.
+    expect(site.asked()).toBe(2);
     expect(await everyTriple(store)).toEqual(before);
   });
 
