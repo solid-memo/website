@@ -50,12 +50,18 @@ jobs:
       # Renovate's packages' signatures, as in CI's check job
       # (docs/testing.md#the-workflows).
       - run: npm run audit:signatures -- --prefix scripts/renovate
+      # Renovate's log holds what the registries and GitHub answer, so the
+      # runner reads no workflow command while it runs, with a token that
+      # is new on every run.
       - env:
           GITHUB_COM_TOKEN: ${{ github.token }}
           LOG_LEVEL: info
-        run: >-
-          scripts/renovate/node_modules/.bin/renovate --platform=local --dry-run=lookup
-          --report-type=file --report-path="$RUNNER_TEMP/renovate-report.json"
+        run: |
+          token="$(openssl rand -hex 16)"
+          echo "::stop-commands::$token"
+          trap 'printf "\n::%s::\n" "$token"' EXIT
+          scripts/renovate/node_modules/.bin/renovate --platform=local --dry-run=lookup \
+            --report-type=file --report-path="$RUNNER_TEMP/renovate-report.json"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: renovate-report

@@ -33,12 +33,40 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      # lychee, from its release, checked against the SHA-256 committed
+      # here, as the publiccode.yml parser is: Renovate updates the version
+      # and the hash together, and a person merges the update.
+      - env:
+          # renovate: datasource=github-release-attachments depName=lycheeverse/lychee
+          LYCHEE_VERSION: lychee-v0.24.2
+          LYCHEE_SHA256: 1f4e0ef7f6554a6ed33dd7ac144fb2e1bbed98598e7af973042fc5cd43951c9a
+        run: |
+          dir="$RUNNER_TEMP/lychee"
+          mkdir -p "$dir"
+          cd "$dir"
+          file=lychee-x86_64-unknown-linux-gnu.tar.gz
+          curl -fsSLO "https://github.com/lycheeverse/lychee/releases/download/$LYCHEE_VERSION/$file"
+          echo "$LYCHEE_SHA256  $file" | sha256sum -c -
+          tar -xzf "$file" --strip-components=1 lychee-x86_64-unknown-linux-gnu/lychee
+          echo "$dir" >> "$GITHUB_PATH"
       # lychee asks GitHub's own addresses with the run's token, read-only,
-      # as GitHub refuses many requests without one.
-      - uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
-        with:
-          args: --max-retries 3 '**/*.md'
-          output: ${{ runner.temp }}/lychee.md
+      # as GitHub refuses many requests without one. What it prints holds
+      # the web's answers, such as an error's text or the address a
+      # redirect names, so the runner reads no workflow command while it
+      # runs, with a token that is new on every run. Its report is the
+      # job's summary too.
+      - env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          token="$(openssl rand -hex 16)"
+          echo "::stop-commands::$token"
+          trap 'printf "\n::%s::\n" "$token"' EXIT
+          report="$RUNNER_TEMP/lychee.md"
+          status=0
+          lychee --max-retries 3 --format markdown '**/*.md' > "$report" || status=$?
+          cat "$report"
+          cat "$report" >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"
       - uses: ./.github/actions/publiccode
         if: success() || failure()
         with:
@@ -47,7 +75,8 @@ jobs:
   # Each suggested provider's issuer answers its discovery document with
   # the issuer the entry names, and its sign-up page answers
   # (scripts/checkProviders.ts). The script imports only the providers'
-  # list, so it needs no npm ci.
+  # list, so it needs no npm ci. It logs the issuers' answers, so the
+  # runner reads no workflow command while it runs, as in the links job.
   providers:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -58,4 +87,8 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
-      - run: npm run check:providers
+      - run: |
+          token="$(openssl rand -hex 16)"
+          echo "::stop-commands::$token"
+          trap 'printf "\n::%s::\n" "$token"' EXIT
+          npm run check:providers

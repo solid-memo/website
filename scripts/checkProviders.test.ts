@@ -162,6 +162,40 @@ describe("main", () => {
   });
 });
 
+describe("an issuer from the provider", () => {
+  it("is logged so that the workflow's log reads no command in it", async () => {
+    const logs: string[] = [];
+    const fetch = fakeFetch({
+      [CONFIGURATION]: [
+        json({ issuer: "##[error]Pod provider list compromised\n::warning::x\r  ::notice::y" }),
+      ],
+      "https://example/sign-up": [new Response("")],
+    });
+    expect(await main({ providers: [PROVIDER], fetch, log: (m) => logs.push(m) })).toBe(1);
+    expect(logs).toEqual([
+      'Example Pods: its issuer is "##\\[error]Pod provider list compromised\\n::warning::x\\r  ::notice::y", not "https://login.example/".',
+    ]);
+    expect(logs.join("\n")).not.toContain("##[");
+    expect(logs.join("\n")).not.toMatch(/^\s*::/m);
+  });
+
+  it("is cut short past 200 characters, whatever its type", async () => {
+    const long = `https://login.example/${"a".repeat(300)}`;
+    const fetch = fakeFetch({
+      [CONFIGURATION]: [json({ issuer: long })],
+      "https://example/sign-up": [new Response("")],
+    });
+    const { signUpUrl: _, ...withoutSignUp } = PROVIDER;
+    expect(await providerProblems(withoutSignUp, fetch)).toEqual([
+      `Example Pods: its issuer is ${JSON.stringify(long).slice(0, 200)}… (324 characters), not "https://login.example/".`,
+    ]);
+    const object = fakeFetch({ [CONFIGURATION]: [json({ issuer: { at: 1 } })] });
+    expect(await providerProblems(withoutSignUp, object)).toEqual([
+      'Example Pods: its issuer is {"at":1}, not "https://login.example/".',
+    ]);
+  });
+});
+
 describe("run", () => {
   it("checks the providers onboarding suggests, with the global fetch", async () => {
     const issuers = new Map(
