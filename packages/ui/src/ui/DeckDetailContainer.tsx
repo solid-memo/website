@@ -17,7 +17,7 @@ import { Loading } from "./Loading";
 import { routeToHash, studioHref } from "./router";
 import { useI18n } from "./i18n";
 import { useDeckReleaseQuery } from "./deckRelease";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 import { changes, useWrite } from "./writeEffects";
 
 /**
@@ -44,10 +44,7 @@ export function DeckDetailContainer({
   onStudy: () => void;
 }) {
   const { t, errorText } = useI18n();
-  const cardsQuery = useQuery({
-    queryKey: queryKeys.cards(deck.cardsDocumentUrl),
-    queryFn: () => useCases.listCards(deck),
-  });
+  const cardsQuery = useQuery(queries.cards(useCases, deck));
 
   const { release, error: releaseError } = useDeckReleaseQuery(useCases, deck);
   const unchecked = release === undefined && releaseError !== null;
@@ -59,13 +56,7 @@ export function DeckDetailContainer({
     [cardsQuery.data, release, unchecked],
   );
 
-  const queueQuery = useQuery({
-    queryKey: queryKeys.studyQueue(deck.url),
-    queryFn: () => useCases.getStudyQueue(instance.url, deck, new Date()),
-    staleTime: Infinity,
-    refetchOnWindowFocus: false,
-    refetchOnMount: "always",
-  });
+  const queueQuery = useQuery(queries.studyQueue(useCases, instance.url, deck, () => new Date()));
   // A failed reset may still have removed the day's answers from the log, so what was read
   // before it is refreshed either way; the queue this screen shows is read again.
   const resetDayMutation = useWrite({

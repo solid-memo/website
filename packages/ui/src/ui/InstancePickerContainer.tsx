@@ -11,6 +11,7 @@ import { isInStorages } from "@solid-memo/domain/instanceLayout";
 import type { Session } from "@solid-memo/domain/session";
 import { useI18n } from "./i18n";
 import { InstancePicker } from "./InstancePicker";
+import { queries } from "./queries";
 import { queryKeys } from "./queryKeys";
 import { changes, useWrite } from "./writeEffects";
 
@@ -45,15 +46,9 @@ export function InstancePickerContainer({
   const queryClient = useQueryClient();
   const webId = session.webId;
 
-  const registrationOptionsQuery = useQuery({
-    queryKey: queryKeys.registrationOptions(webId),
-    queryFn: () => useCases.getRegistrationOptions(session),
-  });
+  const registrationOptionsQuery = useQuery(queries.registrationOptions(useCases, session));
 
-  const storagesQuery = useQuery({
-    queryKey: queryKeys.storages(webId),
-    queryFn: () => useCases.listStorages(session),
-  });
+  const storagesQuery = useQuery(queries.storages(useCases, session));
 
   const attachInstanceMutation = useWrite({
     mutationFn: (args: { url: string; target: RegistrationTarget }) =>

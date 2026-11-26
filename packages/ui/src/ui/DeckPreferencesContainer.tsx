@@ -21,8 +21,7 @@ import { Loading } from "./Loading";
 import { deckHref, routeToHash } from "./router";
 import { useI18n } from "./i18n";
 import { useDeckReleaseQuery } from "./deckRelease";
-import { courseStripQuery } from "./CourseStrip";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 import { changes, useWrite } from "./writeEffects";
 
 /**
@@ -67,10 +66,7 @@ export function DeckPreferencesContainer({
 
   const { release, error: releaseError } = useDeckReleaseQuery(useCases, deck);
 
-  const cardsQuery = useQuery({
-    queryKey: queryKeys.cards(deck.cardsDocumentUrl),
-    queryFn: () => useCases.listCards(deck),
-  });
+  const cardsQuery = useQuery(queries.cards(useCases, deck));
 
   // The release decides which cards are the user's to settle: none is counted until it is known.
   const languages = useMemo(
@@ -84,7 +80,7 @@ export function DeckPreferencesContainer({
   // A copy made before a course's deck said so is told one by its release.
   const course = deck.course === true || release?.isCourse === true;
   // The outline as the course strip reads it, so one read serves both.
-  const courseQuery = useQuery({ ...courseStripQuery(useCases, deck), enabled: course });
+  const courseQuery = useQuery({ ...queries.courseStrip(useCases, deck), enabled: course });
 
   const cardLanguages = useMemo(() => {
     if (cardsQuery.data === undefined) return undefined;
@@ -100,10 +96,7 @@ export function DeckPreferencesContainer({
       : undefined;
   }, [cardsQuery.data, course, release, releaseError, courseQuery.data, courseQuery.isError]);
 
-  const preferencesQuery = useQuery({
-    queryKey: queryKeys.preferences(instance.url),
-    queryFn: () => useCases.getPreferences(instance.url),
-  });
+  const preferencesQuery = useQuery(queries.preferences(useCases, instance.url));
 
   const saveMutation = useWrite({
     mutationFn: (pace: DeckPace) => useCases.setDeckPace(deck, pace),

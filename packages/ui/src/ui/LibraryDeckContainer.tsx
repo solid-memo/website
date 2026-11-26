@@ -10,7 +10,7 @@ import { isCopyOf, type LibraryDeck } from "@solid-memo/domain/library";
 import { LibraryDeckScreen } from "./LibraryDeckScreen";
 import { libraryPreviewHref, routeToHash, tryHref } from "./router";
 import { useI18n } from "./i18n";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 import { changes, useWrite } from "./writeEffects";
 
 /**
@@ -39,10 +39,7 @@ export function LibraryDeckContainer({
 }) {
   const { errorText } = useI18n();
 
-  const decksQuery = useQuery({
-    queryKey: queryKeys.decks(instance.url),
-    queryFn: () => useCases.listDecks(instance.url),
-  });
+  const decksQuery = useQuery(queries.decks(useCases, instance.url));
   const imported = (decksQuery.data ?? []).some((podDeck) => isCopyOf(podDeck, deck));
 
   const importMutation = useWrite({

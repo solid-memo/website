@@ -12,7 +12,7 @@ import type { LibraryUpgradePlan } from "@solid-memo/domain/libraryUpgrade";
 import { useDataCheck } from "@solid-memo/ui/dataCheck";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
-import { libraryUpgradeQuery, upgradeChanges } from "@solid-memo/ui/LibraryUpgradeContainer";
+import { upgradeChanges } from "@solid-memo/ui/LibraryUpgradeContainer";
 import { useWrite } from "@solid-memo/ui/writeEffects";
 import { Loading } from "@solid-memo/ui/Loading";
 import {
@@ -23,7 +23,7 @@ import {
   type CopyRow,
   type PlanState,
 } from "./LibraryCopiesScreen";
-import { libraryUpdatesQuery } from "./UpdateBadge";
+import { queries } from "./queries";
 
 /**
  * The library copies screen's data: the instance's copies of library
@@ -141,13 +141,12 @@ export function LibraryPlanContainer({
  * compared against those it read.
  */
 function useCopyRows(useCases: UseCases, instanceUrl: string) {
-  const copiesQuery = useQuery(libraryUpdatesQuery(useCases, instanceUrl));
+  const copiesQuery = useQuery(queries.libraryUpdates(useCases, instanceUrl));
   const copies = copiesQuery.data ?? [];
   const planQueries = useQueries({
+    // A copy with a newer release has its series, as the copies found it: it is not looked for again.
     queries: copies.map((copy) => ({
-      ...libraryUpgradeQuery(useCases, copy.deck),
-      // A copy with a newer release has its series, as the copies found it: it is not looked for again.
-      queryFn: () => useCases.planLibraryUpgrade(copy.deck, copy),
+      ...queries.libraryUpgradePlan(useCases, copy.deck, copy),
       enabled: copy.newer === true,
     })),
   });

@@ -8,13 +8,12 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LibraryDeck } from "@solid-memo/domain/library";
 import { copiedTest } from "@solid-memo/domain/libraryCopy";
-import { libraryIndexQuery } from "./deckTreeEditor";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
 import { forgetLibrarySelection, LibraryScreen } from "./LibraryScreen";
 import { Loading } from "./Loading";
 import { importUrlHref, libraryDeckHref, libraryPreviewHref } from "./router";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 import { changes, useWrite } from "./writeEffects";
 
 /**
@@ -35,12 +34,9 @@ export function LibraryContainer({
   // Per instance: another instance's library is a fresh list.
   const memoryKey = `library:${instance.url}`;
 
-  const libraryQuery = useQuery(libraryIndexQuery(useCases));
+  const libraryQuery = useQuery(queries.library(useCases));
 
-  const decksQuery = useQuery({
-    queryKey: queryKeys.decks(instance.url),
-    queryFn: () => useCases.listDecks(instance.url),
-  });
+  const decksQuery = useQuery(queries.decks(useCases, instance.url));
   // Worked out once for each read of the decks, not on each render: the
   // screen renders again on each keystroke in the search.
   const isImported = useMemo(() => copiedTest(decksQuery.data ?? []), [decksQuery.data]);

@@ -4,16 +4,9 @@
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
-import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
-import {
-  readWhole,
-  type CheckPolicy,
-  type ReleaseCheck,
-} from "@solid-memo/domain/release/releaseCheck";
+import type { CheckPolicy, ReleaseCheck } from "@solid-memo/domain/release/releaseCheck";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
-import type { MarkdownCheck } from "@solid-memo/domain/release/markdownFields";
-import { releaseMarkdownCheck } from "@solid-memo/ui/markdownCache";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 
 /**
  * The release check of a draft as the Studio's screens run it (docs/
@@ -26,70 +19,13 @@ import { queryKeys } from "./queryKeys";
  * version it is in.
  */
 
-/** The draft whose Markdown check is kept, and that check. */
-let kept: { url: string; check: MarkdownCheck } | undefined;
-
-/**
- * The Markdown check every check of the draft shares, its publishing
- * among them, which remembers the texts it checked within its caches'
- * bound (releaseMarkdownCheck). Only the last
- * draft's is kept: another draft's starts anew, so one draft's texts
- * neither stay in memory nor slow the next one's check.
- */
-export function markdownCheckOf(url: string): MarkdownCheck {
-  if (kept?.url !== url) kept = { url, check: releaseMarkdownCheck() };
-  return kept.check;
-}
-
-const revisions = new WeakMap<ReleaseDraft, number>();
-let latest = 0;
-
-/** A number for each version of a draft: the editor makes a new draft for each change. */
-export function revisionOf(draft: ReleaseDraft): number {
-  let revision = revisions.get(draft);
-  if (revision === undefined) {
-    revision = ++latest;
-    revisions.set(draft, revision);
-  }
-  return revision;
-}
-
-/**
- * The domain's rules of the draft for the policy, the shapes left out; the
- * last version's while a newer one is checked (not another draft's, nor
- * another policy's: the workspace's check goes from draft to draft). A
- * check with a part unread is stale at once, so it is made again when its
- * screen opens again or the window is focused. No draft (null), no check.
- * Once a version is checked, the checks of the other versions that no
- * screen shows go: the editor makes a version for each change, and each
- * check holds all its problems.
- */
+/** The domain's rules of the draft for the policy, the shapes left out (queries.releaseCheck); no draft (null), no check. */
 export function useReleaseCheck(
   useCases: UseCases,
   draft: ReleaseDraft | null,
   policy: CheckPolicy,
 ) {
-  const queryClient = useQueryClient();
-  const revision = draft === null ? 0 : revisionOf(draft);
-  return useQuery<ReleaseCheck>({
-    queryKey: queryKeys.releaseCheck(draft?.url, policy, revision),
-    queryFn: async () => {
-      const found = await useCases.checkReleaseDraft(draft!, markdownCheckOf(draft!.url), policy);
-      queryClient.removeQueries({
-        queryKey: queryKeys.releaseChecks(),
-        type: "inactive",
-        predicate: (query) => query.queryKey[3] !== revision,
-      });
-      return found;
-    },
-    enabled: draft !== null,
-    placeholderData: (previous, previousQuery) =>
-      previousQuery?.queryKey[1] === draft?.url && previousQuery?.queryKey[2] === policy
-        ? previous
-        : undefined,
-    staleTime: (query) =>
-      query.state.data === undefined || readWhole(query.state.data) ? Infinity : 0,
-  });
+  return useQuery(queries.releaseCheck(useCases, useQueryClient(), draft, policy));
 }
 
 /**
@@ -105,15 +41,5 @@ export function publishErrors(check: Pick<ReleaseCheck, "rules" | "drops" | "mar
 
 /** What the shapes say of the version of the draft they were asked of (`asked`); nothing until they are. */
 export function useShapeCheck(useCases: UseCases, asked: ReleaseDraft | null, policy: CheckPolicy) {
-  return useQuery<ReleaseProblem[]>({
-    queryKey: queryKeys.releaseShapes(asked?.url, policy, asked === null ? 0 : revisionOf(asked)),
-    queryFn: async () =>
-      (
-        await useCases.checkReleaseDraft(asked!, markdownCheckOf(asked!.url), policy, {
-          shapes: true,
-        })
-      ).shapes!,
-    enabled: asked !== null,
-    staleTime: Infinity,
-  });
+  return useQuery(queries.releaseShapes(useCases, asked, policy));
 }

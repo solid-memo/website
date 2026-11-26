@@ -20,6 +20,7 @@ import { draftNameOf } from "./titles";
 import { deckOf, sectionHome, sectionOf, SIDEBAR_SECTIONS } from "./workspaceLayout";
 import { queryKeys } from "../queryKeys";
 import { searchedText } from "../searchText";
+import { queries } from "../queries";
 
 /** A name's texts, in each language it has, as the filter matches them (searchedText). */
 function searchedTexts(...texts: (LangText | string)[]): string[] {
@@ -77,14 +78,8 @@ export function StudioSidebar({
   const recentId = useId();
   const decksId = useId();
   const draftsId = useId();
-  const decksQuery = useQuery({
-    queryKey: queryKeys.decks(instance.url),
-    queryFn: () => useCases.listDecks(instance.url),
-  });
-  const draftsQuery = useQuery({
-    queryKey: queryKeys.releaseDrafts(instance.url),
-    queryFn: () => useCases.listReleaseDrafts(instance.url),
-  });
+  const decksQuery = useQuery(queries.decks(useCases, instance.url));
+  const draftsQuery = useQuery(queries.releaseDrafts(useCases, instance.url));
   const problems = useInstanceCheck(instance.url)?.violationCount ?? 0;
   const section = sectionOf(route);
   const deckUrl = deckOf(route);

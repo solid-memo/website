@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { skipToken, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "preact/hooks";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
@@ -19,7 +19,6 @@ import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n, type I18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { problemText, type MarkdownProblem } from "@solid-memo/ui/MarkdownEditing";
-import { deckHealthQuery } from "./HealthBadge";
 import { placeText } from "./HealthScreen";
 import { listedProblems, PROBLEM_LIMIT, ProblemList, shownProblems } from "./ProblemList";
 import { publishErrors, useReleaseCheck } from "./releaseCheck";
@@ -31,7 +30,7 @@ import {
   type StudioRoute,
 } from "./router";
 import type { WorkspaceProblems } from "./shell/BottomDock";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 
 /** A deck's health as the badges and its health screen check it, with what its Markdown check finds. */
 type Health = DeckHealth<MarkdownProblem>;
@@ -51,7 +50,7 @@ type Health = DeckHealth<MarkdownProblem>;
  * pod, as its release screen counts them; undefined while it is made),
  * or that it is published already.
  *
- * A deck's are what its health found (deckHealthQuery), as the badges
+ * A deck's are what its health found (queries.deckHealth), as the badges
  * and its health screen check it: read here only from what they found,
  * and checked only when the dock shows them (DeckProblems), so a deck's
  * screens make no check of their own. Its routes are those the dock
@@ -68,7 +67,6 @@ export function useWorkspaceProblems(
 } {
   // Its text, kept from one drawing to the next (I18nProvider), not the context's object.
   const { t, cardReader } = useI18n();
-  const queryClient = useQueryClient();
   const draftRoute = route !== null && isDraftRoute(route) ? route : null;
   const draft = draftRoute === null ? null : shown.draft;
   const check = useReleaseCheck(
@@ -79,13 +77,7 @@ export function useWorkspaceProblems(
   // A pod's, as publishing checks it: the one above but where the check shows the library's.
   const podCheck = useReleaseCheck(useCases, draft, "pod");
   const deck = shown.deck;
-  const health = useQuery<Health>({
-    queryKey:
-      deck === null
-        ? queryKeys.validation(null)
-        : deckHealthQuery(useCases, queryClient, instanceUrlOfDeck(deck.url), deck).queryKey,
-    queryFn: skipToken,
-  });
+  const health = useQuery(queries.foundDeckHealth(deck));
   const deckRoutes = useMemo(
     () =>
       deck === null || health.data === undefined
@@ -246,7 +238,7 @@ export function deckProblemsOf(
 function DeckProblems({ useCases, deck }: { useCases: UseCases; deck: Deck }) {
   const { t, cardReader, errorText } = useI18n();
   const health = useQuery(
-    deckHealthQuery(useCases, useQueryClient(), instanceUrlOfDeck(deck.url), deck),
+    queries.deckHealth(useCases, useQueryClient(), instanceUrlOfDeck(deck.url), deck),
   );
   const found = useMemo(
     () => (health.data === undefined ? null : deckProblemsOf(deck, health.data, { t, cardReader })),

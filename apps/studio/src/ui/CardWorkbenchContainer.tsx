@@ -29,7 +29,7 @@ import {
 import type { CardTransfer } from "./TransferCardsDialog";
 import type { SavedView } from "./shell/views";
 import { changes, useWrite } from "@solid-memo/ui/writeEffects";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 
 /**
  * The card workbench's data: the deck's cards and review states, read as
@@ -108,18 +108,9 @@ export function CardWorkbenchContainer({
   const [failure, setFailure] = useState<unknown>(null);
   const [reviewDone, setReviewDone] = useState<ReviewEditMade | null>(null);
   const [transferDone, setTransferDone] = useState<TransferMade | null>(null);
-  const cardsQuery = useQuery({
-    queryKey: queryKeys.cards(deck.cardsDocumentUrl),
-    queryFn: () => useCases.listCards(deck),
-  });
-  const reviewsQuery = useQuery({
-    queryKey: queryKeys.reviews(deck.reviewsDocumentUrl),
-    queryFn: () => useCases.listDeckReviewStates(deck),
-  });
-  const preferencesQuery = useQuery({
-    queryKey: queryKeys.preferences(instance.url),
-    queryFn: () => useCases.getPreferences(instance.url),
-  });
+  const cardsQuery = useQuery(queries.cards(useCases, deck));
+  const reviewsQuery = useQuery(queries.reviews(useCases, deck));
+  const preferencesQuery = useQuery(queries.preferences(useCases, instance.url));
   const check = useDataCheck(useCases, instance.url);
   // Only a deck that may be changed takes cards, and not one over this deck's
   // documents. Found once per read of the decks and of the check, not on each
@@ -130,10 +121,7 @@ export function CardWorkbenchContainer({
     const shares = sharesDocumentsWith(deck);
     return decks.filter((other) => check.readOnly(other) === null && !shares(other));
   }, [deck, decks, check.policy, check.unsettled, check.report]);
-  const answersQuery = useQuery({
-    queryKey: queryKeys.answerLog(instance.url),
-    queryFn: () => useCases.loadAnswerLog(instance.url),
-  });
+  const answersQuery = useQuery(queries.answerLog(useCases, instance.url));
   const answers = answersQuery.data;
   const lapses = useMemo(
     () => (answers === undefined ? undefined : lapseIndex(deckAnswers(answers, deck))),

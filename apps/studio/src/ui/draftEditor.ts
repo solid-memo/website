@@ -4,7 +4,7 @@
 
 import { createContext } from "preact";
 import { useContext, useEffect, useRef, useState } from "preact/hooks";
-import { queryOptions, useIsMutating, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useIsMutating, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { DraftEdit } from "@solid-memo/application/releaseDrafts";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { changedDocuments, draftPlaceOf } from "@solid-memo/domain/release/draftLayout";
@@ -17,28 +17,11 @@ import {
 } from "@solid-memo/domain/release/releaseDraft";
 import { useDataCheck, type ReadOnlyReason } from "@solid-memo/ui/dataCheck";
 import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 
 /** The queue a write of a draft waits in, after the draft's writes before it, whatever their documents. */
 export function draftScope(draftUrl: string): string {
   return `draft ${draftUrl}`;
-}
-
-/**
- * The query of a draft, as every screen that reads it asks for it: the
- * editors (useDraftEditor), the workspace and a trial. A query takes the
- * options of the screen that asked last, so they all ask alike. The
- * draft on screen holds changes not yet written: it is read afresh only
- * when asked. The draft kept is the very one an edit made, not a copy
- * shared with the one before it (structural sharing), so the next edit
- * finds its layout known (changedDocuments).
- */
-export function releaseDraftQuery(useCases: UseCases, draftUrl: string) {
-  return queryOptions({
-    queryKey: queryKeys.releaseDraft(draftUrl),
-    queryFn: () => useCases.getReleaseDraft(draftUrl),
-    staleTime: Infinity,
-    structuralSharing: false,
-  });
 }
 
 /** What a draft's editor tells the Studio's status bar: how many documents of its changes wait to be written, and whether its last change failed. */
@@ -169,7 +152,7 @@ export function useDraftEditor(useCases: UseCases, draftUrl: string): DraftEdito
   // A draft's screens are routed only at a draft's URL.
   const instanceUrl = draftPlaceOf(draftUrl)!.instanceUrl;
   const check = useDataCheck(useCases, instanceUrl);
-  const query = useQuery(releaseDraftQuery(useCases, draftUrl));
+  const query = useQuery(queries.releaseDraft(useCases, draftUrl));
   const [failure, setFailure] = useState<DraftFailure | null>(null);
   const waiting = pendingOf(draftUrl);
   const [waitingCount, setWaitingCount] = useState(0);

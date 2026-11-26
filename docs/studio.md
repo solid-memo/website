@@ -2032,7 +2032,7 @@ Every edit is made at once on the screen, then written in the pod
   a save returns included, the first time an edit needs it. The layout
   is kept from one edit to the next, since every screen that reads
   the draft keeps the draft the edit made, not a copy
-  (`releaseDraftQuery`). After that, a keystroke compares the records
+  (`queries.releaseDraft`). After that, a keystroke compares the records
   it replaced alone. A change of several documents (a move, say) is
   written at once. What waits is the draft's, not an editor's: the
   screen's editor and the outline share it. Leaving the screen, or an

@@ -13,6 +13,7 @@ import { PaletteEditorScreen } from "./PaletteEditorScreen";
 import { routeToHash } from "./router";
 import { useI18n } from "./i18n";
 import { useTheme } from "./theme";
+import { queries } from "./queries";
 import { queryKeys } from "./queryKeys";
 import { changes, useWrite } from "./writeEffects";
 
@@ -36,10 +37,7 @@ export function PaletteEditorContainer({
 }) {
   const { t, errorText } = useI18n();
   const { chooseCustomPalette } = useTheme();
-  const palettesQuery = useQuery({
-    queryKey: queryKeys.palettes(instance.url),
-    queryFn: () => useCases.listPalettes(instance.url),
-  });
+  const palettesQuery = useQuery(queries.palettes(useCases, instance.url));
   const saveMutation = useWrite({
     mutationFn: ({ draft, useAnyway }: { draft: PaletteDraft; useAnyway: boolean }) =>
       useCases.savePalette(instance.url, draft, { useAnyway }),

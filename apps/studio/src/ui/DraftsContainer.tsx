@@ -17,6 +17,7 @@ import { Loading } from "@solid-memo/ui/Loading";
 import { DraftsScreen } from "./DraftsScreen";
 import { changes, useWrite } from "@solid-memo/ui/writeEffects";
 import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 
 /**
  * The drafts screen's data: the instance's drafts (queryKeys.releaseDrafts) and its
@@ -54,14 +55,8 @@ export function DraftsContainer({
   const { t, errorText } = useI18n();
   const queryClient = useQueryClient();
   const check = useDataCheck(useCases, instance.url);
-  const draftsQuery = useQuery({
-    queryKey: queryKeys.releaseDrafts(instance.url),
-    queryFn: () => useCases.listReleaseDrafts(instance.url),
-  });
-  const treeQuery = useQuery({
-    queryKey: queryKeys.deckTree(instance.url),
-    queryFn: () => useCases.listDeckTree(instance.url),
-  });
+  const draftsQuery = useQuery(queries.releaseDrafts(useCases, instance.url));
+  const treeQuery = useQuery(queries.deckTree(useCases, instance.url));
   // The instance's check covers its drafts' documents too.
   const reread = () => [
     changes.reads(queryKeys.releaseDrafts(instance.url), queryKeys.validation(instance.url)),

@@ -12,7 +12,7 @@ import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
 import { LibraryPreviewScreen, type PreviewPrompt } from "./LibraryPreviewScreen";
 import { Loading } from "./Loading";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 
 /**
  * Fetches a library deck's cards and shows them at random, one after
@@ -34,10 +34,7 @@ export function LibraryPreviewContainer({
   random?: () => number;
 }) {
   const { t, readerText, readerLang, errorText, languageParts } = useI18n();
-  const cardsQuery = useQuery({
-    queryKey: queryKeys.libraryCards(deck.url),
-    queryFn: () => useCases.listLibraryCards(deck),
-  });
+  const cardsQuery = useQuery(queries.libraryCards(useCases, deck));
   const [first] = useState(random);
   const [shown, setShown] = useState<{ index: number; turn: number } | null>(null);
 

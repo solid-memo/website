@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: MIT
 
 import type { QueryClient } from "@tanstack/react-query";
-import type { UseCases } from "@solid-memo/application/useCases";
 import type { StatisticsRange as RangeRead } from "@solid-memo/application/statistics";
 import type { StatisticsRange } from "./router";
 import { queryKeys } from "./queryKeys";
@@ -48,40 +47,4 @@ export function rangeRead(range: StatisticsRange): RangeRead {
     case "all":
       return { range: "all" };
   }
-}
-
-/** The statistics of a range, of every deck of the instance or of one (by its URL), as one query. */
-export function statisticsQuery(
-  useCases: UseCases,
-  instanceUrl: string,
-  range: StatisticsRange,
-  deckUrl?: string,
-) {
-  const read = rangeRead(range);
-  return {
-    queryKey:
-      deckUrl !== undefined
-        ? queryKeys.deckStatistics(instanceUrl, deckUrl, range)
-        : queryKeys.statisticsOfRange(instanceUrl, range),
-    queryFn: () =>
-      useCases.getStatistics(
-        instanceUrl,
-        new Date(),
-        deckUrl === undefined ? read : { ...read, deckUrl },
-      ),
-    staleTime: STATISTICS_STALE_MS,
-  };
-}
-
-/**
- * The today strip's figures (TodaySummaryContainer), as the statistics
- * are kept: under "statistics", so a change made clears them too
- * (keepStudyFiguresFresh), and as long without reading them anew.
- */
-export function todayFiguresQuery(useCases: UseCases, instanceUrl: string) {
-  return {
-    queryKey: queryKeys.todayFigures(instanceUrl),
-    queryFn: () => useCases.getTodayFigures(instanceUrl, new Date()),
-    staleTime: STATISTICS_STALE_MS,
-  };
 }

@@ -19,7 +19,8 @@ import { Loading } from "./Loading";
 import type { StatisticsRange, StatisticsView } from "./router";
 import { StatisticsScreen, type StatisticsChange } from "./StatisticsScreen";
 import { ActivitySection, MemorySection, OverviewSection } from "./StatisticsSections";
-import { rangeRead, statisticsQuery } from "./studyFigures";
+import { queries } from "./queries";
+import { rangeRead } from "./studyFigures";
 
 /**
  * The statistics page, of every deck of the instance or of the one deck
@@ -58,7 +59,7 @@ export function StatisticsContainer({
   onChange: (change: StatisticsChange) => void;
 }) {
   const { t, errorText } = useI18n();
-  const statisticsRead = useQuery(statisticsQuery(useCases, instance.url, range, deck?.url));
+  const statisticsRead = useQuery(queries.statistics(useCases, instance.url, range, deck?.url));
   const progress = useCardProgress(useCases, instance, deck).data;
   const cardsYouKnow =
     progress === undefined

@@ -9,7 +9,7 @@ import type { Instance } from "@solid-memo/domain/instance";
 import { CheckIcon } from "./icons";
 import { LoadingDots } from "./Loading";
 import { useI18n } from "./i18n";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 
 /**
  * What a deck-list row offers for its deck today, with how much is left
@@ -71,21 +71,6 @@ export function DeckStudyAction({
   );
 }
 
-/**
- * A deck's study counts for its deck-list row. Under the deck's queue
- * key, so whatever drops the queue drops them too; fresh for a little
- * while, so counts fetched while the instance is checked (Workspace)
- * serve the list that follows.
- */
-export function studyCountsQuery(useCases: UseCases, instanceUrl: string, deck: Deck) {
-  return {
-    queryKey: queryKeys.studyCounts(deck.url),
-    queryFn: () => useCases.getStudyCounts(instanceUrl, deck, new Date()),
-    staleTime: 30_000,
-    refetchOnWindowFocus: false,
-  };
-}
-
 /** Owns one deck's counts query for its deck-list row. */
 export function DeckStudyActionContainer({
   useCases,
@@ -99,7 +84,7 @@ export function DeckStudyActionContainer({
   onStudy: () => void;
 }) {
   const { readerText } = useI18n();
-  const queueQuery = useQuery(studyCountsQuery(useCases, instance.url, deck));
+  const queueQuery = useQuery(queries.studyCounts(useCases, instance.url, deck));
 
   return (
     <DeckStudyAction

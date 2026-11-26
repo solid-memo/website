@@ -28,6 +28,7 @@ import { useClock } from "./courseLinks";
 import { useReportTarget } from "./deckRelease";
 import { deckHref } from "./router";
 import { useI18n } from "./i18n";
+import { queries } from "./queries";
 import { queryKeys } from "./queryKeys";
 
 /** A study session as it stands. */
@@ -101,13 +102,7 @@ export function StudyContainer({
   const queryClient = useQueryClient();
   const now = useClock();
 
-  const queueQuery = useQuery({
-    queryKey: queryKeys.studyQueue(deck.url),
-    queryFn: () => useCases.getStudyQueue(instance.url, deck, now()),
-    staleTime: Infinity,
-    refetchOnWindowFocus: false,
-    refetchOnMount: "always",
-  });
+  const queueQuery = useQuery(queries.studyQueue(useCases, instance.url, deck, now));
 
   const report = useReportTarget(useCases, deck);
 

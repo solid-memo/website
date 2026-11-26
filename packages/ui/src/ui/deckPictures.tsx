@@ -10,10 +10,9 @@ import type { Deck } from "@solid-memo/domain/deck";
 import { pictureHost } from "@solid-memo/domain/deckPictures";
 import { libraryCopyTest } from "@solid-memo/domain/libraryCopy";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
-import { libraryIndexQuery } from "./deckTreeEditor";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type ErrorText } from "./i18n";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 import { changes, useWrite } from "./writeEffects";
 import { useRemembered } from "./remembered";
 
@@ -45,11 +44,7 @@ const PicturesContext = createContext<PictureGate | null>(null);
  */
 export function useInOwnPod(useCases: UseCases, deck: Deck | undefined): boolean | undefined {
   const catalogUrl = deck === undefined ? null : documentUrlOf(deck.url);
-  const query = useQuery({
-    queryKey: queryKeys.inOwnPod(catalogUrl),
-    queryFn: () => useCases.isInOwnPod(catalogUrl!),
-    enabled: catalogUrl !== null,
-  });
+  const query = useQuery(queries.inOwnPod(useCases, catalogUrl));
   return query.data ?? (query.isError ? false : undefined);
 }
 
@@ -101,7 +96,7 @@ export function DeckPictures({
   const { errorText } = useI18n();
   const inOwnPod = useInOwnPod(useCases, deck);
   const copy = inOwnPod === true && deck?.sourceUrl !== undefined;
-  const libraryQuery = useQuery({ ...libraryIndexQuery(useCases), enabled: copy });
+  const libraryQuery = useQuery({ ...queries.library(useCases), enabled: copy });
   const library = libraryQuery.data;
   const isLibraryCopy = useMemo(
     () => (library === undefined ? undefined : libraryCopyTest(library)),

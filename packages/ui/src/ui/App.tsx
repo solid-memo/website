@@ -49,6 +49,7 @@ import { AppName, useDocumentTitle } from "./documentTitle";
 import { MAIN_ID, SkipLink } from "./SkipLink";
 import { parseHash, STUDIO_PATH } from "./router";
 import { keepStudyFiguresFresh } from "./studyFigures";
+import { queries } from "./queries";
 import { queryKeys } from "./queryKeys";
 import { DeviceValues } from "./deviceValues";
 import { settleLoginWebId } from "./remembered";
@@ -350,10 +351,9 @@ function useProfileName(
   account: SolidAccount | undefined,
 ): string | undefined {
   const profileNameQuery = useQuery({
-    queryKey: queryKeys.webIdDocument(session?.webId ?? ""),
-    queryFn: () => useCases.viewWebIdDocument(session!),
+    ...queries.webIdDocument(useCases, session),
     select: (document) => profileNameOf(document, session!.webId),
-    enabled: session !== null && session.guest !== true && !connecting && account === undefined,
+    enabled: session?.guest !== true && !connecting && account === undefined,
   });
   return account?.name ?? profileNameQuery.data;
 }
@@ -447,11 +447,7 @@ function AppContent({
     });
   }, [useCases, queryClient]);
 
-  const accountQuery = useQuery({
-    queryKey: queryKeys.account(session?.webId),
-    queryFn: () => useCases.discoverAccount(session!),
-    enabled: session !== null && connecting,
-  });
+  const accountQuery = useQuery({ ...queries.account(useCases, session), enabled: connecting });
   const profileName = useProfileName(useCases, session, connecting, accountQuery.data);
   const connected = useConnectedScreen({
     useCases,

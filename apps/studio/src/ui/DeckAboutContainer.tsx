@@ -18,6 +18,7 @@ import { routeToHash } from "@solid-memo/ui/router";
 import { DeckAboutScreen } from "./DeckAboutScreen";
 import { changes, useWrite } from "@solid-memo/ui/writeEffects";
 import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 
 /** One save of the screen: the write, and the queries it changes beside the decks'. */
 interface Save {
@@ -56,22 +57,12 @@ export function DeckAboutContainer({
   const isCourse = useCopies(useCases, [deck]).isCourse(deck);
   const { release, error: releaseError } = useDeckReleaseQuery(useCases, deck);
 
-  const preferencesQuery = useQuery({
-    queryKey: queryKeys.preferences(instance.url),
-    queryFn: () => useCases.getPreferences(instance.url),
-  });
+  const preferencesQuery = useQuery(queries.preferences(useCases, instance.url));
   // After the preferences' own query, which reads them.
   const readOnly = useDataCheck(useCases, instance.url).readOnly(deck);
-  const cardsQuery = useQuery({
-    queryKey: queryKeys.cards(deck.cardsDocumentUrl),
-    queryFn: () => useCases.listCards(deck),
-  });
+  const cardsQuery = useQuery(queries.cards(useCases, deck));
   // The same query as Solid Memo's course screens, so a change shows there.
-  const courseQuery = useQuery({
-    queryKey: queryKeys.course(deck.url),
-    queryFn: () => useCases.getCourse(deck),
-    enabled: isCourse,
-  });
+  const courseQuery = useQuery({ ...queries.course(useCases, deck), enabled: isCourse });
   // The release decides which cards are the user's to settle: none is counted until it is known.
   const languages = useMemo(
     () =>

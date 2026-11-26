@@ -11,7 +11,7 @@ import { FirstTryTile, onlyCourseAnswers, QuizTile, RecallTile } from "./charts/
 import { HardestCardsContainer } from "./HardestCardsContainer";
 import { useI18n } from "./i18n";
 import { DEFAULT_STATISTICS_RANGE, deckStatisticsHref } from "./router";
-import { statisticsQuery } from "./studyFigures";
+import { queries } from "./queries";
 
 /**
  * A deck's own statistics on its page, in short, of the range its
@@ -36,7 +36,7 @@ export function DeckStatisticsContainer({
 }) {
   const { t, directionLabel } = useI18n();
   const statistics = useQuery(
-    statisticsQuery(useCases, instance.url, DEFAULT_STATISTICS_RANGE, deck.url),
+    queries.statistics(useCases, instance.url, DEFAULT_STATISTICS_RANGE, deck.url),
   ).data;
   return (
     <>

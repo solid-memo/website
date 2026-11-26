@@ -418,6 +418,27 @@ of two modules makes every key:
 - [apps/studio/src/ui/queryKeys.ts](../apps/studio/src/ui/queryKeys.ts):
   the keys only the Studio reads, built on the first.
 
+Each cached read is defined once, beside its key, in one of two
+`queries` modules:
+
+- [packages/ui/src/ui/queries.ts](../packages/ui/src/ui/queries.ts):
+  the reads Solid Memo's screens make, the Studio's too;
+- [apps/studio/src/ui/queries.ts](../apps/studio/src/ui/queries.ts):
+  the reads only the Studio makes, built on the first.
+
+A definition is TanStack Query's `queryOptions`: the key, the use case
+that fills it, and how long what it read stays fresh (`staleTime`,
+`refetchOnWindowFocus` and the like), with the reason in its comment.
+A screen spreads a definition into `useQuery`, `useQueries` or a
+prefetch. It adds only what is its own: when it reads (`enabled`), and
+what it makes of the data (`select`). A definition given no argument
+to read with, such as no instance open, reads nothing (`skipToken`).
+So every screen that reads a key reads it the same way. Two reads that
+fill one key differently would show each other's data, so each gets a
+key of its own, as the check made when an instance opens and the
+developer report's full check do
+([validation.md](validation.md)).
+
 When a read that's already cached fails as it's made again, the
 workspace keeps showing what it read before. An access token may
 expire while the app is in the background, and the next read may well
@@ -426,9 +447,12 @@ cached: the instances, and the decks, cards, course or library deck
 the route needs (`lookupWaiting` in
 [packages/ui/src/ui/Workspace.tsx](../packages/ui/src/ui/Workspace.tsx)).
 
-A new key goes in one of these modules, never into a screen as an
-array written out, which `npm run check:keys` refuses
-([testing.md](testing.md#the-repositorys-own-checks)).
+A new key goes in a keys module, never into a screen as an array
+written out, which `npm run check:keys` refuses
+([testing.md](testing.md#the-repositorys-own-checks)). A new read goes
+in a `queries` module. A write's refresh, a removal, and a
+QueryClient's read or write of one query name the key by its function
+in a keys module.
 
 A key whose first items are another's sits under it, so refreshing or
 dropping the shorter key reaches it too: the decks' arrangement

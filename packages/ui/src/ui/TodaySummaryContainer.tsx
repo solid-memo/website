@@ -8,9 +8,8 @@ import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import { todayOf, welcomeBackOf } from "@solid-memo/domain/statistics";
 import { expectedTimeToday } from "@solid-memo/domain/studyTime";
-import { studyCountsQuery } from "./DeckStudyAction";
 import { statisticsHref } from "./router";
-import { todayFiguresQuery } from "./studyFigures";
+import { queries } from "./queries";
 import { TodaySummary } from "./TodaySummary";
 import { WelcomeBack } from "./WelcomeBack";
 
@@ -21,9 +20,9 @@ import { WelcomeBack } from "./WelcomeBack";
  * the months that changed since the digest summarized them): read again
  * when the list opens and it is over half a minute old, and at once
  * after any change made, an answer in a session or a course among them,
- * which clears it (todayFiguresQuery). With it, the cards
+ * which clears it (queries.todayFigures). With it, the cards
  * left to study today in the `decks` listed, from the counts their rows
- * read (studyCountsQuery, one cache), once every deck's is known, and
+ * read (queries.studyCounts, one cache), once every deck's is known, and
  * about how many minutes they will take, from how long an answer has
  * taken and how often young cards were forgotten over those months
  * (expectedTimeToday), a minute at least. Finishing the day's study is
@@ -45,9 +44,9 @@ export function TodaySummaryContainer({
   /** A study session was just left with an answer. */
   celebrate?: boolean;
 }) {
-  const figures = useQuery(todayFiguresQuery(useCases, instance.url));
+  const figures = useQuery(queries.todayFigures(useCases, instance.url));
   const counts = useQueries({
-    queries: decks.map((deck) => studyCountsQuery(useCases, instance.url, deck)),
+    queries: decks.map((deck) => queries.studyCounts(useCases, instance.url, deck)),
   });
   const known = counts.every((one) => one.data !== undefined);
   const reviews = counts.reduce((sum, { data }) => sum + (data?.dueCount ?? 0), 0);

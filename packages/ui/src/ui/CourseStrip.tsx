@@ -17,7 +17,7 @@ import { ErrorMessage } from "./ErrorMessage";
 import { CourseIcon, LibraryIcon } from "./icons";
 import { useI18n } from "./i18n";
 import { ReaderText } from "./ReaderText";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 
 /** A course still to finish, as the strip shows it. */
 export interface CourseStripEntry {
@@ -103,22 +103,6 @@ export function CourseStrip({
 }
 
 /**
- * What the strip needs of a course deck (UseCases.getCourseSummary). Under
- * the key the course's own screens refresh it by, as one of its own (so
- * it is never taken for the whole course), with the release it is of;
- * fresh for a little while, so summaries fetched as the deck list's
- * arrangement is read (Workspace) serve the strip that follows.
- */
-export function courseStripQuery(useCases: UseCases, deck: Deck) {
-  return {
-    queryKey: queryKeys.courseStrip(deck.url, deck.sourceUrl),
-    queryFn: () => useCases.getCourseSummary(deck),
-    staleTime: 30_000,
-    refetchOnWindowFocus: false,
-  };
-}
-
-/**
  * How many of the courses shown are read whole behind the strip, from
  * the library or a link: a catalog may list any number, and a course
  * read whole holds all its cards for a while. Any other reads as its
@@ -164,7 +148,7 @@ export function courseFinished(summary: CourseSummary, deck: Deck): boolean {
 }
 
 /**
- * Reads what the strip needs of each course deck (courseStripQuery) and
+ * Reads what the strip needs of each course deck (queries.courseStrip) and
  * shows those still to finish, as far as the deck says (its title and
  * completed chapters, so a deck read afresh moves the strip on), linked where the course links say (useCourseLinks). A
  * course not yet read, or that cannot be, is left out: the deck list
@@ -195,7 +179,7 @@ export function CourseStripContainer({
   const links = useCourseLinks();
   const queryClient = useQueryClient();
   const results = useQueries({
-    queries: decks.map((deck) => courseStripQuery(useCases, deck)),
+    queries: decks.map((deck) => queries.courseStrip(useCases, deck)),
   });
   const entries = results.flatMap(({ data: summary }, at): CourseStripEntry[] => {
     if (summary === undefined) return [];
@@ -219,11 +203,8 @@ export function CourseStripContainer({
   useEffect(() => {
     const keys = new Set(shown.split(" "));
     for (const deck of decks.filter((one) => keys.has(one.url)).slice(0, COURSES_READ_BEHIND)) {
-      void queryClient.prefetchQuery({
-        queryKey: queryKeys.course(deck.url),
-        queryFn: () => useCases.getCourse(deck),
-        staleTime: 30_000,
-      });
+      // The prefetch's own: a course read in the last half minute is not read again.
+      void queryClient.prefetchQuery({ ...queries.course(useCases, deck), staleTime: 30_000 });
     }
   }, [shown]);
   return (

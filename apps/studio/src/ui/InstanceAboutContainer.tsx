@@ -14,6 +14,7 @@ import { routeToHash } from "@solid-memo/ui/router";
 import { InstanceAboutScreen } from "./InstanceAboutScreen";
 import { changes, useWrite } from "@solid-memo/ui/writeEffects";
 import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 
 /**
  * The instance screen's data: the instance's catalog (UseCases.readCatalog).
@@ -37,10 +38,7 @@ export function InstanceAboutContainer({
 }) {
   const { t, errorText } = useI18n();
   const check = useDataCheck(useCases, instance.url);
-  const catalogQuery = useQuery({
-    queryKey: queryKeys.catalog(instance.url),
-    queryFn: () => useCases.readCatalog(instance.url),
-  });
+  const catalogQuery = useQuery(queries.catalog(useCases, instance.url));
   const save = useWrite({
     mutationFn: (write: () => Promise<unknown>) => write(),
     changes: () => [changes.reads(queryKeys.allInstances(), queryKeys.catalog(instance.url))],

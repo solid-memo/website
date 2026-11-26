@@ -9,7 +9,7 @@ import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
 import { Loading } from "./Loading";
 import { WebIdDocumentView } from "./WebIdDocumentView";
-import { queryKeys } from "./queryKeys";
+import { queries } from "./queries";
 
 /**
  * Developer tool: the raw WebID document of the logged-in user. Only
@@ -24,10 +24,7 @@ export function WebIdDocumentContainer({
   session: Session;
 }) {
   const { t, errorText } = useI18n();
-  const documentQuery = useQuery({
-    queryKey: queryKeys.webIdDocument(session.webId),
-    queryFn: () => useCases.viewWebIdDocument(session),
-  });
+  const documentQuery = useQuery(queries.webIdDocument(useCases, session));
 
   return (
     <details>

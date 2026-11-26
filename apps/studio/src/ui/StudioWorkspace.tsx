@@ -83,8 +83,7 @@ import {
   type CardRoute,
   type StudioRoute,
 } from "./router";
-import { queryKeys } from "./queryKeys";
-import { releaseDraftQuery } from "./draftEditor";
+import { queries } from "./queries";
 
 // The Studio's messages, which the page adds to its own when it fetches this chunk (apps/web/src/App.tsx).
 export { STUDIO_CATALOGS } from "./catalogs";
@@ -846,18 +845,14 @@ function useRouteReads(
   session: WorkspaceProps["session"],
   route: StudioRoute | null,
 ) {
-  const instancesQuery = useQuery({
-    queryKey: queryKeys.instances(session.webId),
-    queryFn: () => useCases.listInstances(session),
-  });
+  const instancesQuery = useQuery(queries.instances(useCases, session));
   const instances = instancesQuery.data;
   const instanceUrl = route === null ? null : instanceOfRoute(route);
   const activeInstance =
     instanceUrl === null ? null : (instances?.find((i) => i.url === instanceUrl) ?? null);
   const deckUrl = deckUrlOf(route);
   const decksQuery = useQuery({
-    queryKey: queryKeys.decks(instanceUrl),
-    queryFn: () => useCases.listDecks(instanceUrl!),
+    ...queries.decks(useCases, instanceUrl),
     enabled: deckUrl !== null && activeInstance !== null,
   });
   const activeDeck =
@@ -865,8 +860,7 @@ function useRouteReads(
   const cardUrl = route?.screen === "card" ? route.cardUrl : null;
   // The same query as the workbench's and Solid Memo's, so an edit anywhere shows here.
   const cardsQuery = useQuery({
-    queryKey: queryKeys.cards(activeDeck?.cardsDocumentUrl),
-    queryFn: () => useCases.listCards(activeDeck!),
+    ...queries.cards(useCases, activeDeck),
     enabled: cardUrl !== null && activeDeck !== null,
   });
   const activeCard =
@@ -881,8 +875,8 @@ function useRouteReads(
   const draftUrl = route !== null && isDraftRoute(route) ? route.draftUrl : null;
   // The draft's editors share this query (useDraftEditor): it is read once, and changed as they edit it.
   const draftQuery = useQuery({
-    ...releaseDraftQuery(useCases, draftUrl ?? ""),
-    enabled: draftUrl !== null && activeInstance !== null,
+    ...queries.releaseDraft(useCases, draftUrl),
+    enabled: activeInstance !== null,
   });
   const activeDraft = draftUrl === null ? null : (draftQuery.data ?? null);
   const draftSubject = activeDraft === null ? null : subjectOf(activeDraft, route!);

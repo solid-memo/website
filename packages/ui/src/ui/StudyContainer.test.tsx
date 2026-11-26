@@ -6,7 +6,8 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StudyContainer } from "./StudyContainer";
-import { keepStudyFiguresFresh, todayFiguresQuery } from "./studyFigures";
+import { keepStudyFiguresFresh } from "./studyFigures";
+import { queries } from "./queries";
 import { Clock } from "./courseLinks";
 import { DeckStudyActionContainer } from "./DeckStudyAction";
 import { TodaySummaryContainer } from "./TodaySummaryContainer";
@@ -845,7 +846,7 @@ describe("StudyContainer leaving for the deck list", () => {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     keepStudyFiguresFresh(queryClient);
     queryClient.setQueryData(
-      todayFiguresQuery(useCases, instance.url).queryKey,
+      queries.todayFigures(useCases, instance.url).queryKey,
       todayFiguresFrom([], "2026-09-21"),
     );
     queryClient.setQueryData(["studyQueue", deck.url, "counts"], { dueCount: 1, newCount: 0 });
@@ -1000,7 +1001,7 @@ describe("StudyContainer leaving for the deck list", () => {
     keepStudyFiguresFresh(queryClient);
     // The strip read the day before the session: nothing studied yet, fresh for a while.
     queryClient.setQueryData(
-      todayFiguresQuery(useCases, instance.url).queryKey,
+      queries.todayFigures(useCases, instance.url).queryKey,
       todayFiguresFrom([], "2026-09-21"),
     );
     const screenFor = (studying: boolean) => (

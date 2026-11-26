@@ -18,25 +18,9 @@ import {
   DeckUpgradeProgress,
   type DeckUpgradeScreenStep,
 } from "./DeckUpgrade";
+import { queries } from "./queries";
 import { queryKeys } from "./queryKeys";
 import { changes, useWrite, type WriteEffect } from "./writeEffects";
-
-/**
- * What upgrading the deck would do (UseCases.planLibraryUpgrade), kept
- * for the session. Planned for the deck as it is: once an upgrade moves
- * it to another release, the plan for the deck as it was no longer
- * applies. The plan kept is the very one planned, not a copy shared with
- * the one before it (structural sharing): its lists stay frozen, so what
- * is counted of them is counted once (activeCountOf).
- */
-export function libraryUpgradeQuery(useCases: LibraryUseCases, deck: Deck) {
-  return {
-    queryKey: queryKeys.libraryUpgradePlan(deck.url, deck.sourceUrl, deck.cardsDocumentUrl),
-    queryFn: () => useCases.planLibraryUpgrade(deck),
-    staleTime: Infinity,
-    structuralSharing: false,
-  };
-}
 
 /**
  * What an upgrade of a deck changed (`outcome`; undefined: it could not
@@ -88,19 +72,13 @@ export function LibraryUpgradeContainer({
   const queryClient = useQueryClient();
 
   const planQuery = useQuery({
-    ...libraryUpgradeQuery(useCases, deck),
+    ...queries.libraryUpgradePlan(useCases, deck),
     enabled: deck.sourceUrl !== undefined,
   });
 
   useQuery({
-    queryKey: queryKeys.releaseLanguages(deck.url, deck.sourceUrl),
-    queryFn: async () => {
-      const updated = await useCases.addReleaseLanguages(deck);
-      if (updated !== null) await queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() });
-      return updated !== null;
-    },
+    ...queries.releaseLanguages(useCases, queryClient, deck),
     enabled: deck.sourceUrl !== undefined,
-    staleTime: Infinity,
   });
 
   const [progress, setProgress] = useState<{
