@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.5.13](https://github.com/solid-memo/website/compare/v8.5.12...v8.5.13) (2026-11-27)
+
+### Fixes
+
+* **application:** keep the upgrade lookup and failed plan of a linked deck ([1fc76fb](https://github.com/solid-memo/website/commit/1fc76fb479dd9f900585409ef9601842281e982a))
+* **composition:** read releases in workers of their own ([5359ee2](https://github.com/solid-memo/website/commit/5359ee241c10fe92a19b1c2a3150813bc7797023))
+* **domain:** count a draft's changed records by their pieces ([69a5dc0](https://github.com/solid-memo/website/commit/69a5dc0264adfb94fe826f3728326792846ffde8))
+
 ## [8.5.12](https://github.com/solid-memo/website/compare/v8.5.11...v8.5.12) (2026-11-27)
 
 ### Fixes
