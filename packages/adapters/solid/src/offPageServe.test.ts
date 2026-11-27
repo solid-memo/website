@@ -248,6 +248,41 @@ describe("serveOffPage", () => {
     worker.close();
   });
 
+  it("fails each request a job leaves waiting as it ends, done or failed, as aborted", async () => {
+    const left: Promise<unknown>[] = [];
+    const worker = served({
+      done: async (env) => {
+        left.push(
+          env
+            .fetch("doc")(DOC)
+            .catch((error: unknown) => error),
+        );
+        return "done";
+      },
+      fails: async (env) => {
+        left.push(
+          env
+            .fetch("doc")(DOC)
+            .catch((error: unknown) => error),
+        );
+        throw new TypeError("broken");
+      },
+    });
+    worker.run("done");
+    const { call } = (await worker.next()) as Extract<WorkerMessage, { type: "fetch" }>;
+    expect(await worker.next()).toMatchObject({ type: "done", result: "done" });
+    worker.run("fails");
+    expect(await worker.next()).toMatchObject({ type: "fetch" });
+    expect(await worker.next()).toMatchObject({ type: "failed", error: { name: "TypeError" } });
+    for (const error of await Promise.all(left))
+      expect(error).toMatchObject({ name: "AbortError" });
+    // An answer to an abandoned request goes nowhere.
+    worker.send({ type: "response", call, response: answer("") });
+    worker.run("done");
+    expect(await worker.next()).toMatchObject({ type: "fetch" });
+    worker.close();
+  });
+
   it("parses an answer under the page's limits, counting on from what the page spent, and sends the page what the parse counted", async () => {
     const limits = { bytes: 1000, quads: 3, characters: 10_000 };
     const worker = served({
@@ -357,6 +392,50 @@ describe("serveOffPage", () => {
 
     worker.run("none");
     expect(await worker.next()).toMatchObject({ result: true });
+    worker.close();
+  });
+
+  it("ends each spend of the budget a job leaves waiting as it ends, as spent, and hears nothing of it after", async () => {
+    const left: Promise<string>[] = [];
+    let reads = 0;
+    let release: (() => void) | undefined;
+    const spend = (env: JobEnv, started?: () => void) =>
+      env.budget!.spend("spent", async () => {
+        reads++;
+        started?.();
+        await new Promise<void>((resolve) => (release = resolve));
+        return "read";
+      });
+    const worker = served({
+      // Ends before the page says the read may start.
+      leaves: async (env) => {
+        left.push(spend(env));
+        return "done";
+      },
+      // Ends while the read is under way.
+      leavesReading: async (env) => {
+        await new Promise<void>((started) => left.push(spend(env, started)));
+        return "done";
+      },
+    });
+    const budget = { budget: true };
+    worker.run("leaves", {}, budget);
+    const { call } = (await worker.next()) as Extract<WorkerMessage, { type: "spend" }>;
+    expect(await worker.next()).toMatchObject({ type: "done", result: "done" });
+    expect(await left[0]).toBe("spent");
+    worker.send({ type: "budget", call, event: "start" });
+
+    worker.run("leavesReading", {}, budget);
+    const { call: reading } = (await worker.next()) as Extract<WorkerMessage, { type: "spend" }>;
+    worker.send({ type: "budget", call: reading, event: "start" });
+    expect(await worker.next()).toMatchObject({ type: "done", result: "done" });
+    expect(await left[1]).toBe("spent");
+    expect(reads).toBe(1);
+    release!();
+
+    // Neither the page's late start nor the read's end is heard: the next message is the next job's.
+    worker.run("leaves", {}, budget);
+    expect(await worker.next()).toMatchObject({ type: "spend" });
     worker.close();
   });
 
