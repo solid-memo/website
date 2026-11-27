@@ -143,21 +143,23 @@ describe("a pod draft that states a name of a creator with no record (GHSA-q4pr-
 });
 
 describe("a creator with no record, whatever its IRI (GHSA-mv57-839j-wrf6)", () => {
-  const AGENT = `<#anton-wiklund>
-    a foaf:Agent ;
-    foaf:name "Anton Wiklund" ;
-    foaf:mbox <mailto:antonwiklund91@gmail.com> .`;
+  /** The deck's creator, by its statements, whatever its address. */
+  const AGENT =
+    /<#anton-wiklund>\s+a foaf:Agent ;\s+foaf:name "Anton Wiklund" ;\s+foaf:mbox <mailto:[^>]+> \./;
   const PUBLISHER = "dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;";
   const CREATOR = "dcterms:creator <#anton-wiklund> ;";
   const TWO_CLASSES = `<#anton-wiklund> a foaf:Agent, dcat:Distribution ; foaf:name "Unseen" ; dcat:accessURL <> .`;
   const WEB_ID = `${POD}profile/card#me`;
 
   /** A library deck with its creator replaced, and a publisher of its own. */
-  const releaseFile = (statements: string, creator = "<#anton-wiklund>") =>
-    readFileSync(join(DECKS_ROOT, "academy-award-best-picture/v1.ttl"), "utf8")
+  const releaseFile = (statements: string, creator = "<#anton-wiklund>") => {
+    const deck = readFileSync(join(DECKS_ROOT, "academy-award-best-picture/v1.ttl"), "utf8");
+    expect(deck).toMatch(AGENT);
+    return deck
       .replace(AGENT, `${statements}\n<#p> a foaf:Agent ; foaf:name "Publisher" .`)
       .replace(PUBLISHER, "dcterms:publisher <#p> ;")
       .replace(CREATOR, `dcterms:creator ${creator} ;`);
+  };
 
   const useCasesOf = (repository: Pod["repository"], text: string) =>
     createReleaseDraftUseCases({
