@@ -387,15 +387,20 @@ is the ports' side in the page, which the composition root wires in
   the check stopped at its deadline (`documentCheckTooLong`). A worker
   that ends on its own, out of memory say, counts the same. The tab goes
   on working.
-- **Workers.** At most `OFF_PAGE_WORKERS` (four) run at once, one job
-  each, and the rest wait their turn. A worker no job needs is kept for
-  30 seconds, with the shapes it has read, then ended.
-  The reads of documents elsewhere have workers of their own, which
-  read no shapes. There, a job waiting for its requests doesn't count,
-  so a slow server holds no other read up, and there are at most
-  `OFF_PAGE_WORKERS_IN_ALL` (16) of them. A job whose requests are
-  answered waits for a place before its worker gets the answers, so no
-  more than four parse at once.
+- **Workers.** The work is shared among three pools of workers. The
+  reads of documents elsewhere have workers of their own, which read no
+  shapes. The reads of releases, from a link and for the Studio's
+  drafts, and of their catalogs and what they name, have theirs too,
+  which read the library's shapes. The main pool does the rest: the
+  user's own checks, deck files and release files. In each pool, at
+  most `OFF_PAGE_WORKERS` (four) jobs work at once, one per worker, and
+  the rest wait their turn. A worker no job needs is kept for 30
+  seconds, with the shapes it has read, then ended.
+  In the pools of reads, a job waiting for its requests doesn't count,
+  so a slow server holds up neither another read nor the user's own
+  work. There are at most `OFF_PAGE_WORKERS_IN_ALL` (16) workers in
+  each. A job whose requests are answered waits for a place before its
+  worker gets the answers.
 - **The build.** Vite bundles the worker as a module of its own
   ([offPageWorker.ts](../packages/adapters/solid/src/offPageWorker.ts)), with the
   Solid client the page has (`worker` in `apps/web/vite.config.ts`). It's
