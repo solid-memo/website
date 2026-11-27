@@ -4,6 +4,7 @@
 
 import { ensureTrailingSlash, hasDotSegment, isDocumentIn } from "../instanceLayout.ts";
 import type { LangText } from "../langText.ts";
+import { TextMap } from "../pathKeys.ts";
 import {
   canonical,
   type DraftNode,
@@ -376,14 +377,17 @@ function recordOf(list: Listed, item: Item): unknown {
 
 /**
  * What each document loses and gains, as strings to compare by; those
- * that cancel out are no change.
+ * that cancel out are no change. A record's string joins all its fields
+ * and can be longer than V8 hashes all of, so each is kept as the path
+ * of its pieces (TextMap): many records of one length then cost no more
+ * than their number.
  */
 class Delta {
-  private readonly documents = new Map<string, Map<string, number>>();
+  private readonly documents = new Map<string, TextMap<number>>();
 
   count(url: string, value: unknown, by: number): void {
     const key = canonical(value);
-    const held = this.documents.get(url) ?? new Map<string, number>();
+    const held = this.documents.get(url) ?? new TextMap<number>();
     held.set(key, (held.get(key) ?? 0) + by);
     this.documents.set(url, held);
   }

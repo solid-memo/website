@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
+import { HASHED_CHARACTERS } from "../pathKeys.ts";
 import { growth } from "../testing/growth.ts";
 import { card, courseDraft, DRAFT, link, of } from "../testing/releaseDraft.ts";
 import {
@@ -299,6 +300,51 @@ describe("changedDocuments", () => {
     );
     expect(ratio).toBeLessThan(4);
   });
+
+  it("names the document of a chapter whose many steps are longer than V8 hashes, in time that grows with them", () => {
+    // A control character is one character of a term but six of its
+    // JSON, so each step's record is past the bound while its theory is
+    // well within the bound on a term. The steps' ids, alike but for
+    // their end, make records of one length slow to tell apart.
+    const theory = "\u0001".repeat(Math.ceil(HASHED_CHARACTERS / 6));
+    const prefix = "s".repeat(14_000);
+    const course = courseDraft();
+    const many = (count: number) => {
+      const before = {
+        ...course,
+        steps: Array.from({ length: count }, (_, n) => ({
+          id: `${prefix}${String(n).padStart(6, "0")}`,
+          data: {
+            theory: { en: theory },
+            chapter: of("ch-a"),
+            position: (n + 1) * 10,
+            checkedBy: [],
+          },
+        })),
+      } as ReleaseDraft;
+      const after = applyDraftChanges(before, [
+        { kind: "moveStep", id: before.steps[0]!.id, chapter: "ch-a", to: count },
+      ]) as ReleaseDraft;
+      return [before, after] as const;
+    };
+    const [before, after] = many(3);
+    const { id, data } = before.steps[0]!;
+    expect(canonical(["steps", id, data]).length).toBeGreaterThan(HASHED_CHARACTERS);
+    expect(changedDocuments(before, after)).toEqual([chapterDocumentOf(DRAFT, "ch-a")]);
+    // Eight times the steps, each renumbered, take about as long as an
+    // eighth of them eight times over; counted by their whole records,
+    // many of one length, they took many times as long.
+    const ratio = growth(
+      (count) => {
+        const [was, now] = many(count);
+        return () => changedDocuments(was, now);
+      },
+      250,
+      8,
+      4,
+    );
+    expect(ratio).toBeLessThan(4);
+  }, 180_000);
 });
 
 describe("changedDocuments, against the whole draft laid out", () => {

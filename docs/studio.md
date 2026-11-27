@@ -2039,7 +2039,9 @@ Every edit is made at once on the screen, then written in the pod
   is kept from one edit to the next, since every screen that reads
   the draft keeps the draft the edit made, not a copy
   (`queries.releaseDraft`). After that, a keystroke compares the records
-  it replaced alone. A change of several documents (a move, say) is
+  it replaced alone. Each record is compared as the path of its pieces
+  (`TextMap` in `pathKeys.ts`), never one long string, so a chapter of
+  many long steps renumbered at once costs no more than its steps. A change of several documents (a move, say) is
   written at once. What waits is the draft's, not an editor's: the
   screen's editor and the outline share it. Leaving the screen, or an
   edit that isn't typing, such as a move in the outline, writes what
