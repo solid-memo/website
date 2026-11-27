@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.5.12](https://github.com/solid-memo/website/compare/v8.5.11...v8.5.12) (2026-11-27)
+
+### Fixes
+
+* **solid:** leave a newer or foreign subject at a deck's distribution ([9d539c4](https://github.com/solid-memo/website/commit/9d539c445b953d63791826bccbb756d73a80a35a))
+
 ## [8.5.11](https://github.com/solid-memo/website/compare/v8.5.10...v8.5.11) (2026-11-27)
 
 ### Fixes
