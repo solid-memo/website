@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.5.14](https://github.com/solid-memo/website/compare/v8.5.13...v8.5.14) (2026-11-27)
+
+### Fixes
+
+* **solid:** end a worker's requests that an ended job left waiting ([d9933be](https://github.com/solid-memo/website/commit/d9933be5923e769a6cf8e7cafdcf9687722f1411))
+
 ## [8.5.13](https://github.com/solid-memo/website/compare/v8.5.12...v8.5.13) (2026-11-27)
 
 ### Fixes
