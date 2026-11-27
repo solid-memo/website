@@ -448,9 +448,13 @@ several pull requests at once, each is its own commit with its own run,
 on top of those ahead of it, and `main` moves to the last. A run is
 found by its commit, never by its pull request.
 
-**Know when a change skipped the queue.** A change can reach `main`
-without the queue through a ruleset bypass, such as a merge from a
-security advisory's private fork, where Actions don't run. Its push run
+**Know when a change skipped the queue.** The ruleset on `main` lets
+only deploy keys past the queue, and the release's is the only one with
+write access ([the deploy key](#the-deploy-key)). Any other change
+reaches `main` without the queue only if an admin adds a bypass first.
+A merge from a security advisory's private fork, where Actions don't
+run, would need one. The only fix merged so came on 2026-10-20
+(`05078e24`), before the bypass list was narrowed. Such a change's push run
 is its first CI and runs every job. The release follows that run only
 once it passes ([below](#what-a-release-does)).
 
