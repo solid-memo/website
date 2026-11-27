@@ -74,6 +74,7 @@ function setUp({
         return storages as Storage[];
       }),
     },
+    webId: () => WEBID,
     now: () => new Date(NOW),
   });
   return { drafts, repository, publisher, fileExchange, shapeValidator, useCases };
@@ -88,7 +89,9 @@ describe("publishRelease", () => {
     });
     expect(drafts.checkReleaseDraft).toHaveBeenCalledWith(courseDraft(), markdownCheck, "pod");
     expect(shapeValidator.validateRelease).toHaveBeenCalledWith(courseDraft(), TARGET);
-    expect(repository.assemble).toHaveBeenCalledWith(DRAFT, TARGET, NOW, "v1");
+    expect(repository.assemble).toHaveBeenCalledWith(DRAFT, TARGET, NOW, "v1", {
+      followedAsUser: expect.any(Function),
+    });
     expect(publisher.publish).toHaveBeenCalledWith(INSTANCE, TURTLE, TARGET);
     const [before, after, version] = repository.applyChanges.mock.calls[0]!;
     expect(after).toEqual({ ...before, root: { ...before.root, releasedAs: TARGET } });
@@ -291,11 +294,43 @@ describe("downloadRelease", () => {
       DRAFT,
       "https://site.example/decks/solid/v2.ttl",
       NOW,
+      undefined,
+      { followedAsUser: expect.any(Function) },
     );
     expect(fileExchange.save).toHaveBeenCalledWith("solid-v2.ttl", "text/turtle", TURTLE);
     await expect(useCases.downloadRelease(DRAFT, TARGET)).resolves.toEqual({
       name: "solid-v2.ttl",
       url: TARGET,
     });
+  });
+});
+
+describe("the release a draft follows, as publishing reads it (GHSA-hcwc-432r-hgxx)", () => {
+  const OWN = "https://own.example/";
+  const KEPT = `${OWN}memo/releases/kept/v1.ttl`;
+  const BESIDE = "https://pod.example/public/solid/v1.ttl";
+
+  /** Whether the release at `url` is read as the user, as the last assemble was told. */
+  async function asUser(repository: { assemble: ReturnType<typeof vi.fn> }, url: string) {
+    const options = repository.assemble.mock.calls.at(-1)![4] as {
+      followedAsUser: (prev: string) => Promise<boolean>;
+    };
+    return options.followedAsUser(url);
+  }
+
+  it("is read as no one when it is in a storage of the user's the instance is not in", async () => {
+    const { useCases, repository } = setUp({ storages: [{ url: OWN }] });
+    await useCases.publishRelease(DRAFT, TARGET, markdownCheck);
+    await expect(asUser(repository, KEPT)).resolves.toBe(false);
+    await useCases.downloadRelease(DRAFT);
+    await expect(asUser(repository, KEPT)).resolves.toBe(false);
+  });
+
+  it("is read as the user when it is the instance's", async () => {
+    const { useCases, repository } = setUp();
+    await useCases.publishRelease(DRAFT, TARGET, markdownCheck);
+    await expect(asUser(repository, BESIDE)).resolves.toBe(true);
+    await useCases.downloadRelease(DRAFT);
+    await expect(asUser(repository, `${INSTANCE}releases/solid/v1.ttl`)).resolves.toBe(true);
   });
 });

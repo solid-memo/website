@@ -12,7 +12,7 @@ import type { ShapeValidator } from "./ports/checks";
 import type { FileExchange } from "./ports/device";
 import type { DeckLibrary, ReleaseDraftRepository, ReleasePublisher } from "./ports/library";
 import type { StorageGateway } from "./ports/session";
-import { isInInstancePod, type ReleaseDraftUseCases } from "./releaseDrafts";
+import { followedAsNoOne, isInInstancePod, type ReleaseDraftUseCases } from "./releaseDrafts";
 import { mapAtOnce } from "./atOnce";
 
 /**
@@ -102,6 +102,7 @@ export function createReleasePublishingUseCases({
   deckLibrary,
   fileExchange,
   storageGateway,
+  webId,
   now,
 }: {
   drafts: Pick<ReleaseDraftUseCases, "readReleaseDraft" | "checkReleaseDraft">;
@@ -111,8 +112,14 @@ export function createReleasePublishingUseCases({
   deckLibrary: DeckLibrary;
   fileExchange: FileExchange;
   storageGateway: Pick<StorageGateway, "discoverStorages">;
+  /** Who is logged in, whose own release a draft may follow as the user (followedAsNoOne). */
+  webId: () => string | undefined;
   now: () => Date;
 }): ReleasePublishingUseCases {
+  /** Read the release the draft at `draftUrl` follows as the user only when it is the instance's (followedAsNoOne). */
+  const followedAsUser = (draftUrl: string) => async (prev: string) =>
+    !(await followedAsNoOne(storageGateway, webId(), draftUrl, prev));
+
   return {
     async publishRelease(draftUrl, targetUrl, markdownCheck) {
       if (isGuestUrl(draftUrl)) throw new AppError("guestCannotPublish");
@@ -142,6 +149,7 @@ export function createReleasePublishingUseCases({
         targetUrl,
         now().toISOString(),
         version,
+        { followedAsUser: followedAsUser(draftUrl) },
       );
       const { public: shared } = await releasePublisher.publish(instanceUrl, turtle, targetUrl);
       await releaseDraftRepository.applyChanges(
@@ -166,7 +174,13 @@ export function createReleasePublishingUseCases({
       const { name, version } = draftPlaceOf(draftUrl)!;
       const url =
         targetUrl ?? libraryReleaseUrl((await deckLibrary.readLibraryIndex()).url, name, version);
-      const turtle = await releaseDraftRepository.assemble(draftUrl, url, now().toISOString());
+      const turtle = await releaseDraftRepository.assemble(
+        draftUrl,
+        url,
+        now().toISOString(),
+        undefined,
+        { followedAsUser: followedAsUser(draftUrl) },
+      );
       const file = releaseFileName(name, version);
       fileExchange.save(file, "text/turtle", turtle);
       return { name: file, url };

@@ -438,7 +438,7 @@ export function createSolidReleaseDraftRepository({
       read.version = "";
     },
 
-    async assemble(draftUrl, targetUrl, issued, version) {
+    async assemble(draftUrl, targetUrl, issued, version, { followedAsUser } = {}) {
       const { urls, datasets } =
         version === undefined ? await readDocuments(draftUrl) : readAt(draftUrl, version);
       const iriOf = draftIriOf(draftContainerOf(draftUrl), draftUrl);
@@ -487,14 +487,16 @@ export function createSolidReleaseDraftRepository({
         .map(({ quad }) => quad);
       // The earlier versions as the release it follows states them, none later than that one (earlierVersionsOf).
       // Publishing holds that one to be the instance's or the library's, and the version before (the release check:
-      // previousElsewhere, previousUnread, versionNotNext); Download .ttl reads it all the same.
+      // previousElsewhere, previousUnread, versionNotNext); Download .ttl reads it all the same. It is read as no one
+      // unless the caller says it may be read as the user: one of the user's own may have been kept from everyone.
       const prev = kept.find(
         ({ subject, predicate }) => subject.value === targetUrl && predicate.value === DCAT("prev"),
       )?.object.value;
       let earlier = new Map<string, DraftTriple[]>();
       if (prev !== undefined) {
         const reads = releaseReads?.() ?? repository;
-        const followed = await reads.readRelease(prev);
+        const asNoOne = !(await followedAsUser?.(prev));
+        const followed = await reads.readRelease(prev, { asNoOne });
         earlier = earlierVersionsOf(followed, targetUrl, await reads.readLinked(followed));
       }
       const quads = releaseQuadsOf(withOwnVersionsAt(kept, targetUrl, earlier), targetUrl, issued);

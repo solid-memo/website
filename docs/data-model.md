@@ -773,7 +773,9 @@ No document Solid Memo names has any.
   An instance attached from another's pod may list the user's own. Its
   next version, written into the instance, is made from it read as the
   user only by the same place rule, and from it read as no one
-  otherwise. So is a draft made from a deck, from the deck's cards,
+  otherwise. So is a release a draft follows (`dcat:prev`), which the
+  draft is checked against and whose earlier versions it publishes
+  again. So is a draft made from a deck, from the deck's cards,
   and so are the deck list's counts and the format update's plan, from
   a deck's cards and reviews documents. The [digest](#the-digest)
   keeps nothing of a deck unless both are the instance's.

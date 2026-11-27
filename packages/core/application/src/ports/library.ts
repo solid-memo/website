@@ -236,9 +236,19 @@ export interface ReleaseDraftRepository {
    * value of a predicate a shape owns is published as the value its
    * record holds, which the release check saw (apart from what
    * publishing writes of the root itself: its format, times and
-   * sm:releasedAs).
+   * sm:releasedAs). The release the draft follows, whose earlier
+   * versions it publishes again, is read as no one unless `followedAsUser`
+   * says it may be read as the user (followedAsNoOne): one in the user's
+   * own pod that is not the draft's instance's was perhaps kept from
+   * everyone.
    */
-  assemble(draftUrl: string, targetUrl: string, issued: string, version?: string): Promise<string>;
+  assemble(
+    draftUrl: string,
+    targetUrl: string,
+    issued: string,
+    version?: string,
+    options?: { followedAsUser?: (prev: string) => Promise<boolean> },
+  ): Promise<string>;
   /**
    * A release document anywhere, as it states itself, at its own URL;
    * releaseUnreadable when there is none to read there, or its version
