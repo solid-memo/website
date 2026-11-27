@@ -62,15 +62,19 @@ The first screen offers three ways in
   decide later ([guest-mode.md](guest-mode.md)): each card is then in
   your Pod where you left it.
 - **Log in with your Pod.** Pick your provider, or type your WebID
-  under "Or use your WebID" and press "Log in with Solid". You log in
+  under "Or use your WebID" and press "Log in with Solid". Check
+  "Remember my WebID on this device" and the form is filled with it
+  next time. You log in
   on the provider's page and come back to Solid Memo, which finds your
   Pod from your profile and says "Your Pod is connected." Press
   Continue ([authentication.md](authentication.md)). To go straight on
   next time, on every device, first check "Don't show this screen after
   logging in"
   ([onboarding.md](onboarding.md#skipping-the-connected-screen)).
-- **No Pod yet?** "Create a Pod" opens a provider's sign-up page in a
-  new tab. Come back when you're done, and log in.
+- **No Pod yet?** Each provider is listed with its own "Create a Pod"
+  button, which opens that provider's sign-up page in a new tab. Come
+  back when you're done, and log in
+  ([onboarding.md](onboarding.md#offered-for-creating-a-pod)).
 
 The first time you log in, Solid Memo asks which storage to use if your
 Pod has more than one, then a name for your instance and where in your
@@ -583,3 +587,12 @@ ones in the [online report](https://journeys.solid-memo.com/).
 | Reloading in the middle of a study session | [study-reload.journey.ts](../e2e/journeys/journeys/study-reload.journey.ts) | 05–10 |
 | Removing a card, in Solid Memo and the Studio, and undoing a delete | [card-removal.journey.ts](../e2e/journeys/journeys/card-removal.journey.ts) | 04–12 |
 | Studying in two tabs and on two devices at once, and editing cards in both apps | [concurrent-writes.journey.ts](../e2e/journeys/journeys/concurrent-writes.journey.ts) | 04–24 |
+| Logging out in one tab, and the other tab logged out too | [two-tabs.journey.ts](../e2e/journeys/journeys/two-tabs.journey.ts) | 03–05 |
+| Pausing a deck until a day and until resumed, kept in the Pod and shown in the Studio, and resuming it | [pause-deck.journey.ts](../e2e/journeys/journeys/pause-deck.journey.ts) | 04–09 |
+| A deck added by link whose pictures are on other servers, shown only once you choose | [linked-deck-pictures.journey.ts](../e2e/journeys/journeys/linked-deck-pictures.journey.ts) | 02–05 |
+| An instance made by an older version, its format update put off, cut off part-way and finished | [format-update.journey.ts](../e2e/journeys/journeys/format-update.journey.ts) | 03–09 |
+| Attaching an instance another user shares, and what Solid Memo leaves of theirs when you remove its decks or it | [pod-safety.journey.ts](../e2e/journeys/journeys/pod-safety.journey.ts), first and second journeys | 03–06 |
+| A shared draft the Studio doesn't open, and a release the Pod doesn't make public, each saying why | pod-safety, third and fourth journeys | 03–05 |
+| Deleting an instance whose deck shares a document with another app's data | pod-safety, fifth journey | 03–05 |
+| Attaching an instance at the Pod's root, studying it and removing a deck in the Studio | pod-safety, sixth journey | 03–07 |
+| Every screen in the other palettes and themes: the learner's, the library's, the Studio's and the errors' | [tour-learner.journey.ts](../e2e/journeys/journeys/tour-learner.journey.ts), [tour-library.journey.ts](../e2e/journeys/journeys/tour-library.journey.ts), [tour-studio.journey.ts](../e2e/journeys/journeys/tour-studio.journey.ts), [tour-errors.journey.ts](../e2e/journeys/journeys/tour-errors.journey.ts) | all |

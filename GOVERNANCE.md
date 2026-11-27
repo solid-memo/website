@@ -121,7 +121,14 @@ public channels, and the maintainer decides when they cannot agree.
 
 - Every change reaches `main` through a pull request that passes CI,
   on its own and again in the merge queue, on top of `main`
-  ([docs/testing.md](docs/testing.md#the-merge-queue)).
+  ([docs/testing.md](docs/testing.md#the-merge-queue)). The release
+  commit is the exception: semantic-release pushes it with a deploy
+  key, after CI has passed on `main`, and it changes only the version
+  and the changelog, from commits already merged
+  ([docs/releasing.md](docs/releasing.md#the-deploy-key)). One fix came
+  without a pull request before the ruleset stopped allowing it: a
+  security advisory's, merged from its private fork on 2026-10-20
+  (`05078e24`).
 - A pull request is reviewed by a maintainer who did not write it
   ([CONTRIBUTING.md](CONTRIBUTING.md#review)).
 - A contribution that is declined or closed always gets a written

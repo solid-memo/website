@@ -31,8 +31,46 @@ a new major version ([docs/releasing.md](docs/releasing.md)).
 ## Done recently
 
 These are done. Those since 1.0.0 come first; the rest are part of
-1.0.0. Every version is in the [changelog](CHANGELOG.md).
+1.0.0. Every version is in the [changelog](CHANGELOG.md). Some were
+asked for by people outside the project, and say so.
 
+- Listed among the apps on solidproject.org, under Education.
+- Signing in to a storage that speaks the W3C's Linked Web Storage,
+  as asked in #594
+  ([docs/lws.md](docs/lws.md)).
+- Choosing among every type index of yours, registering only where the
+  instance is, and removing old registrations, as a Solid developer
+  asked in #643 and #644
+  ([docs/data-model.md](docs/data-model.md#choosing-a-type-index)).
+- Logging in with a Pod on your own machine over `http:`, as asked in
+  #975 ([docs/onboarding.md](docs/onboarding.md#webid-validation)).
+- A Solid client of the app's own, beside Inrupt's
+  ([docs/solid-memo-client.md](docs/solid-memo-client.md)), and the
+  app named to providers by its Client ID Document
+  ([docs/authentication.md](docs/authentication.md#the-client-id-document)).
+- Logging in from the landing page, with the WebID you last used
+  remembered, and every suggested provider offered for a new Pod
+  ([docs/user-guide.md](docs/user-guide.md#getting-in)).
+- Pausing a deck, which keeps it and its course out of the day's study,
+  and catching up on its backlog afterward
+  ([docs/user-guide.md](docs/user-guide.md#pausing-a-deck)).
+- A course's preview, by its chapters, and its own language for its
+  theory and titles ([docs/user-guide.md](docs/user-guide.md#courses)).
+- Courses on reading Hangul, web accessibility with WCAG 2.2, open
+  source and open content licenses, DCAT, and A Year in Sweden's
+  everyday dialogues; Korean at the Table finished in ten chapters; and
+  a deck of the brain's regions
+  ([docs/deck-library.md](docs/deck-library.md)).
+- Four more languages for the label decks' cards, from Wikidata
+  ([docs/deck-library.md](docs/deck-library.md#languages-from-wikidata)),
+  and a library that names and filters by the languages of a deck's
+  cards.
+- A finished day celebrated on the deck list, with the today strip in
+  gold, learned decks and finished courses decorated, what's new in a
+  version at the top of the deck list, and a message of the day
+  ([docs/user-guide.md](docs/user-guide.md#your-decks)).
+- An enlarged picture zoomed on its own, closed only on purpose
+  ([docs/user-guide.md](docs/user-guide.md#studying)).
 - A deck's cards shown in a language the learner chooses for that deck
   ([docs/user-guide.md](docs/user-guide.md#languages)).
 - Cramming a deck's leeches, or every deck's from the statistics,
@@ -118,7 +156,6 @@ These are done. Those since 1.0.0 come first; the rest are part of
   8.0.0 is out, in place of 6 ([docs/testing.md](docs/testing.md)).
 - **More decks and courses** in the library
   ([docs/deck-library.md](docs/deck-library.md)), proposed by anyone.
-- **Listing Solid Memo** in the Solid project's catalog of apps.
 
 ## Out of scope
 

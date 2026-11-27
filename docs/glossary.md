@@ -17,6 +17,12 @@ status.
 - **ACR** (Access Control Resource): an ACP pod's counterpart of an
   ACL. [Specification](https://solidproject.org/TR/acp#access-control-resource);
   [data-model.md](data-model.md).
+- **Client ID Document**: a JSON-LD document at the app's own address
+  that names it and the addresses a provider may send the learner back
+  to, so that Solid-OIDC needs no registration. Solid Memo's is
+  `clientid.jsonld` on its domain.
+  [Specification](https://solidproject.org/TR/oidc#clientids);
+  [authentication.md](authentication.md#the-client-id-document).
 - **CSP** (Content Security Policy): what the browser lets a page load
   and run.
   [Specification](https://www.w3.org/TR/CSP3/);
@@ -33,6 +39,12 @@ status.
 - **LDP** (Linked Data Platform): rules for a server's containers
   (folders) of linked data, which Solid pods follow.
   [Specification](https://www.w3.org/TR/ldp/).
+- **LWS** (Linked Web Storage): the W3C's protocol for a storage of
+  linked data, which its Working Group is writing as the Solid
+  Protocol's successor. Solid Memo works on a server that speaks it and
+  the Solid Protocol's requests too.
+  [Specification](https://www.w3.org/TR/lws10-core/);
+  [lws.md](lws.md).
 - **OIDC** (OpenID Connect): a standard for logging in with another
   site's account.
   [Specification](https://openid.net/specs/openid-connect-core-1_0.html).
