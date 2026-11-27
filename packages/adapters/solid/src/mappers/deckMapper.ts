@@ -236,20 +236,21 @@ export function withDeck(dataset: Dataset, deck: Deck): Dataset {
 export function withDecks(dataset: Dataset, decks: readonly Deck[]): Dataset {
   const edit = editOf(dataset);
   const nodes = agentNodesIn(edit.getThing);
+  const foreign = foreignSubjects(dataset);
   for (const deck of decks.map(withBoundedMetadata)) {
-    if (!wroteDeck(edit, nodes, deck)) {
+    if (!wroteDeck(edit, nodes, foreign, deck)) {
       throw new AppError("termTooLong", { limit: MAX_TERM_CHARACTERS });
     }
   }
   const documents = new Set(decks.map((deck) => documentUrlOf(deck.url)));
   return withCatalogDatasets(
-    withoutStrayAgents(edit.done(), documents, foreignSubjects(dataset)),
+    withoutStrayAgents(edit.done(), documents, foreign),
     decks.map((deck) => deck.url),
     "add",
   );
 }
 
-/** The subjects a deck is written as in `dataset` (withDeck's): its entry, its distribution and its agents. */
+/** The subjects a deck is written as in `dataset` (withDeck's): its entry, its distribution when it writes one, and its agents. */
 export function deckSubjects(dataset: Dataset, deck: Deck): string[] {
   return decksSubjects(dataset, [deck]);
 }
@@ -257,16 +258,24 @@ export function deckSubjects(dataset: Dataset, deck: Deck): string[] {
 /**
  * The subjects each of the decks is written as in `dataset` (withDecks'),
  * one deck after another, as deckSubjects gives them: the agent nodes of
- * the dataset are looked at once for all of them (agentNodesOf).
+ * the dataset are looked at once for all of them (agentNodesOf). A
+ * distribution the write left as it is (leftDistribution) is none of
+ * them: it is not this app's to hold to its shape.
  */
 export function decksSubjects(dataset: Dataset, decks: readonly Deck[]): string[] {
   const nodes = agentNodesIn((url) => getThing(dataset, url));
+  const foreign = foreignSubjects(dataset);
   return decks.flatMap((deck) => {
     const agents = new TextMap<string>();
     // Only the authors withDecks writes (withBoundedMetadata).
     const { url, authors } = withBoundedMetadata(deck);
     for (const agent of nodes.urlsOf(url, authors)) agents.set(agent, agent);
-    return [deck.url, distributionUrlOf(deck.url), ...agents.values()];
+    const distribution = distributionUrlOf(url);
+    return [
+      url,
+      ...(leftDistribution(getThing(dataset, distribution), foreign) ? [] : [distribution]),
+      ...agents.values(),
+    ];
   });
 }
 
@@ -301,35 +310,66 @@ function agentNodesIn(thingAt: (url: string) => NamedSubject | null): AgentNodes
 export function decksWithAgentsWithinBound(dataset: Dataset, decks: readonly Deck[]): Deck[] {
   const edit = editOf(dataset);
   const nodes = agentNodesIn(edit.getThing);
-  return decks.filter((deck) => wroteDeck(edit, nodes, withBoundedMetadata(deck)));
+  const foreign = foreignSubjects(dataset);
+  return decks.filter((deck) => wroteDeck(edit, nodes, foreign, withBoundedMetadata(deck)));
 }
 
 /**
  * Writes `deck` into `edit` as withDecks writes each deck: its entry,
- * its agents at the nodes `nodes` names and its distribution, and has
- * `nodes` look again at what it wrote. False, with nothing written,
- * when an agent's node is longer than any term.
+ * its agents at the nodes `nodes` names and its distribution, unless
+ * the subject there is left as it is (leftDistribution, `foreign` being
+ * another app's subjects of the document as read), and has `nodes` look
+ * again at what it wrote. False, with nothing written, when an agent's
+ * node is longer than any term.
  */
-function wroteDeck(edit: DatasetEdit<Dataset>, nodes: AgentNodes, deck: Deck): boolean {
+function wroteDeck(
+  edit: DatasetEdit<Dataset>,
+  nodes: AgentNodes,
+  foreign: ReadonlySet<string>,
+  deck: Deck,
+): boolean {
   const creator = nodes.urlsOf(deck.url, deck.authors);
   if (creator.some(isIriPastBound)) return false;
-  edit.setThing(
-    recordThing(deck.url, DECK_V6, deckToRecord(deck, creator), edit.getThing(deck.url)),
-  );
-  for (const { url, record } of deckAgents(deck, creator)) {
-    edit.setThing(recordThing(url, AGENT_V1, record, edit.getThing(url)));
-  }
-  const distribution = deckDistribution(deck);
+  const { url, record } = deckDistribution(deck);
+  const links = leftDistribution(edit.getThing(url), foreign);
   edit.setThing(
     recordThing(
-      distribution.url,
-      DISTRIBUTION_V1,
-      distribution.record,
-      edit.getThing(distribution.url),
+      deck.url,
+      DECK_V6,
+      { ...deckToRecord(deck, creator), ...(links && { distribution: links }) },
+      edit.getThing(deck.url),
     ),
   );
-  for (const url of [deck.url, ...creator, distribution.url]) nodes.written(url);
+  for (const agent of deckAgents(deck, creator)) {
+    edit.setThing(recordThing(agent.url, AGENT_V1, agent.record, edit.getThing(agent.url)));
+  }
+  if (!links) edit.setThing(recordThing(url, DISTRIBUTION_V1, record, edit.getThing(url)));
+  for (const written of [deck.url, ...creator, url]) nodes.written(written);
   return true;
+}
+
+/**
+ * The entry's links to the subject at its distribution's IRI
+ * (distributionUrlOf) when a deck's write leaves that subject as it is,
+ * never rewriting, removing, checking or refusing it; undefined when the
+ * write writes the distribution there: there is none, or it is this
+ * app's at its format. The IRI alone never makes it this app's. One a
+ * newer version of the app wrote, stamped above the distribution format
+ * this app writes (DISTRIBUTION_V1) whatever its classes, is left, as an
+ * agent node a newer version wrote is (GHSA-hqvj-6p8f-vqfx): the entry
+ * still links to it when it is a dcat:Distribution, as it may link to
+ * no subject of another class. Another app's, one of `foreign`
+ * (foreignSubjects of the document as read, GHSA-gvpx-j2mc-x9r9), is
+ * left and not linked to: the deck is written with no distribution.
+ */
+function leftDistribution(
+  thing: NamedSubject | null,
+  foreign: ReadonlySet<string>,
+): string[] | undefined {
+  if (thing === null) return undefined;
+  if (storedVersionOf(thing) > DISTRIBUTION_V1.version)
+    return hasClass(thing, DISTRIBUTION_V1.targetClass) ? [thing.url] : [];
+  return foreign.has(thing.url) ? [] : undefined;
 }
 
 /**
@@ -352,12 +392,13 @@ function agentHolderOf(thing: NamedSubject | null): AgentHolder {
  * The catalog document without each of the decks, their distributions,
  * or agents only they named, and with no deck group this app writes
  * listing one of them any more. Only this app's subjects go: another
- * app's at a distribution's IRI stays (foreignSubjects,
+ * app's at an entry's or a distribution's IRI stays (foreignSubjects,
  * GHSA-gvpx-j2mc-x9r9), and a group in a newer format than this app's
  * keeps its links, which the layout reads as no member once the deck is
- * gone (GHSA-x9mp-vw7v-rpwg). An entry, a distribution or the catalog
- * node a newer version of the app wrote is refused (writtenByNewerApp);
- * an agent node a newer version wrote stays as it is.
+ * gone (GHSA-x9mp-vw7v-rpwg). An entry or the catalog node a newer
+ * version of the app wrote is refused (writtenByNewerApp); a
+ * distribution or an agent node a newer version wrote stays as it is,
+ * as a write of the deck leaves it (leftDistribution).
  * Their former siblings keep their positions: the gap is read as if it
  * were not there (domain/deckTree.ts buildTree), and the next
  * arrangement closes it. The entries and distributions are taken out at
@@ -370,9 +411,13 @@ export function withoutDecks(dataset: Dataset, decks: readonly Deck[]): Dataset 
   const foreign = foreignSubjects(dataset);
   const removed = removeAllUnlessNewer(
     dataset,
-    decks
-      .flatMap((deck) => [deck.url, distributionUrlOf(deck.url)])
-      .filter((url) => !foreign.has(url)),
+    decks.flatMap((deck) => {
+      const distribution = distributionUrlOf(deck.url);
+      return [
+        ...(foreign.has(deck.url) ? [] : [deck.url]),
+        ...(leftDistribution(getThing(dataset, distribution), foreign) ? [] : [distribution]),
+      ];
+    }),
   );
   const groups: NamedSubject[] = [];
   for (const thing of getThingAll(removed)) {

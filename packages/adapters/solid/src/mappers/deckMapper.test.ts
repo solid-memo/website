@@ -1456,6 +1456,17 @@ describe("the catalog node", () => {
       expect(getThing(removed, deck.url)).toBeNull();
       expect(getThing(removed, cards.url)).toEqual(cards);
     });
+
+    it("leaves another app's subject at a removed deck's entry", () => {
+      const subject = buildThing(createThing({ url: `${CATALOG}#z` }))
+        .addStringNoLocale(DCTERMS.title, "other app")
+        .build();
+      const dataset = setThing(withDeck(datasetFrom(CATALOG), deck), subject);
+      expect(foreignSubjects(dataset).has(subject.url)).toBe(true);
+      const removed = withoutDecks(dataset, [{ ...deck, url: subject.url }]);
+      expect(getThing(removed, subject.url)).toEqual(subject);
+      expect(getThing(removed, deck.url)).not.toBeNull();
+    });
   });
 
   it("is absent from a document whose #catalog has no statements of its own", () => {
@@ -1891,5 +1902,110 @@ describe("a deck's metadata in the catalog (GHSA-cr5j-7hg4-ccvr)", () => {
 
     const written = withDeck(dataset, { ...read!, title: { en: "Renamed" } });
     expect(keywordsIn(written)).toHaveLength(MAX_DECK_METADATA);
+  });
+});
+
+describe("the subject at a deck's distribution IRI (GHSA-22vh-cv35-wv8q)", () => {
+  const PREFIXES = [
+    "@prefix dcterms: <http://purl.org/dc/terms/> .",
+    "@prefix dcat: <http://www.w3.org/ns/dcat#> .",
+    "@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .",
+  ].join("\n");
+  const entry = (id: string, version: number) =>
+    `<#${id}> a sm:Deck ; sm:formatVersion ${version} ; dcterms:title "${id}" ; sm:direction "front-to-back" ; sm:cardsDocument <decks/${id}.ttl> ; sm:reviewsDocument <reviews/${id}.ttl> .`;
+  // Each with the links the entry has to it once written: only a distribution is linked to.
+  const NEWER: [string, string, string[]][] = [
+    ["untyped", "<#deck-1-cards> sm:formatVersion 99 .", []],
+    [
+      "typed a distribution",
+      "<#deck-1-cards> a dcat:Distribution, dcat:Dataset ; sm:formatVersion 99 .",
+      [distributionUrlOf(`${CATALOG}#deck-1`)],
+    ],
+    ["of another class", "<#deck-1-cards> a dcat:Dataset ; sm:formatVersion 2 .", []],
+  ];
+  const url = distributionUrlOf(`${CATALOG}#deck-1`);
+  const catalogWith = (subject: string) =>
+    datasetOfTurtle(
+      CATALOG,
+      [PREFIXES, entry("deck-1", 1), entry("deck-2", 1), subject].join("\n"),
+    );
+  const upgraded = (dataset: Dataset) =>
+    decksWithAgentsWithinBound(
+      dataset,
+      toDecks(dataset, CATALOG).filter(isDeckOutdated).map(upgradeDeck),
+    );
+
+  describe.each(NEWER)("stamped newer and %s", (_, subject, links) => {
+    it("is left as it is by a save of the deck, which does not check it", async () => {
+      const dataset = await catalogWith(subject);
+      const before = getThing(dataset, url);
+      const [deck] = toDecks(dataset, CATALOG);
+      const saved = { ...upgradeDeck(deck!), title: { en: "Renamed" } };
+      const written = withDeck(dataset, saved);
+      expect(getThing(written, url)).toEqual(before);
+      expect(getUrlAll(getThing(written, deck!.url)!, DCAT.distribution)).toEqual(links);
+      expect(deckSubjects(written, saved)).not.toContain(url);
+    });
+
+    it("keeps no deck from the format update, which brings both up to date", async () => {
+      const dataset = await catalogWith(subject);
+      const written = upgraded(dataset);
+      expect(written.map((deck) => deck.id)).toEqual(["deck-1", "deck-2"]);
+      const updated = withDecks(dataset, written);
+      expect(toDecks(updated, CATALOG).map((deck) => deck.formatVersion)).toEqual([6, 6]);
+      expect(getThing(updated, url)).toEqual(getThing(dataset, url));
+      expect(decksSubjects(updated, written)).toEqual([
+        `${CATALOG}#deck-1`,
+        `${CATALOG}#deck-2`,
+        distributionUrlOf(`${CATALOG}#deck-2`),
+      ]);
+    });
+
+    it("is left as it is by the removal of the deck, alone or with another", async () => {
+      const dataset = await catalogWith(subject);
+      const decks = toDecks(dataset, CATALOG);
+      for (const removing of [decks.slice(0, 1), decks]) {
+        const removed = withoutDecks(withDecks(dataset, decks.map(upgradeDeck)), removing);
+        expect(getThing(removed, url)).toEqual(getThing(dataset, url));
+        for (const deck of removing) expect(getThing(removed, deck.url)).toBeNull();
+      }
+    });
+  });
+
+  describe.each([
+    [
+      "another app's dataset",
+      `<#deck-1-cards> a dcat:Dataset, <urn:x:Thing> ; dcterms:title "Other" .`,
+    ],
+    ["another app's untyped subject", `<#deck-1-cards> dcterms:title "Other" .`],
+  ])("%s", (_, subject) => {
+    it("is left as it is by a save and the format update, and the deck has no distribution", async () => {
+      const dataset = await catalogWith(subject);
+      const before = getThing(dataset, url);
+      const written = upgraded(dataset);
+      expect(written).toHaveLength(2);
+      const updated = withDecks(dataset, written);
+      expect(getThing(updated, url)).toEqual(before);
+      expect(getUrlAll(getThing(updated, `${CATALOG}#deck-1`)!, DCAT.distribution)).toEqual([]);
+      expect(foreignSubjects(updated).has(url)).toBe(true);
+      expect(deckSubjects(updated, written[0]!)).toEqual([`${CATALOG}#deck-1`]);
+      const renamed = withDeck(updated, { ...toDecks(updated, CATALOG)[0]!, title: { en: "R" } });
+      expect(getThing(renamed, url)).toEqual(before);
+      expect(getThing(withoutDecks(renamed, toDecks(renamed, CATALOG)), url)).toEqual(before);
+    });
+  });
+
+  it("this app wrote at its format is written over and removed", async () => {
+    const dataset = await catalogWith(
+      `<#deck-1-cards> a dcat:Distribution, <urn:x:Thing> ; sm:formatVersion 1 .`,
+    );
+    const updated = withDecks(dataset, upgraded(dataset));
+    const distribution = getThing(updated, url)!;
+    expect(getUrlAll(distribution, "http://www.w3.org/ns/dcat#accessURL")).toEqual([
+      "https://pod.example/solid-memo/a/decks/deck-1.ttl",
+    ]);
+    expect(getUrlAll(distribution, RDF.type)).toContain("urn:x:Thing");
+    expect(deckSubjects(updated, toDecks(updated, CATALOG)[0]!)).toContain(url);
+    expect(getThing(withoutDecks(updated, toDecks(updated, CATALOG)), url)).toBeNull();
   });
 });
