@@ -8,7 +8,7 @@
 # (CSS_LWS_SHA), as no release or image of it is published. It is built
 # without its dependencies' install scripts, then run with css-lws-e2e.json
 # (css-lws) or css-lws-only-e2e.json (css-lws-only).
-FROM node:22.23.5-bookworm-slim@sha256:e9f565d32859f0cbfb52125eafe8be39390f24dac302dc3cdf566e8ba3ab21ee AS build
+FROM node:22.23.5-bookworm-slim@sha256:be979e5523c76fa4d5ca4ebd3099078f220aa47ec39c48ad5b5df9314debd6eb AS build
 # Renovate proposes newer commits of the branch for a person to approve (renovate.json5).
 # renovate: datasource=git-refs depName=https://github.com/jeswr/CommunitySolidServer branch=feat/lws-next-major
 ARG CSS_LWS_SHA=ed404e97f5177d94f683f76b658b6e9492737f97
@@ -23,7 +23,7 @@ RUN git init -q . \
  && npm run build \
  && npm prune --omit=dev --ignore-scripts --no-audit --no-fund
 
-FROM node:22.23.5-bookworm-slim@sha256:e9f565d32859f0cbfb52125eafe8be39390f24dac302dc3cdf566e8ba3ab21ee
+FROM node:22.23.5-bookworm-slim@sha256:be979e5523c76fa4d5ca4ebd3099078f220aa47ec39c48ad5b5df9314debd6eb
 WORKDIR /community-server
 COPY --from=build /community-server/package.json ./
 COPY --from=build /community-server/bin ./bin
