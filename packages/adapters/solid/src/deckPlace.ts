@@ -20,6 +20,7 @@ import {
   isDocumentIn,
   isInFolder,
   isSameUrl,
+  isSameDocuments,
   ownsDocument,
   reviewsContainerOf,
 } from "@solid-memo/domain/instanceLayout";
@@ -604,14 +605,20 @@ export function createDeckDocumentGuard(
     },
 
     /**
-     * Claim the deck's unclaimed documents, as the user confirmed: each
-     * says it is the deck's from then on, in one write made only while it
-     * is as read (If-Match), or, where there is none, made with that alone
-     * (If-None-Match: *). Nothing else in it changes. One that is a deck
-     * itself (isDeckItself) is left as it is.
+     * Claim the deck's unclaimed documents, `documents` being those the
+     * user was shown and confirmed: each of them says it is the deck's
+     * from then on, in one write made only while it is as read (If-Match),
+     * or, where there is none, made with that alone (If-None-Match: *).
+     * Nothing else in it changes. One that is a deck itself (isDeckItself)
+     * is left as it is. Refused (changedElsewhere), with nothing written, when
+     * the deck's unclaimed documents, read now, are not those: the catalog
+     * may name others since the user saw them. The two lists match by
+     * documentKeyOf, and what is written is the confirmed spelling.
      */
-    async claim(deck: DeckPlace): Promise<void> {
-      for (const url of await unclaimed(deck)) {
+    async claim(deck: DeckPlace, documents: readonly string[]): Promise<void> {
+      if (!isSameDocuments(await unclaimed(deck), documents))
+        throw new AppError("changedElsewhere", { url: deck.url });
+      for (const url of documents) {
         if (isDraftDocument(url)) continue;
         const dataset = (await getSolidDatasetOrNull(url, fetch)) ?? createSolidDataset();
         if (isDeckItself(dataset, url)) continue;

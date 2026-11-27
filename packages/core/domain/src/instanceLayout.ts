@@ -327,6 +327,17 @@ export function documentKeyOf(url: string): string {
 }
 
 /**
+ * Whether two lists name the same documents, in any order and any
+ * spelling a server may read as one (documentKeyOf): as the documents a
+ * deck's claim writes to are those the user confirmed.
+ */
+export function isSameDocuments(one: readonly string[], other: readonly string[]): boolean {
+  const keys = new Set(one.map(documentKeyOf));
+  const otherKeys = new Set(other.map(documentKeyOf));
+  return keys.size === otherKeys.size && [...otherKeys].every((key) => keys.has(key));
+}
+
+/**
  * Whether a subject is one of the document at `documentUrl`, and not a
  * subject of another document that this one merely states things of: a
  * fragment is an id only in its own document, so another document's

@@ -690,7 +690,11 @@ No document Solid Memo names has any.
   documents". Once the user confirms, each document is made to say it's
   the deck's: one write made only while it's as read (`If-Match`), or
   only where there's none (`claimDeckDocuments`;
-  `createDeckDocumentGuard` in `deckPlace.ts`). The claim is only for
+  `createDeckDocumentGuard` in `deckPlace.ts`). Only the addresses the
+  user was shown and confirmed are claimed. When the deck's unclaimed
+  documents, read again, aren't those (`documentKeyOf`, in any order),
+  nothing is written (`changedElsewhere`), and the check runs again to show
+  the addresses the deck names now. The claim is only for
   documents in the instance's folder, or in one of the user's storages,
   as found at that moment, that holds the instance too
   (`isInInstancePod`). An instance attached from someone else's pod may

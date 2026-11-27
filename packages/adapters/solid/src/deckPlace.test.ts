@@ -157,7 +157,7 @@ describe("a deck the catalog names at an address no deck's may have", () => {
         p.reviews.createReviewStates(there, { sm2: [], fsrs: [] }),
       ).rejects.toMatchObject(gone);
       await expect(p.decks.unclaimedDocuments(there)).resolves.toEqual([]);
-      await expect(p.decks.claimDocuments(there)).resolves.toBeUndefined();
+      await expect(p.decks.claimDocuments(there, [])).resolves.toBeUndefined();
       expect(p.writes).toEqual([]);
       expect(await p.text(CARD)).toBe(await (await pod()).text(CARD));
     });
@@ -471,7 +471,7 @@ describe("a deck whose documents do not say they are its own", () => {
 
     p.writes.length = 0;
     p.conditions.length = 0;
-    await p.decks.claimDocuments(listed!);
+    await p.decks.claimDocuments(listed!, [cards, reviews]);
     expect(p.writes).toEqual([`PATCH ${cards}`, `PUT ${reviews}`]);
     // The cards on the version read; the reviews document made only where there was none.
     expect(p.conditions[0]).toMatch(/^"e\d+"$/);
@@ -481,7 +481,7 @@ describe("a deck whose documents do not say they are its own", () => {
 
     // Claimed once: claiming again sends nothing, and writes work, the link stated once.
     p.writes.length = 0;
-    await p.decks.claimDocuments(listed!);
+    await p.decks.claimDocuments(listed!, []);
     expect(p.writes).toEqual([]);
     await p.decks.addCard(listed!, DOS);
     expect(await backLinks(p, cards, deck)).toBe(1);
@@ -489,6 +489,40 @@ describe("a deck whose documents do not say they are its own", () => {
       "card-1",
       "card-id2",
     ]);
+  });
+
+  it("is claimed only as the user confirmed it: never once the catalog names another document", async () => {
+    const p = await pod();
+    const deck = await p.decks.createDeck(BOB, { en: "Spanish" });
+    const shown = `${ROOT}bob/public/old-cards.ttl`;
+    const reviews = `${ROOT}bob/public/old-reviews.ttl`;
+    const swapped = `${ROOT}bob/private/notes.ttl`;
+    await p.put(shown, deckDocument(deck, cardTurtle("card-1", "uno"), false));
+    await p.put(swapped, `<#note> <${SM}front> "private" .`);
+    await plant(p, deck, shown, reviews);
+    const [listed] = await p.decks.listDecks(BOB);
+    const confirmed = await p.decks.unclaimedDocuments(listed!);
+    expect(confirmed).toEqual([shown, reviews]);
+
+    // The catalog names another document by the time the user confirms.
+    await plant(p, listed!, swapped, reviews);
+    const [now] = await p.decks.listDecks(BOB);
+    const before = await p.text(swapped);
+    p.writes.length = 0;
+    await expect(p.decks.claimDocuments(now!, confirmed)).rejects.toMatchObject({
+      code: "changedElsewhere",
+      vars: { url: deck.url },
+    });
+    expect(p.writes).toEqual([]);
+    expect(await p.text(swapped)).toBe(before);
+
+    // As the catalog was, the confirmed list is claimed, in whatever order, and nothing else.
+    await plant(p, now!, shown, reviews);
+    const [again] = await p.decks.listDecks(BOB);
+    p.writes.length = 0;
+    await p.decks.claimDocuments(again!, [reviews, shown]);
+    expect(p.writes).toEqual([`PUT ${reviews}`, `PATCH ${shown}`]);
+    expect(await p.text(swapped)).toBe(before);
   });
 
   it("is written to anywhere in the instance's storage when it says it is the deck's", async () => {
@@ -870,7 +904,7 @@ describe("a deck whose document is a deck itself: a release", () => {
     await expect(
       p.reviews.createReviewStates(listed!, { sm2: [], fsrs: [] }),
     ).rejects.toMatchObject({ code: "deckDocumentUnclaimed" });
-    await p.decks.claimDocuments(listed!);
+    await p.decks.claimDocuments(listed!, [release]);
     await p.decks.removeDeck(listed!);
     expect(p.writes.filter((write) => write.endsWith(release))).toEqual([]);
     expect(await p.text(release)).toBe(before);
@@ -1006,7 +1040,7 @@ describe("a deck whose document is one of a draft's, as a draft made from a rele
       await expect(
         p.reviews.createReviewStates(listed!, { sm2: [], fsrs: [] }),
       ).rejects.toMatchObject({ code: "deckDocumentUnclaimed" });
-      await p.decks.claimDocuments(listed!);
+      await p.decks.claimDocuments(listed!, [document]);
       await p.decks.removeDeck(listed!);
       expect(p.writes.filter((write) => write.endsWith(document))).toEqual([]);
       expect(await p.text(document)).toBe(before);
@@ -1503,7 +1537,7 @@ describe("a deck's document named at another spelling of its address, on a serve
       });
 
       // Claimed (one outside the instance's folder), each says it is the other deck's too, on the subject it already has.
-      await decks.claimDocuments(listed);
+      await decks.claimDocuments(listed, await decks.unclaimedDocuments(listed));
       expect(await p.text(deck.cardsDocumentUrl)).not.toContain(upper(deck.cardsDocumentUrl));
       expect(await backLinks(p, deck.cardsDocumentUrl, listed)).toBe(instance === BOB ? 0 : 1);
       await decks.removeDeck(listed);

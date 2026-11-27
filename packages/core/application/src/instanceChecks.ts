@@ -10,6 +10,7 @@ import {
   historyUrlOf,
   instanceDocumentUrls,
   isDocumentIn,
+  isSameDocuments,
 } from "@solid-memo/domain/instanceLayout";
 import {
   summarize,
@@ -55,14 +56,22 @@ export interface InstanceCheckUseCases {
   /**
    * Mark a deck's unclaimed documents (the report's `unclaimed`) as the
    * deck's, once the user has confirmed they are: from then on they are
-   * written to and deleted as the deck's. Each in one write made only
-   * while it is as read; nothing else in it changes. deckGone when the
-   * instance has no such deck; claimOutsidePod, with nothing written,
-   * when any of them is outside the instance's folder and in no storage
-   * of the user's found to hold the instance too (UnclaimedDeck
-   * `outsidePod`).
+   * written to and deleted as the deck's. `documents` are the addresses
+   * the user was shown and confirmed (UnclaimedDeck `documents`), and
+   * only those are claimed. Each in one write made only while it is as
+   * read; nothing else in it changes. deckGone when the instance has no
+   * such deck; changedElsewhere, with nothing written, when the deck's
+   * unclaimed documents, read again, are not those (in any spelling,
+   * documentKeyOf, and any order); claimOutsidePod, with nothing
+   * written, when any of them is outside the instance's folder and in
+   * no storage of the user's found to hold the instance too
+   * (UnclaimedDeck `outsidePod`).
    */
-  claimDeckDocuments(instanceUrl: string, deckUrl: string): Promise<void>;
+  claimDeckDocuments(
+    instanceUrl: string,
+    deckUrl: string,
+    documents: readonly string[],
+  ): Promise<void>;
   /**
    * Everything wrong with one deck of the instance (domain/deckHealth.ts):
    * the check of its entry in the catalog and of its cards and reviews
@@ -684,16 +693,18 @@ export function createInstanceCheckUseCases({
   return {
     validateInstance,
     checkInstance,
-    async claimDeckDocuments(instanceUrl, deckUrl) {
+    async claimDeckDocuments(instanceUrl, deckUrl, documents) {
       const deck = (await deckRepository.listDecks(instanceUrl)).find(
         (listed) => listed.url === deckUrl,
       );
       if (deck === undefined) throw new AppError("deckGone", { deck: deckUrl });
-      const documents = await deckRepository.unclaimedDocuments(deck);
+      // The catalog may name other documents now than the check showed the user: only those confirmed are claimed.
+      if (!isSameDocuments(await deckRepository.unclaimedDocuments(deck), documents))
+        throw new AppError("changedElsewhere", { url: deckUrl });
       const [outside] = await outsidePodTest(instanceUrl)(documents);
       if (outside !== undefined)
         throw new AppError("claimOutsidePod", { deck: deck.title, url: outside });
-      await deckRepository.claimDocuments(deck);
+      await deckRepository.claimDocuments(deck, documents);
     },
     forgetDeckCheck(instanceUrl, deck) {
       if (shared.instanceUrl !== instanceUrl) return;

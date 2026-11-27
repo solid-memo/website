@@ -60,7 +60,12 @@ describe("UnclaimedDecksNotice", () => {
     fireEvent.click(screen.getByRole("button", { name: "These are this deck's documents" }));
     fireEvent.click(screen.getByRole("button", { name: "Mark them as the deck's" }));
     await waitFor(() =>
-      expect(useCases.claimDeckDocuments).toHaveBeenCalledWith(INSTANCE, SPANISH.deckUrl),
+      // With the addresses it showed, so that only those are claimed.
+      expect(useCases.claimDeckDocuments).toHaveBeenCalledWith(
+        INSTANCE,
+        SPANISH.deckUrl,
+        SPANISH.documents,
+      ),
     );
     await waitFor(() =>
       expect(invalidate).toHaveBeenCalledWith({ queryKey: ["validation", INSTANCE] }),
@@ -91,12 +96,16 @@ describe("UnclaimedDecksNotice", () => {
           }),
       ),
     });
-    renderNotice(useCases);
+    const { invalidate } = renderNotice(useCases);
     fireEvent.click(screen.getByRole("button", { name: "These are this deck's documents" }));
     fireEvent.click(screen.getByRole("button", { name: "Mark them as the deck's" }));
     expect(await screen.findByRole("button", { name: "Marking…" })).toBeDisabled();
-    fail(new AppError("changedElsewhere", { url: SPANISH.documents[0]! }));
+    fail(new AppError("changedElsewhere", { url: SPANISH.deckUrl }));
     expect(await screen.findByRole("alert")).toBeInTheDocument();
+    // The instance is checked again, so that the addresses the deck names now are shown.
+    await waitFor(() =>
+      expect(invalidate).toHaveBeenCalledWith({ queryKey: ["validation", INSTANCE] }),
+    );
   });
 
   it("lists at most LIST_LIMIT decks, and says how many more there are", () => {

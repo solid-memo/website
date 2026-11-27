@@ -691,8 +691,8 @@ export function createSolidDeckRepository({
       return budget === undefined ? read() : budget.spend(false, read);
     },
 
-    claimDocuments(deck) {
-      return guard.claim(deck);
+    claimDocuments(deck, documents) {
+      return guard.claim(deck, documents);
     },
   };
 

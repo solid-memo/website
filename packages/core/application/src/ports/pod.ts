@@ -457,11 +457,14 @@ export interface DeckRepository {
     reads?: SharedReads,
   ): Promise<boolean>;
   /**
-   * Claim the deck's unclaimed documents, as the user confirmed: each is
-   * marked as the deck's, in one write made only while it is as read;
-   * nothing else in it changes.
+   * Claim the deck's unclaimed documents, `documents` being those the
+   * user was shown and confirmed: each of them is marked as the deck's,
+   * in one write made only while it is as read; nothing else in it
+   * changes. Refused with changedElsewhere, before anything is written, when
+   * the deck's unclaimed documents, read again, are not those (in any
+   * order and spelling, documentKeyOf).
    */
-  claimDocuments(deck: Deck): Promise<void>;
+  claimDocuments(deck: Deck, documents: readonly string[]): Promise<void>;
   /**
    * Delete a document of the deck that its entry does not name yet, as
    * one a guest's deck being added wrote before its catalog entry

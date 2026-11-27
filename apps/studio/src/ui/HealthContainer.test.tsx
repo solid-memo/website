@@ -205,7 +205,9 @@ describe("HealthContainer", () => {
     fireEvent.click(await screen.findByRole("button", { name: "These are this deck's documents" }));
     fireEvent.click(screen.getByRole("button", { name: "Mark them as the deck's" }));
     await waitFor(() =>
-      expect(useCases.claimDeckDocuments).toHaveBeenCalledWith(instanceA.url, deck.url),
+      expect(useCases.claimDeckDocuments).toHaveBeenCalledWith(instanceA.url, deck.url, [
+        deck.reviewsDocumentUrl,
+      ]),
     );
     renderContainer(useCases, deck);
     expect(
