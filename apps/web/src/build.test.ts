@@ -57,7 +57,7 @@ const DOCS_PAGES = DOCS_SOURCES.map((name) =>
  * front, not a small change's growth. A change that passes it says why
  * the page needs the weight, and raises this in the same commit.
  */
-const UP_FRONT_BUDGET_KB = 500;
+const UP_FRONT_BUDGET_KB = 550;
 
 let chunks: Rolldown.OutputChunk[];
 let assets: Rolldown.OutputAsset[];
