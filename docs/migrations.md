@@ -459,10 +459,12 @@ Rules that hold across versions:
   deck entry. It refuses a subject stamped above
   every version this app writes for its class. Where a shape fixes
   values the subject has (an FSRS-6 review state), the bound is the
-  version for that shape's kind. Four removals leave such a subject as
+  version for that shape's kind. Five removals leave such a subject as
   it is and go on, as no write needs it gone. One removes what's Solid
   Memo's from a document (`removeOwned`). One removes the agent nodes
-  no deck names any more. One removes the distractors no card names
+  no deck names any more. One removes a deck's entry and leaves a newer
+  subject at its distribution's IRI in place (`withoutDecks`). One
+  removes the distractors no card names
   any more (`withoutUnnamedDistractors`), and a card's removal leaves
   a newer subject at its id that isn't a card (`withoutCardSubjects`).
   The last removes every review state of a card
@@ -472,7 +474,10 @@ Rules that hold across versions:
   removal is for, so a newer one of those is refused. An agent node
   stamped above the agent format, whatever its classes, is never
   removed or rewritten by a catalog write: a deck saved over it names
-  its author's next node.
+  its author's next node. So is a subject at a deck's distribution IRI
+  stamped above the distribution format, whatever its classes: the
+  deck's save leaves it out of the write and keeps the entry's link to
+  it only when it is a distribution.
   Answers are the exception: they're never rewritten, only added and
   removed whole, so resetting a day or undoing an answer removes one a
   newer version wrote too.

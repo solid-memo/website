@@ -723,9 +723,10 @@ No document Solid Memo names has any.
   instance's deletion, before the catalog is written. The entry stays, the
   error is shown, and trying again finishes it, a document already gone
   (404, 410) counting as removed. A deck's removal makes the new catalog
-  before it deletes any document, so an entry, a distribution, an agent
-  only the removed decks name or the catalog node a newer version wrote
-  refuses it (`writtenByNewerApp`) with every document still there. A document outside the instance's
+  before it deletes any document, so an entry or the catalog node a
+  newer version wrote refuses it (`writtenByNewerApp`) with every
+  document still there. A distribution or an agent node a newer version
+  wrote stays as it is. A document outside the instance's
   folder may be anyone's and may never answer, so a failed read doesn't
   hold the deck back: it's kept whole, the result names it
   (`keptDocuments`), and the entry goes. The same holds for one the pod
@@ -886,7 +887,13 @@ graph LR
     bound, so an entry saved before holds it until the deck is next
     saved.
   - Its cards document is its `dcat:distribution` (`#deck-X-cards`, with
-    `dcat:accessURL`).
+    `dcat:accessURL`). A subject already at that IRI that a newer
+    version wrote stays as it is: no write or removal of the deck
+    rewrites, removes or refuses it, and the entry links to it only when
+    it's a `dcat:Distribution`. Another app's subject there is never
+    written onto: the deck is then written without a distribution
+    (`leftDistribution`,
+    [deckMapper.ts](../packages/adapters/solid/src/mappers/deckMapper.ts)).
   - A deck copied from the [deck library](deck-library.md), or from a
     release added [from a link](deck-library.md#from-a-link), names the
     release it came from with `prov:wasDerivedFrom` (`dcterms:source`
