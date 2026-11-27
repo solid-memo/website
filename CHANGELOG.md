@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.5.11](https://github.com/solid-memo/website/compare/v8.5.10...v8.5.11) (2026-11-27)
+
+### Fixes
+
+* **application:** claim only the deck documents the user confirmed ([b8201d5](https://github.com/solid-memo/website/commit/b8201d546b1459ed1929444ad7ac7e60f87934ff))
+* **application:** read a followed release as the user only in its pod ([c7f37bd](https://github.com/solid-memo/website/commit/c7f37bd9b4a5316f4ba3a2486fd3222b3350d1c1))
+
 ## [8.5.10](https://github.com/solid-memo/website/compare/v8.5.9...v8.5.10) (2026-11-26)
 
 ### Fixes
