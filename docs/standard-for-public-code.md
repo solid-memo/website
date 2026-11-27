@@ -1018,40 +1018,41 @@ Only an admin of the repository can change these. All are done, as
 
 ### Small fixes this assessment found
 
-Found on 2026-11-26:
+Found on 2026-11-26, and made since. The scores above are still the
+assessment's; the next one counts what these change.
 
-- **Open.** **standards.md's sign-in specifications.** The OpenID
+- **Done.** **standards.md's sign-in specifications.** The OpenID
   Connect row names neither PKCE (RFC 7636), OpenID Connect Discovery
   1.0, dynamic client registration (RFC 7591), RFC 9207 nor RFC 8414's
   well-known path, which `solid-memo-client` implements. *(11)*
-- **Open.** **standards.md's other gaps:** the reference data
+- **Done.** **standards.md's other gaps:** the reference data
   `dcterms:subject` points to, Wikidata's entity data, JPEG and the
   IIIF Image API for card pictures, and the `prefers-contrast` and
   `forced-colors` media features. *(11)*
-- **Open.** **ROADMAP.md.** "Done recently" stops at 6.4.0, and names
+- **Done.** **ROADMAP.md.** "Done recently" stops at 6.4.0, and names
   none of the work outside parties asked for. *(3, 4)*
-- **Open.** **The user guide's journeys.** Its table leaves out nine of
+- **Done.** **The user guide's journeys.** Its table leaves out nine of
   the 28 journeys, among them `pause-deck` and `pod-safety`, which show
   features the guide describes. *(9)*
-- **Open.** **The user guide's sign-in.** It says "Create a Pod" opens
+- **Done.** **The user guide's sign-in.** It says "Create a Pod" opens
   a provider's sign-up page, where there's now one button per provider
   (#283), and doesn't mention the box that remembers the WebID. *(10)*
-- **Open.** **theme.md's question size.** It says the window's width
+- **Done.** **theme.md's question size.** It says the window's width
   alone sizes the question, which shrinks with its length too. *(9,
   10)*
-- **Open.** **The glossary**, without Linked Web Storage and the Client
+- **Done.** **The glossary**, without Linked Web Storage and the Client
   ID Document, each used on several pages. *(10)*
-- **Open.** **reuse.md's list of what to edit**, without the
+- **Done.** **reuse.md's list of what to edit**, without the
   Storybook's job, which names its repository and host. *(3)*
-- **Open.** **privacy.md**, which names the deck versions and the code
+- **Done.** **privacy.md**, which names the deck versions and the code
   of conduct as where the maintainer's address is published, not the
   test fixture in `importedAuthors.test.ts` (`ccc7e0e8`). The fixture
   could use an `example.invalid` address instead. *(1)*
-- **Open.** **releasing.md's skipped queue.** It says a change can
+- **Done.** **releasing.md's skipped queue.** It says a change can
   reach `main` through a ruleset bypass, such as a merge from an
   advisory's private fork. The bypass list names only "Deploy keys",
   so such a merge needs a bypass added first. *(12)*
-- **Open.** **GOVERNANCE.md's merging.** It says every change reaches
+- **Done.** **GOVERNANCE.md's merging.** It says every change reaches
   `main` through a pull request that passes CI, and names neither the
   release commits nor `05078e24`. *(7, 12)*
 
