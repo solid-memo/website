@@ -1391,6 +1391,20 @@ flowchart LR
   left out has it counts as the
   user's, and the upgrade keeps it. The copy's own release is checked
   the same way, as its creator can change it after the import.
+- A copy's lookup of its series is made once a page load, by the
+  copy's release, whatever it finds or however it fails
+  (`keptLinkedSeries`). The deck's page, the course screen and the
+  Studio share it, and those made at once share one. A plan of an
+  upgrade from a link that fails, for what its releases hold or how
+  their server answers, is kept for the page load the same way, as a
+  failed check is. Their retries then look it up and plan it no more,
+  so the creator's server is asked nothing more for it. The offer's
+  query isn't run again on focus or as a screen opens. Reading the
+  release from its link again (`readReleaseFromLink`), as adding the
+  deck again does, looks it up and plans it afresh. A plan that passes
+  isn't kept by the use cases: it holds the releases' cards, so a screen
+  that plans it again once the query has let it go reads those releases
+  again.
 - Only the cards the copy took from a release are the series': each
   names that release (`sm:fromRelease`). A card moved or copied in, or
   one the user wrote, names none and is the user's, whatever ids the

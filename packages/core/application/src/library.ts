@@ -99,7 +99,8 @@ export interface LibraryUseCases {
    * A copy whose series the index does not list is looked for as a
    * release added from a link: its release read, and its creator's
    * catalog for a newer one in its series ("unknown" when it cannot be
-   * read), each release once, whichever copies name it, and a few at a
+   * read), each release once a page session, whichever copies name it
+   * and whatever the lookup found or how it failed, and a few at a
    * time. Writes nothing: planLibraryUpgrade says what an upgrade would
    * change.
    */
@@ -319,6 +320,10 @@ export function createLibraryUseCases({
   /** The turns whole decks' cards are read in, shared with the Studio's deck table (listCardsInTurn). */
   cardsTurn: ReturnType<typeof inTurns>;
 }): LibraryUseCases {
+  /** Failed plans of copies from a link, by the copy's release, kept for the page (planUpgrade). */
+  const linkedPlanFailures = new Map<string, { error: unknown }>();
+  /** Lookups of the series of copies from a link, by the copy's release, kept for the page (keptLinkedSeries). */
+  const linkedLookups = new Map<string, Promise<LinkedSeries>>();
   /**
    * What upgrading the deck to its library deck's current release would
    * do, of its cards as `cards` reads them; null when nothing (safe). A
@@ -335,6 +340,14 @@ export function createLibraryUseCases({
    * from are the series' (planLibraryUpgrade's `linked`). Those releases are read for
    * the plan alone (DeckLibrary.linkedReads): under one release's limits
    * together, however many it reads, and none kept once it is made.
+   * A plan of a copy from a link that fails for what its releases are or
+   * how their server answers is kept for the page session, by the copy's
+   * release (linkedPlanFailures), as withLinkedReleasesChecked keeps a
+   * failed check: the release's address is its creator's to choose, and
+   * may log each read, so the screens that plan it, and their retries,
+   * send that server nothing more. Its series is looked up once a page
+   * session too (keptLinkedSeries). Only the learner reading the release
+   * from its link again (readReleaseFromLink) plans it afresh.
    */
   async function planUpgrade(
     deck: Deck,
@@ -342,23 +355,48 @@ export function createLibraryUseCases({
     known?: LibraryCopy,
   ): Promise<LibraryUpgradePlan | null> {
     if (deck.sourceUrl === undefined) return null;
+    const failed = linkedPlanFailures.get(deck.sourceUrl);
+    if (failed !== undefined) throw failed.error;
     const { series, fromLink } = known ?? (await seriesOf(deck));
     if (series === null) return null;
     // The index tells a copy of the current release, or of no older one,
     // without reading a release (thousands of cards) or the copy's cards.
     if (!offersNewerRelease(deck, series)) return null;
+    if (fromLink !== true) return planWith(deck, deck.sourceUrl, series, cards, false);
+    // A failure of the copy's own cards is the learner's pod's, not the releases': it is not kept.
+    let cardsFailed = false;
+    const copyCards = () =>
+      cards().catch((error: unknown) => {
+        cardsFailed = true;
+        throw error;
+      });
+    try {
+      return await planWith(deck, deck.sourceUrl, series, copyCards, true);
+    } catch (error) {
+      if (!cardsFailed) linkedPlanFailures.set(deck.sourceUrl, { error });
+      throw error;
+    }
+  }
+  /** planUpgrade's plan of `deck`, a copy of `source`, to `series`, from a link (`fromLink`) or not. */
+  async function planWith(
+    deck: Deck,
+    source: string,
+    series: LibraryDeck,
+    cards: () => Promise<Card[]>,
+    fromLink: boolean,
+  ): Promise<LibraryUpgradePlan | null> {
     // The releases from a link, the copy's own among them, are read for this plan alone: kept with it, and under one
     // release's limits together.
-    const reads = fromLink === true ? deckLibrary.linkedReads() : deckLibrary;
+    const reads = fromLink ? deckLibrary.linkedReads() : deckLibrary;
     // A release from a link is checked as it is read, and that read is the one fetchLibraryDeck gives then; the
     // releases in between and the notes come from it too, not from the series as read before. The copy's own
     // release is its creator's to change too: it is checked as the newer one is.
     const [checked] = await Promise.all([
-      fromLink === true ? checkLinkedRelease(series.url, reads) : series,
-      fromLink === true ? checkLinkedRelease(deck.sourceUrl, reads) : null,
+      fromLink ? checkLinkedRelease(series.url, reads) : series,
+      fromLink ? checkLinkedRelease(source, reads) : null,
     ]);
     const [from, to, copy] = await Promise.all([
-      reads.fetchLibraryDeck(deck.sourceUrl),
+      reads.fetchLibraryDeck(source),
       reads.fetchLibraryDeck(series.url),
       cards(),
     ]);
@@ -376,8 +414,8 @@ export function createLibraryUseCases({
     ];
     // Oldest first. A release from a link lists what its creator wrote: MAX_LINKED_RELEASES of them at most, the
     // newest; a card as one left out has it counts as the user's, and is kept.
-    const betweenUrls = fromLink === true ? inBetween.slice(-MAX_LINKED_RELEASES) : inBetween;
-    if (fromLink === true)
+    const betweenUrls = fromLink ? inBetween.slice(-MAX_LINKED_RELEASES) : inBetween;
+    if (fromLink)
       await mapAtOnce(betweenUrls, (url) => checkLinkedRelease(url, reads), LINKED_READS_AT_ONCE);
     const between = await mapAtOnce(
       betweenUrls,
@@ -400,7 +438,7 @@ export function createLibraryUseCases({
       course: checked.isCourse === true || from.isCourse === true,
       ...(outlines === null ? {} : { outlines: { from: outlines[0], to: outlines[1] } }),
       // A card of a deck from a link that names no release is the user's (Card.fromRelease): left as it is.
-      linked: fromLink === true,
+      linked: fromLink,
     });
   }
   /**
@@ -456,7 +494,7 @@ export function createLibraryUseCases({
     const library = await deckLibrary.listLibraryDecks();
     const indexed = library.find((libraryDeck) => isCopyOf(deck, libraryDeck));
     if (indexed !== undefined) return { series: indexed };
-    return linkedSeries(deck.sourceUrl!, library).then(
+    return keptLinkedSeries(deck.sourceUrl!, library).then(
       (found) => (found.complete ? { series: found.series, fromLink: true } : { series: null }),
       () => ({ series: null }),
     );
@@ -537,6 +575,27 @@ export function createLibraryUseCases({
     if (newest === copied && pastLimits) return { copied, series: copied, complete: false };
     return { copied, series: newest, complete: true };
   }
+  /**
+   * The series of the release at `url` added from a link (linkedSeries),
+   * looked up once a page session, whatever it finds or however it fails,
+   * by the deck's page, the course screen and the Studio alike, and by
+   * those under way at once: the release's address is its creator's to
+   * choose, and may log each read, so a lookup made again would tell
+   * when the learner comes back to the deck. Only the learner reading
+   * the release from its link again (readReleaseFromLink) looks it up
+   * afresh. What is kept is the two releases' descriptions, none of
+   * their cards.
+   */
+  function keptLinkedSeries(url: string, library: readonly LibraryDeck[]): Promise<LinkedSeries> {
+    let lookup = linkedLookups.get(url);
+    if (lookup === undefined) {
+      lookup = linkedSeries(url, library);
+      // Kept failed too; each caller gets the failure as it awaits it.
+      lookup.catch(() => undefined);
+      linkedLookups.set(url, lookup);
+    }
+    return lookup;
+  }
   /** A copy whose series the library's index does not list, as a release added from a link, by what its lookup found; as it was when its release cannot be read. */
   function linkedCopy(copy: LibraryCopy, found: LinkedSeries | null): LibraryCopy {
     if (found === null) return copy;
@@ -569,6 +628,9 @@ export function createLibraryUseCases({
     async readReleaseFromLink(text) {
       const url = releaseUrlOf(text);
       if (url === null) throw new AppError("releaseUrlInvalid", { url: text });
+      // The learner asks for the release again: a copy of it is looked up and planned afresh.
+      linkedPlanFailures.delete(url);
+      linkedLookups.delete(url);
       // One read: what cannot be read as a release says so before any shape is loaded, and what is checked is shown.
       return checkLinkedRelease(url);
     },
@@ -587,13 +649,15 @@ export function createLibraryUseCases({
       const library = await deckLibrary.listLibraryDecks();
       const copies = libraryCopiesOf(decks, library);
       // Each release's series is looked up on its own, under limits of its own, as its deck's page looks it up, a few at
-      // a time, and once however many copies name it: they share what is found.
+      // a time, and once a page session however many copies name it: they share what is found (keptLinkedSeries).
       const sources = [
         ...new Set(
           copies.filter((copy) => copy.series === null).map((copy) => copy.deck.sourceUrl!),
         ),
       ];
-      const found = await mapAtOnce(sources, (url) => linkedSeries(url, library).catch(() => null));
+      const found = await mapAtOnce(sources, (url) =>
+        keptLinkedSeries(url, library).catch(() => null),
+      );
       const foundOf = new Map(sources.map((url, at) => [url, found[at]!]));
       return copies.map((copy) =>
         copy.series === null ? linkedCopy(copy, foundOf.get(copy.deck.sourceUrl!)!) : copy,

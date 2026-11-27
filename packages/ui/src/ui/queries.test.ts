@@ -4,8 +4,10 @@
 
 import { describe, expect, it, vi } from "vitest";
 import {
+  focusManager,
   MutationObserver,
   QueryClient,
+  QueryObserver,
   type QueryObserverOptions,
   skipToken,
 } from "@tanstack/react-query";
@@ -482,6 +484,37 @@ describe("queries", () => {
     expect(onFocus({ status: "success", data: report("unreadable") })).toBe("always");
     expect(onFocus({ status: "success", data: report("valid") })).toBe(false);
     expect(onFocus({ status: "pending" })).toBe(false);
+  });
+
+  it("plans an upgrade once, failed or not, not again on focus or as a screen opens (GHSA-7xfp-q438-m2gv)", async () => {
+    let plans = 0;
+    const failing = makeUseCasesFake({
+      planLibraryUpgrade: vi.fn(async () => {
+        plans++;
+        throw new AppError("releaseNotConforming", { host: "bob.example", count: 1 });
+      }),
+    });
+    const options = queries.libraryUpgradePlan(failing, deck);
+    expect(options).toMatchObject({
+      staleTime: Infinity,
+      refetchOnWindowFocus: false,
+      retryOnMount: false,
+    });
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    client.mount();
+    const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
+    let off = new QueryObserver(client, options).subscribe(() => undefined);
+    await settle();
+    focusManager.setFocused(false);
+    focusManager.setFocused(true);
+    await settle();
+    off();
+    off = new QueryObserver(client, options).subscribe(() => undefined);
+    await settle();
+    off();
+    focusManager.setFocused(undefined);
+    client.unmount();
+    expect(plans).toBe(1);
   });
 
   it("reads the cards' progress that left a deck out again soon, while the reason may pass", () => {
