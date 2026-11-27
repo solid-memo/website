@@ -19,6 +19,7 @@ import type { DigestRepository } from "@solid-memo/application/ports/pod";
 import { createAppUseCases, createSiteFetch } from "./appUseCases";
 import { inProcessWorker } from "@solid-memo/solid/testing/inProcessWorker";
 import { offPageJobs } from "@solid-memo/solid/offPageJobs";
+import { OFF_PAGE_WORKERS } from "@solid-memo/solid/offPage";
 
 /**
  * What each pod adapter was made with, by its factory's name, as the
@@ -211,6 +212,35 @@ function stallingAt(origin: string, rest: typeof globalThis.fetch): typeof globa
     });
     return new Response(body, { status: 200, headers: { "Content-Type": "text/turtle" } });
   };
+}
+
+/**
+ * A network on which the host at `origin` answers every request with its
+ * headers and the start of a body that ends only when the test lets it
+ * go, failing then; any other is `rest`'s. `asked` holds the addresses
+ * it was asked for.
+ */
+function heldAt(origin: string, rest: typeof globalThis.fetch) {
+  const asked: string[] = [];
+  const bodies: ReadableStreamDefaultController<Uint8Array>[] = [];
+  const fetch: typeof globalThis.fetch = async (input, init) => {
+    const url = String(input instanceof Request ? input.url : input);
+    if (!url.startsWith(origin)) return rest(input, init);
+    asked.push(url);
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(
+          new TextEncoder().encode("@prefix dcat: <http://www.w3.org/ns/dcat#> .\n"),
+        );
+        bodies.push(controller);
+      },
+    });
+    return new Response(body, { status: 200, headers: { "Content-Type": "text/turtle" } });
+  };
+  const letGo = () => {
+    for (const body of bodies) body.error(new TypeError("Connection closed"));
+  };
+  return { fetch, asked, letGo };
 }
 
 /**
@@ -1983,6 +2013,54 @@ describe("createAppUseCases", () => {
     vi.useRealTimers();
     await expect(statistics).resolves.toEqual([]);
     expect(await health).toMatchObject({ unstated: null });
+  });
+
+  it("checks the user's own instance while as many releases from a link as there are workers wait for a host that never sends them all", {
+    timeout: 60_000,
+  }, async () => {
+    const carol = "https://carol.example/";
+    const held = heldAt(carol, servedSiteNetwork);
+    vi.stubGlobal("fetch", held.fetch);
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+    await useCases.startGuest("My study");
+    const [instance] = await useCases.listInstances(GUEST_SESSION);
+    let settledReads = 0;
+    const reads = Array.from({ length: OFF_PAGE_WORKERS }, (_, at) =>
+      useCases.readReleaseFromLink(`${carol}releases/r${at}/v1.ttl`).finally(() => settledReads++),
+    );
+    // Each read waits on the host, its worker started.
+    while (held.asked.length < OFF_PAGE_WORKERS) await new Promise((r) => setTimeout(r, 10));
+    expect((await useCases.checkInstance(instance!.url)).conforms).toBe(true);
+    expect(settledReads).toBe(0);
+    held.letGo();
+    for (const read of reads) await expect(read).rejects.toBeDefined();
+  });
+
+  it("checks the user's own instance while as many drafts as there are workers wait for the release they follow from a host that never sends it all", {
+    timeout: 60_000,
+  }, async () => {
+    const carol = "https://carol.example/";
+    const held = heldAt(carol, servedSiteNetwork);
+    vi.stubGlobal("fetch", held.fetch);
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+    await useCases.startGuest("My study");
+    const [instance] = await useCases.listInstances(GUEST_SESSION);
+    let settledReads = 0;
+    const reads = Array.from({ length: OFF_PAGE_WORKERS }, (_, at) =>
+      useCases
+        .createReleaseDraft(
+          instance!.url,
+          { kind: "nextVersionOf", url: `${carol}releases/r${at}/v1.ttl` },
+          GUEST_SESSION.webId,
+        )
+        .finally(() => settledReads++),
+    );
+    // Each read waits on the host, its worker started.
+    while (held.asked.length < OFF_PAGE_WORKERS) await new Promise((r) => setTimeout(r, 10));
+    expect((await useCases.checkInstance(instance!.url)).conforms).toBe(true);
+    expect(settledReads).toBe(0);
+    held.letGo();
+    for (const read of reads) await expect(read).rejects.toBeDefined();
   });
 
   it("reads the deck library the site publishes", async () => {

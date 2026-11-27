@@ -230,11 +230,12 @@ export function createAppUseCases({
   /**
    * The work on documents the app did not write, off the page, in
    * workers (docs/validation.md, Off the page): reading, parsing and
-   * checking a release from a link, a deck file, a release file and the
-   * documents an instance's check reads, its own and those elsewhere.
-   * Their requests are made here, with the fetches below, so a worker
-   * never holds the user's login. One past its deadline, or whose
-   * worker ends, is shown as a document too large to read.
+   * checking a deck file, a release file and the documents an
+   * instance's check reads, its own and those elsewhere; a release read
+   * from a link or for a draft has workers of its own, below. Their requests are made here,
+   * with the fetches below, so a worker never holds the user's login.
+   * One past its deadline, or whose worker ends, is shown as a document
+   * too large to read.
    */
   const offPage = createOffPage({ spawn: spawnWorker, config: shapes });
   /**
@@ -245,6 +246,19 @@ export function createAppUseCases({
   const readsOffPage = offPageDocumentReader(
     createOffPage({ spawn: spawnWorker, config: shapes, freeWhileWaiting: true }),
   );
+  /**
+   * The reads of releases from a link and for the Studio's drafts, and
+   * of their catalogs and what they name, off the page in workers of
+   * their own, which read the library's shapes: a
+   * job waiting for a slow server gives up its place, so it holds up
+   * neither the user's own checks, deck files and drafts nor another
+   * release's read.
+   */
+  const releasesOffPage = createOffPage({
+    spawn: spawnWorker,
+    config: shapes,
+    freeWhileWaiting: true,
+  });
   // An instance's documents outside the user's storages, the guest's pod being this browser's, are read off the page.
   readElsewhere(
     dataFetch,
@@ -412,21 +426,28 @@ export function createAppUseCases({
   /**
    * The drafts: a release file, and a release and what it names read
    * anywhere, are read off the page, as are the release a draft follows
-   * and what it names when the draft is assembled.
+   * and what it names when the draft is assembled. A release file is
+   * the user's own, parsed in the main workers; a release and what it
+   * names are read in the releases' workers, so a slow host holds up
+   * neither the user's own checks, deck files and drafts nor another
+   * release's read.
    */
-  const releaseDraftRepository: ReleaseDraftRepository = offPageReleaseDrafts(
-    offPage,
-    createSolidReleaseDraftRepository({
-      fetch: dataFetch,
-      checkWrite,
-      releaseReads: () => releaseDraftRepository,
-    }),
-    {
-      releaseFetch,
-      // What a release names elsewhere is copied into a draft to be published, so it is read as no one.
-      publicFetch: routedFetch({ origin: SITE, local: siteFetch, remote: noOneFetch }),
-    },
-  );
+  const solidReleaseDrafts = createSolidReleaseDraftRepository({
+    fetch: dataFetch,
+    checkWrite,
+    releaseReads: () => releaseDraftRepository,
+  });
+  const draftFetches = {
+    releaseFetch,
+    // What a release names elsewhere is copied into a draft to be published, so it is read as no one.
+    publicFetch: routedFetch({ origin: SITE, local: siteFetch, remote: noOneFetch }),
+  };
+  const draftReleaseReads = offPageReleaseDrafts(releasesOffPage, solidReleaseDrafts, draftFetches);
+  const releaseDraftRepository: ReleaseDraftRepository = {
+    ...offPageReleaseDrafts(offPage, solidReleaseDrafts, draftFetches),
+    readRelease: draftReleaseReads.readRelease,
+    readLinked: draftReleaseReads.readLinked,
+  };
 
   return createUseCases({
     sessionGateway: session.sessionGateway,
@@ -448,8 +469,9 @@ export function createAppUseCases({
       fetch: siteFetch,
       // The library is published with the site, from decks/.
       indexUrl: libraryIndexUrl ?? `${SITE}decks/index.ttl`,
-      // A release from a link is read and checked against the library's shapes off the page, that read alone.
-      documents: offPageReleaseDocuments(offPage, siteFetch),
+      // A release from a link is read and checked against the library's shapes off the page, that read alone,
+      // in workers of its own.
+      documents: offPageReleaseDocuments(releasesOffPage, siteFetch),
     }),
     preferencesRepository: createSolidPreferencesRepository({ fetch: dataFetch, checkWrite }),
     paletteRepository: createSolidPaletteRepository({ fetch: dataFetch, checkWrite }),
