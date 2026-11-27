@@ -396,6 +396,10 @@ is the ports' side in the page, which the composition root wires in
   most `OFF_PAGE_WORKERS` (four) jobs work at once, one per worker, and
   the rest wait their turn. A worker no job needs is kept for 30
   seconds, with the shapes it has read, then ended.
+  A request a job leaves waiting as it ends, a read whose budget ran
+  out say, fails in the worker then too, so the next job on it reads
+  the document again rather than wait for that read. A wait for the
+  budget it leaves ends then as spent.
   In the pools of reads, a job waiting for its requests doesn't count,
   so a slow server holds up neither another read nor the user's own
   work. There are at most `OFF_PAGE_WORKERS_IN_ALL` (16) workers in

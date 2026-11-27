@@ -168,6 +168,37 @@ describe("offPageShapeValidator", () => {
     });
   });
 
+  it("reads a document again in a later job on the same worker when an earlier job's budget ran out while reading it", async () => {
+    const url = "https://pod.example/solid-memo/a/outside.ttl";
+    let requests = 0;
+    // The first request waits until the page stops it; later ones are answered at once.
+    const fetch: typeof globalThis.fetch = async (input, init) => {
+      if (++requests === 1)
+        await new Promise((_, reject) =>
+          init?.signal?.addEventListener("abort", () => reject(init.signal!.reason)),
+        );
+      return Object.defineProperty(
+        new Response('<#it> <http://schema.org/name> "x" .', {
+          headers: { "Content-Type": "text/turtle" },
+        }),
+        "url",
+        { value: String(input) },
+      );
+    };
+    const offPage = createOffPage({
+      spawn: () => inProcessWorker(offPageJobs({ shapesFetch })),
+      config: SHAPE_SOURCES,
+      workers: 1,
+      deadlineMs: 5000,
+    });
+    const off = offPageShapeValidator(offPage, inPage(fetch), { fetch, siteFetch: shapesFetch });
+    expect(await off.validateDocument(url, "pod", readBudget(20))).toMatchObject({
+      status: "unreadable",
+    });
+    expect(await off.validateDocument(url)).toMatchObject({ status: "checked" });
+    expect(requests).toBe(2);
+  });
+
   it("throws what fails the whole check, as the validator in the page does", async () => {
     const shapes = new AppError("releaseUnreadable", { url: "x" });
     const off = offPageShapeValidator(offPageOf(failing(shapes)), inPage(fakePod().fetch), {

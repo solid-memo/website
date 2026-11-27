@@ -47,6 +47,13 @@ const MAX_BRIDGED = 16;
 export function serveOffPage(port: Port, jobs: Jobs): void {
   let calls = 0;
   const answers = new Map<number, (message: PageMessage) => void>();
+  /**
+   * How each request of the job still waiting for the page ends, a
+   * fetch or a spend of the budget. Each ends as the job ends (abandon):
+   * the page answers none after that, and a read waiting for ever on one
+   * would be shared with the next job (datasets.ts).
+   */
+  const pending = new Map<number, (reason: unknown) => void>();
   /** The objects of errors the page sent, by the id it gave them, so that a job's failure sends that id back. */
   const refs = new WeakMap<object, number>();
   /**
@@ -85,8 +92,14 @@ export function serveOffPage(port: Port, jobs: Jobs): void {
       };
       const call = ++calls;
       const answer = new Promise<SentResponse>((resolve, reject) => {
+        pending.set(call, (reason) => {
+          answers.delete(call);
+          pending.delete(call);
+          reject(reason);
+        });
         answers.set(call, (message) => {
           answers.delete(call);
+          pending.delete(call);
           if (message.type === "response") resolve(message.response);
           else reject(received((message as Extract<PageMessage, { type: "rejected" }>).error));
         });
@@ -94,6 +107,7 @@ export function serveOffPage(port: Port, jobs: Jobs): void {
           "abort",
           () => {
             if (!answers.delete(call)) return;
+            pending.delete(call);
             send({ type: "abort", call });
             reject(signal.reason);
           },
@@ -134,20 +148,29 @@ export function serveOffPage(port: Port, jobs: Jobs): void {
     spend(otherwise, read) {
       const call = ++calls;
       return new Promise((resolve, reject) => {
+        // The job has ended: its budget is as good as spent, and the page waits for no read of it.
+        pending.set(call, () => {
+          answers.delete(call);
+          pending.delete(call);
+          resolve(otherwise);
+        });
         answers.set(call, (message) => {
           if ((message as Extract<PageMessage, { type: "budget" }>).event === "spent") {
             answers.delete(call);
+            pending.delete(call);
             resolve(otherwise);
             return;
           }
           read().then(
             (value) => {
               if (!answers.delete(call)) return;
+              pending.delete(call);
               send({ type: "spendDone", call });
               resolve(value);
             },
             (error: unknown) => {
               if (!answers.delete(call)) return;
+              pending.delete(call);
               send({ type: "spendDone", call });
               reject(error);
             },
@@ -183,14 +206,22 @@ export function serveOffPage(port: Port, jobs: Jobs): void {
       (value) => {
         sendTallies();
         send({ type: "done", result: value, frozen: frozenPaths(value) });
+        abandon();
       },
       (error: unknown) => {
         sendTallies();
         const ref = typeof error === "object" && error !== null ? refs.get(error) : undefined;
         send({ type: "failed", error: toSent(error, ref) });
+        abandon();
       },
     );
   });
+
+  /** The requests the job left waiting as it ended, each ended: a fetch fails as aborted, as the page has stopped it (offPage.ts settle), and a spend gives what it gives when the budget is spent. */
+  function abandon(): void {
+    for (const fail of [...pending.values()])
+      fail(new DOMException("The job that made this request has ended", "AbortError"));
+  }
 
   /** What the job's parses counted in each tally, sent to the page. */
   function sendTallies(): void {
