@@ -62,15 +62,19 @@ The first screen offers three ways in
   decide later ([guest-mode.md](guest-mode.md)): each card is then in
   your Pod where you left it.
 - **Log in with your Pod.** Pick your provider, or type your WebID
-  under "Or use your WebID" and press "Log in with Solid". You log in
+  under "Or use your WebID" and press "Log in with Solid". Check
+  "Remember my WebID on this device" and the form is filled with it
+  next time. You log in
   on the provider's page and come back to Solid Memo, which finds your
   Pod from your profile and says "Your Pod is connected." Press
   Continue ([authentication.md](authentication.md)). To go straight on
   next time, on every device, first check "Don't show this screen after
   logging in"
   ([onboarding.md](onboarding.md#skipping-the-connected-screen)).
-- **No Pod yet?** "Create a Pod" opens a provider's sign-up page in a
-  new tab. Come back when you're done, and log in.
+- **No Pod yet?** Each provider is listed with its own "Create a Pod"
+  button, which opens that provider's sign-up page in a new tab. Come
+  back when you're done, and log in
+  ([onboarding.md](onboarding.md#offered-for-creating-a-pod)).
 
 The first time you log in, Solid Memo asks which storage to use if your
 Pod has more than one, then a name for your instance and where in your
