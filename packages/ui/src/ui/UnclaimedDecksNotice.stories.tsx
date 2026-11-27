@@ -34,6 +34,7 @@ export const Decks: Story = {
       expect(args.useCases.claimDeckDocuments).toHaveBeenCalledWith(
         storyInstance.url,
         unclaimedDeck.deckUrl,
+        unclaimedDeck.documents,
       ),
     );
   },

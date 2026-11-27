@@ -18,9 +18,11 @@ import { changes, useWrite } from "./writeEffects";
  * the instance's own folder (the check's `unclaimed`, docs/data-model.md
  * "Where an instance's documents are"): each with its documents'
  * addresses and "These are this deck's documents", which asks once more,
- * then marks them as the deck's (UseCases.claimDeckDocuments) and reads
- * every check of the instance afresh. A deck with documents that may not
- * be claimed (`outsidePod`) has no such button, and says which and why.
+ * then marks those addresses, and no others, as the deck's
+ * (UseCases.claimDeckDocuments) and reads every check of the instance
+ * afresh, whether it did or the deck names others by then. A deck with
+ * documents that may not be claimed (`outsidePod`) has no such button,
+ * and says which and why.
  * Nothing when there are none. Solid Memo shows it with the data check,
  * above every screen of the instance; the Studio, on its Health screen.
  * So it lists the first LIST_LIMIT decks (bounded), each with its
@@ -39,8 +41,9 @@ export function UnclaimedDecksNotice({
   const [confirming, setConfirming] = useState<string | null>(null);
   const claim = useWrite({
     // The question goes as soon as the claim is written, while the instance is checked again.
-    mutationFn: async (deckUrl: string) => {
-      await useCases.claimDeckDocuments(instanceUrl, deckUrl);
+    // Only the addresses the user was shown and confirmed are claimed, never what the catalog names by then.
+    mutationFn: async (deck: UnclaimedDeck) => {
+      await useCases.claimDeckDocuments(instanceUrl, deck.deckUrl, deck.documents);
       setConfirming(null);
     },
     changes: () => [changes.reads(queryKeys.validation(instanceUrl))],
@@ -73,7 +76,7 @@ export function UnclaimedDecksNotice({
                 {deck.documents.join(", ")}{" "}
                 <button
                   class="primary"
-                  onClick={() => claim.mutate(deck.deckUrl)}
+                  onClick={() => claim.mutate(deck)}
                   disabled={claim.isPending}
                 >
                   {claim.isPending

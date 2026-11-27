@@ -1119,9 +1119,12 @@ describe("createAppUseCases", () => {
         documents: [`${attacker}cards.ttl`, `${attacker}reviews.ttl`],
       }),
     ]);
-    await expect(useCases.claimDeckDocuments(instance.url, deck!.url)).rejects.toMatchObject({
-      code: "claimOutsidePod",
-    });
+    await expect(
+      useCases.claimDeckDocuments(instance.url, deck!.url, [
+        `${attacker}cards.ttl`,
+        `${attacker}reviews.ttl`,
+      ]),
+    ).rejects.toMatchObject({ code: "claimOutsidePod" });
     // An export reads them as no one too.
     await given.get("createSolidDeckArchive")!.fetch(`${attacker}cards.ttl`);
 
@@ -1308,9 +1311,9 @@ describe("createAppUseCases", () => {
     ]);
     const before = [await (await pod(old)).text(), await (await pod(profile)).text()];
     sent.length = 0;
-    await expect(useCases.claimDeckDocuments(shared.url, made.url)).rejects.toMatchObject({
-      code: "claimOutsidePod",
-    });
+    await expect(
+      useCases.claimDeckDocuments(shared.url, made.url, [old, profile]),
+    ).rejects.toMatchObject({ code: "claimOutsidePod" });
     expect(
       sent.filter(({ url, method }) => url.startsWith(alice) && !["GET", "HEAD"].includes(method)),
     ).toEqual([]);
@@ -1331,7 +1334,7 @@ describe("createAppUseCases", () => {
     );
     const [unclaimed] = (await useCases.checkInstance(own.url)).unclaimed!;
     expect(unclaimed).toMatchObject({ documents: [old], outsidePod: [] });
-    await useCases.claimDeckDocuments(own.url, mine.url);
+    await useCases.claimDeckDocuments(own.url, mine.url, unclaimed!.documents);
     expect((await useCases.checkInstance(own.url)).unclaimed).toBeUndefined();
     expect(await (await pod(old)).text()).toContain(mine.url);
     await digestWritten();

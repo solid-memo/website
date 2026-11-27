@@ -618,7 +618,9 @@ describe("instance checks", () => {
           outsidePod: [ownElsewhere],
         },
       ]);
-      await expect(useCases.claimDeckDocuments(place.url, theirs.url)).rejects.toMatchObject({
+      await expect(
+        useCases.claimDeckDocuments(place.url, theirs.url, report.unclaimed![0]!.documents),
+      ).rejects.toMatchObject({
         code: "claimOutsidePod",
         vars: { deck: theirs.title, url: ownElsewhere },
       });
@@ -647,22 +649,24 @@ describe("instance checks", () => {
       deps.deckRepository.unclaimedDocuments = vi.fn(async () => [ownElsewhere]);
       const [named] = (await useCases.checkInstance(instance.url)).unclaimed!;
       expect(named!.outsidePod).toEqual([]);
-      await useCases.claimDeckDocuments(instance.url, deck.url);
-      expect(deps.deckRepository.claimDocuments).toHaveBeenCalledWith(deck);
+      await useCases.claimDeckDocuments(instance.url, deck.url, named!.documents);
+      expect(deps.deckRepository.claimDocuments).toHaveBeenCalledWith(deck, [ownElsewhere]);
 
       deps.deckRepository.listDecks = vi.fn(async () => [theirs]);
       deps.deckRepository.unclaimedDocuments = vi.fn(async () => [`${others}cards.ttl`]);
-      await useCases.claimDeckDocuments(place.url, theirs.url);
-      expect(deps.deckRepository.claimDocuments).toHaveBeenCalledWith(theirs);
+      await useCases.claimDeckDocuments(place.url, theirs.url, [`${others}cards.ttl`]);
+      expect(deps.deckRepository.claimDocuments).toHaveBeenCalledWith(theirs, [
+        `${others}cards.ttl`,
+      ]);
     });
 
     it("refuses a claim that the user's storages cannot be found for, outside the instance's folder", async () => {
       const { deps, useCases } = setup();
       vi.mocked(deps.storageGateway.discoverStorages).mockRejectedValue(new Error("offline"));
       deps.deckRepository.unclaimedDocuments = vi.fn(async () => [ownElsewhere]);
-      await expect(useCases.claimDeckDocuments(instance.url, deck.url)).rejects.toMatchObject({
-        code: "claimOutsidePod",
-      });
+      await expect(
+        useCases.claimDeckDocuments(instance.url, deck.url, [ownElsewhere]),
+      ).rejects.toMatchObject({ code: "claimOutsidePod" });
       expect(deps.deckRepository.claimDocuments).not.toHaveBeenCalled();
     });
 
@@ -670,11 +674,11 @@ describe("instance checks", () => {
       const { deps, useCases } = setup();
       vi.mocked(deps.webId).mockReturnValue(undefined);
       deps.deckRepository.unclaimedDocuments = vi.fn(async () => [ownElsewhere]);
-      await expect(useCases.claimDeckDocuments(instance.url, deck.url)).rejects.toMatchObject({
-        code: "claimOutsidePod",
-      });
+      await expect(
+        useCases.claimDeckDocuments(instance.url, deck.url, [ownElsewhere]),
+      ).rejects.toMatchObject({ code: "claimOutsidePod" });
       deps.deckRepository.unclaimedDocuments = vi.fn(async () => [deck.reviewsDocumentUrl]);
-      await useCases.claimDeckDocuments(instance.url, deck.url);
+      await useCases.claimDeckDocuments(instance.url, deck.url, [deck.reviewsDocumentUrl]);
       expect(deps.deckRepository.claimDocuments).toHaveBeenCalledTimes(1);
       expect(deps.storageGateway.discoverStorages).not.toHaveBeenCalled();
     });
@@ -693,12 +697,40 @@ describe("instance checks", () => {
   });
   it("claims a deck's documents as the user confirmed, a deck of the instance only", async () => {
     const { deps, useCases } = setup();
-    await useCases.claimDeckDocuments(instance.url, deck.url);
-    expect(deps.deckRepository.claimDocuments).toHaveBeenCalledWith(deck);
+    await useCases.claimDeckDocuments(instance.url, deck.url, []);
+    expect(deps.deckRepository.claimDocuments).toHaveBeenCalledWith(deck, []);
     await expect(
-      useCases.claimDeckDocuments(instance.url, `${instance.url}catalog.ttl#deck-other`),
+      useCases.claimDeckDocuments(instance.url, `${instance.url}catalog.ttl#deck-other`, []),
     ).rejects.toMatchObject({ code: "deckGone" });
     expect(deps.deckRepository.claimDocuments).toHaveBeenCalledTimes(1);
+  });
+  it("claims only the documents the user confirmed, and refuses when the catalog names others by then", async () => {
+    const { deps, useCases } = setup();
+    // Both in the user's storage that holds the instance, so either may be claimed once confirmed.
+    const shown = "https://alice.example/public/old-cards.ttl";
+    const swapped = "https://alice.example/private/notes.ttl";
+    deps.deckRepository.listDecks = vi.fn(async () => [{ ...deck, cardsDocumentUrl: shown }]);
+    deps.deckRepository.unclaimedDocuments = vi.fn(async (one) => [one.cardsDocumentUrl]);
+    const [named] = (await useCases.checkInstance(instance.url)).unclaimed!;
+    expect(named!.documents).toEqual([shown]);
+
+    // The catalog names another document between the check and the user's confirmation.
+    deps.deckRepository.listDecks = vi.fn(async () => [{ ...deck, cardsDocumentUrl: swapped }]);
+    await expect(
+      useCases.claimDeckDocuments(instance.url, deck.url, named!.documents),
+    ).rejects.toMatchObject({ code: "changedElsewhere", vars: { url: deck.url } });
+    // A list with more or fewer documents than read again is refused too.
+    await expect(
+      useCases.claimDeckDocuments(instance.url, deck.url, [swapped, shown]),
+    ).rejects.toMatchObject({ code: "changedElsewhere" });
+    expect(deps.deckRepository.claimDocuments).not.toHaveBeenCalled();
+
+    // What the user confirmed, read again as the catalog names it now, is claimed, and only that.
+    await useCases.claimDeckDocuments(instance.url, deck.url, [swapped]);
+    expect(deps.deckRepository.claimDocuments).toHaveBeenCalledWith(
+      { ...deck, cardsDocumentUrl: swapped },
+      [swapped],
+    );
   });
   // One document the check cannot read is in the report: it fails neither the check nor another deck.
   it("reports a deck's document the check could not read, and sets aside only that deck", async () => {

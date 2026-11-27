@@ -688,7 +688,10 @@ describe("a library deck's documents, through its import and an upgrade", () => 
     });
     expect(await everyTriple(store)).toEqual(before);
 
-    await refused.useCases.claimDeckDocuments(instance.url, deck.url);
+    await refused.useCases.claimDeckDocuments(instance.url, deck.url, [
+      deck.cardsDocumentUrl,
+      deck.reviewsDocumentUrl,
+    ]);
     expect(await backLinks(store, deck.cardsDocumentUrl, deck.url)).toBe(1);
     expect(await backLinks(store, deck.reviewsDocumentUrl, deck.url)).toBe(1);
 

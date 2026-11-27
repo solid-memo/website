@@ -374,7 +374,7 @@ describe.each(SERVERS)(
           decks.addCard(listed!, { front: { "": "dos" }, back: { "": "two" } }),
         ).rejects.toMatchObject({ code: "deckDocumentUnclaimed" });
         expect(requests.filter((request) => !/^(GET|HEAD) /.test(request))).toEqual([]);
-        await decks.claimDocuments(listed!);
+        await decks.claimDocuments(listed!, [cards]);
         expect(requests.filter((request) => !/^(GET|HEAD) /.test(request))).toEqual([
           `PATCH ${cards}`,
         ]);

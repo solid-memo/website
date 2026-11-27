@@ -15,6 +15,7 @@ import {
   digestSubjectOf,
   digestUrlOf,
   documentKeyOf,
+  isSameDocuments,
   ensureTrailingSlash,
   historyContainerOf,
   historyUrlOf,
@@ -597,5 +598,22 @@ describe("documentKeyOf", () => {
 
   it("takes text that is no URL as it is written", () => {
     expect(documentKeyOf("not a url")).toBe("not a url");
+  });
+});
+
+describe("isSameDocuments", () => {
+  const cards = "https://pod.example/elsewhere/cards.ttl";
+  const reviews = "https://pod.example/elsewhere/reviews.ttl";
+
+  it("takes the same documents in any order and spelling as the same", () => {
+    expect(isSameDocuments([cards, reviews], [reviews, cards])).toBe(true);
+    expect(isSameDocuments([cards], ["https://pod.example/elsewhere/Cards.ttl"])).toBe(true);
+    expect(isSameDocuments([], [])).toBe(true);
+  });
+
+  it("tells lists that name other documents, or more or fewer, apart", () => {
+    expect(isSameDocuments([cards], ["https://pod.example/private/notes.ttl"])).toBe(false);
+    expect(isSameDocuments([cards], [cards, reviews])).toBe(false);
+    expect(isSameDocuments([cards, reviews], [cards])).toBe(false);
   });
 });

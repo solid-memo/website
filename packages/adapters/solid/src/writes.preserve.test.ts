@@ -646,7 +646,7 @@ const ROWS: { [Name in keyof UseCases]: Row } = {
   checkInstance: async ({ u }) =>
     void expect(await u.checkInstance(INSTANCE)).toMatchObject({ conforms: true }),
   claimDeckDocuments: async ({ u, capitals }) =>
-    void (await u.claimDeckDocuments(INSTANCE, capitals.url)),
+    void (await u.claimDeckDocuments(INSTANCE, capitals.url, [])),
   checkDeck: async ({ u, capitals }) => void (await u.checkDeck(INSTANCE, capitals, textCheck)),
   forgetDeckCheck: async ({ u, capitals }) => u.forgetDeckCheck(INSTANCE, capitals),
 
