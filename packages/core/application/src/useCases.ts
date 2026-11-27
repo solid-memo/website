@@ -213,6 +213,7 @@ export function createUseCases({
     fileExchange,
     storageGateway,
     releasePublisher,
+    webId,
     now,
   });
   const instances = createInstanceUseCases({
@@ -335,6 +336,7 @@ export function createUseCases({
       deckLibrary,
       fileExchange,
       storageGateway,
+      webId,
       now,
     }),
     ...createInstanceGraphUseCases({

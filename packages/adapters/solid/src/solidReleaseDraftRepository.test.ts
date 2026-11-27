@@ -296,6 +296,7 @@ describe("create", () => {
         save: () => undefined,
       },
       storageGateway: { discoverStorages: async () => [] },
+      webId: () => undefined,
       releasePublisher: { listPublished: async () => [] },
       now: () => new Date(NOW),
     });
@@ -336,6 +337,7 @@ describe("create", () => {
       shapeValidator: pod.validator,
       fileExchange: {} as never,
       storageGateway: { discoverStorages: async () => [] },
+      webId: () => undefined,
       releasePublisher: { listPublished: async () => [] },
       now: () => new Date(NOW),
     });
@@ -383,6 +385,7 @@ describe("create", () => {
           save: () => undefined,
         },
         storageGateway: { discoverStorages: async () => [] },
+        webId: () => undefined,
         releasePublisher: { listPublished: async () => [] },
         now: () => new Date(NOW),
       });
@@ -1359,8 +1362,29 @@ describe("assemble", () => {
     expect(await elsewhere.assemble(next, v2, NOW)).toBe(
       await pod.repository.assemble(next, v2, NOW),
     );
-    expect(readRelease).toHaveBeenCalledWith(v1);
+    expect(readRelease).toHaveBeenCalledWith(v1, { asNoOne: true });
     expect(readLinked).toHaveBeenCalledOnce();
+  });
+
+  it("reads the release a draft follows as no one unless told it may be read as the user (GHSA-hcwc-432r-hgxx)", async () => {
+    const pod = await draftPod();
+    const v1 = `${INSTANCE}releases/solid/v1.ttl`;
+    await pod.repository.create(INSTANCE, course());
+    await pod.put(v1, await pod.repository.assemble(DRAFT, v1, NOW));
+    const next = draftUrlOf(INSTANCE, "solid", 2);
+    await pod.repository.create(INSTANCE, nextVersionDraft(await createdRelease(pod, v1), next));
+    const v2 = `${INSTANCE}releases/solid/v2.ttl`;
+    const readRelease = vi.fn(pod.repository.readRelease);
+    const elsewhere = createSolidReleaseDraftRepository({
+      fetch: pod.fetch,
+      releaseReads: () => ({ readRelease, readLinked: pod.repository.readLinked }),
+    });
+    const followedAsUser = vi.fn(async (prev: string) => prev !== v1);
+    await elsewhere.assemble(next, v2, NOW, undefined, { followedAsUser });
+    expect(followedAsUser).toHaveBeenCalledWith(v1);
+    expect(readRelease).toHaveBeenLastCalledWith(v1, { asNoOne: true });
+    await elsewhere.assemble(next, v2, NOW, undefined, { followedAsUser: async () => true });
+    expect(readRelease).toHaveBeenLastCalledWith(v1, { asNoOne: false });
   });
 
   it("writes the next version of a release that describes its series, as the series' last and current", async () => {
@@ -1650,6 +1674,7 @@ describe("assemble", () => {
           save: () => undefined,
         },
         storageGateway: { discoverStorages: async () => [] },
+        webId: () => undefined,
         releasePublisher: { listPublished: async () => [] },
         now: () => new Date(NOW),
       });
@@ -1710,6 +1735,7 @@ describe("assemble", () => {
         shapeValidator: {} as never,
         fileExchange: {} as never,
         storageGateway: { discoverStorages: async () => [] },
+        webId: () => undefined,
         releasePublisher: { listPublished: async () => [] },
         now: () => new Date(NOW),
       });
@@ -1782,6 +1808,7 @@ describe("assemble", () => {
       shapeValidator: {} as never,
       fileExchange: {} as never,
       storageGateway: { discoverStorages: async () => [] },
+      webId: () => undefined,
       releasePublisher: { listPublished: async () => [] },
       now: () => new Date(NOW),
     });
@@ -1844,6 +1871,7 @@ describe("assemble", () => {
       shapeValidator: pod.validator,
       fileExchange: { open: async () => ({ name: "verbs.ttl", text }), save: () => undefined },
       storageGateway: { discoverStorages: async () => [] },
+      webId: () => undefined,
       releasePublisher: { listPublished: async () => [] },
       now: () => new Date(NOW),
     });
@@ -1889,6 +1917,7 @@ describe("assemble", () => {
       shapeValidator: pod.validator,
       fileExchange: { open: async () => ({ name: "git.ttl", text }), save: () => undefined },
       storageGateway: { discoverStorages: async () => [] },
+      webId: () => undefined,
       releasePublisher: { listPublished: async () => [] },
       now: () => new Date(NOW),
     });
@@ -1972,6 +2001,7 @@ describe("assemble", () => {
         shapeValidator: pod.validator,
         fileExchange: {} as never,
         storageGateway: { discoverStorages: async () => [] },
+        webId: () => undefined,
         releasePublisher: { listPublished: async () => [] },
         now: () => new Date(NOW),
       });
@@ -2968,6 +2998,7 @@ ${versions
       shapeValidator: pod.validator,
       fileExchange: {} as never,
       storageGateway: { discoverStorages: async () => [] },
+      webId: () => undefined,
       releasePublisher: { listPublished: async () => [...published] },
       now: () => new Date(NOW),
     });
@@ -2980,6 +3011,7 @@ ${versions
       deckLibrary: {} as never,
       fileExchange: {} as never,
       storageGateway: { discoverStorages: async () => [] },
+      webId: () => undefined,
       now: () => new Date(NOW),
     });
     return { pod, d2, d3, drafts, publishing, publish };
@@ -3131,6 +3163,7 @@ describe("publishing a draft whose root a newer app wrote (GHSA-9grp-qx53-cphh)"
       shapeValidator: pod.validator,
       fileExchange: {} as never,
       storageGateway: { discoverStorages: async () => [] },
+      webId: () => undefined,
       releasePublisher: publisher,
       now: () => new Date(NOW),
     });
@@ -3143,6 +3176,7 @@ describe("publishing a draft whose root a newer app wrote (GHSA-9grp-qx53-cphh)"
       deckLibrary: {} as never,
       fileExchange: {} as never,
       storageGateway: { discoverStorages: async () => [] },
+      webId: () => undefined,
       now: () => new Date(NOW),
     });
     return {

@@ -41,6 +41,7 @@ it("publishes an imported release's creator outside it by its IRI, as the Studio
     shapeValidator: {} as never,
     fileExchange: { open: async () => ({ name: "release.ttl", text }), save: () => undefined },
     storageGateway: { discoverStorages: async () => [] },
+    webId: () => undefined,
     releasePublisher: { listPublished: async () => [] },
     now: () => new Date(NOW),
   });
@@ -79,6 +80,7 @@ describe("a pod draft that states a name of a creator with no record (GHSA-q4pr-
       shapeValidator: {} as never,
       fileExchange: { open: async () => ({ name: "release.ttl", text }), save: () => undefined },
       storageGateway: { discoverStorages: async () => [] },
+      webId: () => undefined,
       releasePublisher: { listPublished: async () => [] },
       now: () => new Date(NOW),
     });
@@ -116,6 +118,7 @@ describe("a pod draft that states a name of a creator with no record (GHSA-q4pr-
       deckLibrary: {} as never,
       fileExchange: {} as never,
       storageGateway: { discoverStorages: async () => [] },
+      webId: () => undefined,
       now: () => new Date(NOW),
     });
     const target = `${POD}public/releases/academy-award-best-picture/v1.ttl`;
@@ -164,6 +167,7 @@ describe("a creator with no record, whatever its IRI (GHSA-mv57-839j-wrf6)", () 
       shapeValidator: {} as never,
       fileExchange: { open: async () => ({ name: "release.ttl", text }), save: () => undefined },
       storageGateway: { discoverStorages: async () => [] },
+      webId: () => undefined,
       releasePublisher: { listPublished: async () => [] },
       now: () => new Date(NOW),
     });

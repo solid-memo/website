@@ -31,7 +31,6 @@ import {
   type DraftChange,
   type DraftRefusal,
   type DraftTriple,
-  type PublishedIds,
   type ReleaseDraft,
   unsupportedIdOf,
 } from "@solid-memo/domain/release/releaseDraft";
@@ -244,7 +243,8 @@ const NAME_ATTEMPTS = 3;
  * Whether the document at `url` (a release, a deck's cards) is the
  * instance's: in the instance, or in one of the user's storages (those
  * of `webId`) the instance is in too, each as a request sends the
- * address. None, when they cannot be found. Only such a document is
+ * address. None, when they cannot be found or no one is logged in
+ * (`webId` undefined). Only such a document is
  * read as the user to be written into the instance, or a release made
  * public by it: an instance attached from someone else's pod may name
  * a document of the user's own that was kept from everyone.
@@ -253,14 +253,34 @@ export async function isInInstancePod(
   storageGateway: Pick<StorageGateway, "discoverStorages">,
   instanceUrl: string,
   url: string,
-  webId: string,
+  webId: string | undefined,
 ): Promise<boolean> {
   if (isDocumentIn(url, instanceUrl)) return true;
+  if (webId === undefined) return false;
   const storages = await storageGateway.discoverStorages(webId).catch(() => []);
   return storages.some(
     (storage) =>
       isDocumentIn(url, storage.url) && isDocumentIn(catalogUrlOf(instanceUrl), storage.url),
   );
+}
+
+/**
+ * Whether the release `prev` that the draft at `draftUrl` follows is
+ * read as no one: it is, unless it is the draft's instance's
+ * (isInInstancePod), as a release made the next version of is. What it
+ * published is held against the draft, and published again with it
+ * (assemble): an instance attached from someone else's pod may name a
+ * release of the user's own that was kept from everyone.
+ */
+export async function followedAsNoOne(
+  storageGateway: Pick<StorageGateway, "discoverStorages">,
+  webId: string | undefined,
+  draftUrl: string,
+  prev: string,
+): Promise<boolean> {
+  // A draft is read only at a draft's place.
+  const { instanceUrl } = draftPlaceOf(draftUrl)!;
+  return !(await isInInstancePod(storageGateway, instanceUrl, prev, webId));
 }
 
 /** Whether a write was refused because a document changed, or was made, since it was read. */
@@ -526,6 +546,7 @@ export function createReleaseDraftUseCases({
   fileExchange,
   storageGateway,
   releasePublisher,
+  webId,
   now,
 }: {
   releaseDraftRepository: ReleaseDraftRepository;
@@ -536,36 +557,41 @@ export function createReleaseDraftUseCases({
   storageGateway: Pick<StorageGateway, "discoverStorages">;
   /** The releases the instance published, which a draft may follow (isFollowable). */
   releasePublisher: Pick<ReleasePublisher, "listPublished">;
+  /** Who is logged in, whose own releases a draft's instance may follow as the user (followedAsNoOne). */
+  webId: () => string | undefined;
   now: () => Date;
 }): ReleaseDraftUseCases {
-  /** Each release a draft follows, by URL: releases are frozen, so each is read once. */
+  /** Each release a draft follows, by URL and whether it is read as no one: releases are frozen, so each is read once. */
   const releases = new Map<string, Promise<ReleaseDraft>>();
 
-  function release(url: string): Promise<ReleaseDraft> {
-    let read = releases.get(url);
+  function release(url: string, asNoOne: boolean): Promise<ReleaseDraft> {
+    const key = JSON.stringify([url, asNoOne]);
+    let read = releases.get(key);
     if (read === undefined) {
-      read = releaseDraftRepository.readRelease(url);
+      read = releaseDraftRepository.readRelease(url, { asNoOne });
       // A failed read is tried again next time.
-      read.catch(() => releases.delete(url));
-      releases.set(url, read);
+      read.catch(() => releases.delete(key));
+      releases.set(key, read);
     }
     return read;
   }
 
-  /** What the release `url` and those before it published. */
-  function published(url: string): Promise<PublishedIds> {
-    return release(url).then(publishedIdsOf);
+  /** The release `prev` the draft at `draftUrl` follows, read as the user only when it is the instance's (followedAsNoOne). */
+  async function followed(draftUrl: string, prev: string): Promise<ReleaseDraft> {
+    return release(prev, await followedAsNoOne(storageGateway, webId(), draftUrl, prev));
   }
 
-  /** Each release a draft follows, as the release rules read it, by URL. */
+  /** Each release a draft follows, as the release rules read it, by URL and whether it is read as no one. */
   const releaseModels = new Map<string, Promise<ReleaseModel>>();
 
-  function releaseModel(url: string): Promise<ReleaseModel> {
-    let model = releaseModels.get(url);
+  async function releaseModel(draftUrl: string, prev: string): Promise<ReleaseModel> {
+    const asNoOne = await followedAsNoOne(storageGateway, webId(), draftUrl, prev);
+    const key = JSON.stringify([prev, asNoOne]);
+    let model = releaseModels.get(key);
     if (model === undefined) {
-      model = release(url).then((read) => draftReleaseModel(read));
-      model.catch(() => releaseModels.delete(url));
-      releaseModels.set(url, model);
+      model = release(prev, asNoOne).then((read) => draftReleaseModel(read));
+      model.catch(() => releaseModels.delete(key));
+      releaseModels.set(key, model);
     }
     return model;
   }
@@ -632,7 +658,10 @@ export function createReleaseDraftUseCases({
           { related: [prev] },
         ),
       ];
-    return releaseModel(prev).then((before) => continuityProblems(before, model), unread);
+    return releaseModel(draft.url, prev).then(
+      (before) => continuityProblems(before, model),
+      unread,
+    );
   }
 
   /**
@@ -705,7 +734,7 @@ export function createReleaseDraftUseCases({
     const { prev } = draft.root;
     if (prev === undefined) return draft;
     const ids = await followable(draft.url, prev)
-      .then((may) => (may ? published(prev) : null))
+      .then((may) => (may ? followed(draft.url, prev).then(publishedIdsOf) : null))
       .catch(() => null);
     return { ...draft, published: ids ?? publishedIdsOf(draft) };
   }
@@ -902,7 +931,10 @@ export function createReleaseDraftUseCases({
       const { prev } = draft.root;
       if (prev === undefined) return null;
       if (!(await isFollowable(draft.url, prev))) return { previousElsewhere: prev };
-      const [previous, before] = await Promise.all([release(prev), releaseModel(prev)]);
+      const [previous, before] = await Promise.all([
+        followed(draft.url, prev),
+        releaseModel(draft.url, prev),
+      ]);
       const listed = draftLibraryDeck(draft);
       return {
         previous,

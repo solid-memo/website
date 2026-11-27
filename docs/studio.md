@@ -1953,8 +1953,12 @@ with nothing written, whether such a copy can be written there.
   learns nothing of who opens the draft. One in the user's own pod (a
   storage of theirs, or an instance they registered) is read as the
   user, since a release the pod wouldn't share is its owner's alone.
-  A redirect from there isn't followed, as none is with the user's
-  credentials ([authentication.md](authentication.md#authenticated-requests)).
+  That holds only when it's the draft's instance's, by the place rule
+  of [the next version of a release](#drafts) (`followedAsNoOne`). Any
+  other is read as no one, so an instance in someone else's pod can't
+  have what a release kept from everyone states copied into a release
+  of its own. A redirect from there isn't followed, as none is with
+  the user's credentials ([authentication.md](authentication.md#authenticated-requests)).
 - Making or deleting a draft is held until the data check is done, and
   while the catalog is set aside ([below](#data-set-aside)).
 - A draft made with a deleted draft's name has its URL, so what the
@@ -2832,8 +2836,10 @@ releases it, two ways.
   any other without reading it (`previousElsewhere`), and one it can't
   read or that isn't the version before (`previousUnread`,
   `versionNotNext`). Download .ttl, which isn't checked, leaves them
-  out the same way: it reads the release the draft follows, as no
-  one, wherever it is, so it too needs that release to be readable.
+  out the same way. It reads the release the draft follows as the
+  user only when it's the instance's, by the place rule of a draft's
+  followed release (`followedAsNoOne`), and as no one otherwise, so it
+  too needs that release to be readable.
 - **Listed.** The catalog links it (`sm:publishedRelease`), before
   it's made public, so a link refused leaves no public release the
   Studio can't list. A catalog node a newer version of the app wrote

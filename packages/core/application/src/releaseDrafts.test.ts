@@ -36,6 +36,7 @@ import type { DeckRepository } from "./ports/pod";
 import {
   createReleaseDraftUseCases,
   type DraftDiff,
+  followedAsNoOne,
   type ReleaseDraftUseCases,
 } from "./releaseDrafts";
 
@@ -77,6 +78,7 @@ function setUp({
   stored = courseDraft() as ReleaseDraft,
   storages = ["https://pod.example/"],
   published = [] as string[],
+  webId = WEB_ID as string | undefined,
 } = {}) {
   const repository = {
     list: vi.fn(async () => drafts),
@@ -123,6 +125,7 @@ function setUp({
     fileExchange,
     storageGateway,
     releasePublisher,
+    webId: () => webId,
     now: () => new Date(NOW),
   });
   const created = () => repository.create.mock.calls.at(-1)![1];
@@ -1375,7 +1378,7 @@ describe("getReleaseDraft", () => {
     await useCases.getReleaseDraft(draft.url);
     await useCases.getReleaseDraft(draft.url);
     expect(repository.readRelease).toHaveBeenCalledTimes(1);
-    expect(repository.readRelease).toHaveBeenCalledWith(beside);
+    expect(repository.readRelease).toHaveBeenCalledWith(beside, { asNoOne: false });
     expect(releasePublisher.listPublished).toHaveBeenCalledTimes(2);
   });
 });
@@ -1434,7 +1437,7 @@ describe("editReleaseDraft", () => {
       ok: false,
       refusal: { refused: "idTaken", id: "ch-z" },
     });
-    expect(ownRepository.readRelease).toHaveBeenCalledWith(V1);
+    expect(ownRepository.readRelease).toHaveBeenCalledWith(V1, { asNoOne: false });
   });
 
   it("reads the draft and makes the changes again when it changed elsewhere, or a new document was made there, a few times", async () => {
@@ -1715,7 +1718,7 @@ describe("checkReleaseDraft", () => {
     expect(repository.readRelease).not.toHaveBeenCalled();
     const check = await useCases.checkReleaseDraft(next, markdownCheck, "pod");
     expect(check.drops).toEqual([]);
-    expect(repository.readRelease).toHaveBeenCalledWith(library);
+    expect(repository.readRelease).toHaveBeenCalledWith(library, { asNoOne: true });
   });
 
   it("runs the shapes again when they failed", async () => {
@@ -1784,7 +1787,7 @@ describe("diffReleaseDraft", () => {
     await expect(useCases.diffReleaseDraft(draft)).rejects.toThrow("offline");
     expect(repository.readRelease).not.toHaveBeenCalled();
     await expect(useCases.diffReleaseDraft(draft)).resolves.toMatchObject({ problems: [] });
-    expect(repository.readRelease).toHaveBeenCalledWith(beside);
+    expect(repository.readRelease).toHaveBeenCalledWith(beside, { asNoOne: false });
   });
 
   it("fails while the release it follows cannot be read, and reads it again next time", async () => {
@@ -1794,5 +1797,52 @@ describe("diffReleaseDraft", () => {
     await expect(useCases.diffReleaseDraft(draft)).rejects.toThrow(AppError);
     await expect(useCases.diffReleaseDraft(draft)).resolves.not.toBeNull();
     expect(repository.readRelease).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("the release a draft follows, in the user's own pod (GHSA-hcwc-432r-hgxx)", () => {
+  // The draft's instance is someone else's; the user's own storage is another.
+  const OWN = "https://own.example/";
+  const OWN_WEB_ID = `${OWN}profile/card#me`;
+  const KEPT = `${OWN}memo/releases/kept/v1.ttl`;
+  const markdownCheck = { problems: () => [], chunks: () => ({ chunks: 1, empty: 0 }) };
+  const following = (prev: string): ReleaseDraft => {
+    const next = nextVersionDraft(v1, courseDraft().url);
+    return { ...next, root: { ...next.root, prev } };
+  };
+
+  it("is read as no one, though the instance's catalog lists it", async () => {
+    const draft = following(KEPT);
+    const { useCases, repository } = setUp({
+      stored: draft,
+      storages: [OWN],
+      published: [KEPT],
+      webId: OWN_WEB_ID,
+    });
+    await useCases.getReleaseDraft(draft.url);
+    await useCases.checkReleaseDraft(draft, markdownCheck, "pod");
+    await expect(useCases.diffReleaseDraft(draft)).resolves.toMatchObject({ problems: [] });
+    expect(repository.readRelease).toHaveBeenCalledWith(KEPT, { asNoOne: true });
+    expect(repository.readRelease).not.toHaveBeenCalledWith(KEPT, { asNoOne: false });
+    // Read once all the same.
+    expect(repository.readRelease).toHaveBeenCalledOnce();
+  });
+
+  it("is read as the user when it is in the storage the instance is in", async () => {
+    const own = "https://pod.example/public/solid/v1.ttl";
+    const draft = following(own);
+    const { useCases, repository } = setUp({ stored: draft, published: [own] });
+    await useCases.diffReleaseDraft(draft);
+    expect(repository.readRelease).toHaveBeenCalledWith(own, { asNoOne: false });
+  });
+
+  it("is read as the user only in the instance while no one is logged in", async () => {
+    const storageGateway = { discoverStorages: vi.fn(async () => []) };
+    const url = courseDraft().url;
+    await expect(followedAsNoOne(storageGateway, undefined, url, V1)).resolves.toBe(false);
+    await expect(
+      followedAsNoOne(storageGateway, undefined, url, "https://pod.example/public/solid/v1.ttl"),
+    ).resolves.toBe(true);
+    expect(storageGateway.discoverStorages).not.toHaveBeenCalled();
   });
 });

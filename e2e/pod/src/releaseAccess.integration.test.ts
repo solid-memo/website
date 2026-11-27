@@ -136,6 +136,7 @@ describe.each(SERVERS)("making a release public on $name", ({ url: server }) => 
           deckLibrary: {} as never,
           fileExchange: {} as never,
           storageGateway: { discoverStorages: async () => [] },
+          webId: () => undefined,
           now: () => new Date(),
         });
         // Refused, or done as the other origin says, which changes nothing but there.
