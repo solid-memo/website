@@ -384,7 +384,13 @@ it. What doesn't is kept to a few places, and made to follow:
 
 - **What the window sizes**: the card's question and answer are sized
   by the window's width (`vw`), within bounds in `rem`, the `vw` term
-  multiplied by `--text-scale` (1 by default).
+  multiplied by `--text-scale` (1 by default). The question shrinks
+  with its length too: full size up to 12 characters, then a little
+  smaller for each one, down to 0.6 of it at 52, and never under
+  1.5rem. Its length is
+  `--text-length`, the characters of its text without Markdown's
+  marks, which [`CardFace.tsx`](../packages/ui/src/ui/CardFace.tsx)
+  sets.
 - **Breakpoints** are in `rem`, which a media query reads as the
   browser's font size, so they follow the browser's text
   size but not the page's. The deck list's is a container query in
