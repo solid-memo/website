@@ -318,7 +318,10 @@ export const queries = {
    * release, the plan for the deck as it was no longer applies. The plan
    * kept is the very one planned, not a copy shared with the one before
    * it (structural sharing): its lists stay frozen, so what is counted of
-   * them is counted once (activeCountOf).
+   * them is counted once (activeCountOf). Not planned again on focus or
+   * as a screen that shows it opens, failed or not: a copy from a link is
+   * planned with reads of its creator's server, and a failed plan is kept
+   * by the use cases until the learner reads its release again.
    */
   libraryUpgradePlan: (
     useCases: Pick<UseCases, "planLibraryUpgrade">,
@@ -332,6 +335,8 @@ export const queries = {
           ? useCases.planLibraryUpgrade(deck)
           : useCases.planLibraryUpgrade(deck, copy),
       staleTime: Infinity,
+      refetchOnWindowFocus: false,
+      retryOnMount: false,
       structuralSharing: false,
     }),
   /**

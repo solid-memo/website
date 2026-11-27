@@ -172,7 +172,15 @@ The browser contacts these, each when it's needed:
   the release, such as Study, Cram, a card's page, the card list and the
   course screen, then send that address nothing more, retries included.
   Only a read the learner asks for, such as adding the deck again, asks
-  it again, and one that passes takes the failure's place.
+  it again, and one that passes takes the failure's place. The upgrade
+  offer's look for a newer version is made once a page load too,
+  whatever it finds or however it fails, and an upgrade plan that fails
+  is kept the same way. The deck's page, the course screen and the
+  Studio then send that server nothing more for them, retries and
+  focusing the tab included. Only loading the page again, or adding the
+  deck again, may ask it again. An offer that's made reads the releases
+  it would upgrade to again when the deck's page or the course screen
+  plans it again after a while.
 - **The server of a release a Studio draft follows**, or whose next
   version the Studio starts, once a page load. It's asked as no one,
   unless the release is in the draft's instance, or in the learner's

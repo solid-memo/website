@@ -9,7 +9,7 @@ import { SM } from "@solid-memo/vocab/vocab.generated";
 import { createUseCases } from "./useCases";
 import { withLinkedReleasesChecked } from "./library";
 import { MAX_CARD_ID_LENGTH, type Card, type Deck } from "@solid-memo/domain/deck";
-import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
+import type { LibraryCopy, LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
 import {
   type DocumentReport,
   MAX_RESULTS_PER_CHECK,
@@ -718,8 +718,9 @@ describe("the deck library", () => {
         `${RELEASES}v9.ttl`,
         `${RELEASES}v2.ttl`,
       ]);
+      // Looked up once a page: in another page, its creator's catalog not shared.
       vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue(null);
-      await expect(useCases.listLibraryUpdates(instance.url)).resolves.toEqual([
+      await expect(createUseCases(deps).listLibraryUpdates(instance.url)).resolves.toEqual([
         { deck: copy, series: linked(1), version: "1", newer: "unknown", fromLink: true },
         { deck: gone, series: null, version: null, newer: false },
       ]);
@@ -733,7 +734,7 @@ describe("the deck library", () => {
         elsewhere.url,
         `${RELEASES}v9.ttl`,
       ]);
-      await expect(useCases.listLibraryUpdates(instance.url)).resolves.toEqual([
+      await expect(createUseCases(deps).listLibraryUpdates(instance.url)).resolves.toEqual([
         { deck: copy, series: linked(2), version: "1", newer: true, fromLink: true },
         { deck: lakes, series: elsewhere, version: "3", newer: false, fromLink: true },
       ]);
@@ -778,13 +779,13 @@ describe("the deck library", () => {
       await expect(useCases.planLibraryUpgrade(copy)).resolves.toBeNull();
       const read = vi.mocked(deps.deckLibrary.readRelease).mock.calls.map(([url]) => url);
       expect(read.filter((url) => !url.startsWith(RELEASES))).toEqual([]);
-      // The instance's own release under another name still is one.
+      // The instance's own release under another name still is one (in another page).
       vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([
         `${RELEASES}v1.ttl`,
         ...strangers.map((release) => release.url),
         renamed.url,
       ]);
-      await expect(useCases.listLibraryUpdates(instance.url)).resolves.toEqual([
+      await expect(createUseCases(deps).listLibraryUpdates(instance.url)).resolves.toEqual([
         { deck: copy, series: renamed, version: "1", newer: true, fromLink: true },
       ]);
     });
@@ -970,13 +971,13 @@ describe("the deck library", () => {
         `${RELEASES}v2.ttl`,
         ...decks.slice(0, 4),
       ]);
-      // A newer one named otherwise is found among them.
+      // A newer one named otherwise is found among them (in another page).
       vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([
         renamed.url,
         ...decks,
         `${RELEASES}v2.ttl`,
       ]);
-      await expect(useCases.listLibraryUpdates(instance.url)).resolves.toEqual([
+      await expect(createUseCases(deps).listLibraryUpdates(instance.url)).resolves.toEqual([
         { deck: newest, series: renamed, version: "2", newer: true, fromLink: true },
       ]);
     });
@@ -993,7 +994,7 @@ describe("the deck library", () => {
       const copy: Deck = { ...deck, sourceUrl: `${RELEASES}v1.ttl` };
       const other: Deck = { ...deck, url: `${deck.url}-other`, sourceUrl: `${RELEASES}v2.ttl` };
       vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([copy, other]);
-      const useCases = createUseCases(deps);
+      let useCases = createUseCases(deps);
       await expect(useCases.listLibraryUpdates(instance.url)).resolves.toEqual([
         { deck: copy, series: linked(4), version: "1", newer: true, fromLink: true },
         { deck: other, series: linked(4), version: "2", newer: true, fromLink: true },
@@ -1009,6 +1010,8 @@ describe("the deck library", () => {
         return read(url, accept);
       });
       vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([copy]);
+      // Each in a page of its own: a lookup is kept for the page.
+      useCases = createUseCases(deps);
       await expect(useCases.listLibraryUpdates(instance.url)).resolves.toEqual([
         { deck: copy, series: linked(1), version: "1", newer: "unknown", fromLink: true },
       ]);
@@ -1022,6 +1025,7 @@ describe("the deck library", () => {
         if (url === `${RELEASES}v4.ttl`) throw new AppError("linkedReadsSpent", { url });
         return read(url, accept);
       });
+      useCases = createUseCases(deps);
       await expect(useCases.listLibraryUpdates(instance.url)).resolves.toEqual([
         { deck: copy, series: linked(1), version: "1", newer: "unknown", fromLink: true },
       ]);
@@ -1035,6 +1039,7 @@ describe("the deck library", () => {
           (_, at) => `https://bob.example/memo/releases/other-${at}/v1.ttl`,
         ),
       ]);
+      useCases = createUseCases(deps);
       await expect(useCases.listLibraryUpdates(instance.url)).resolves.toEqual([
         { deck: copy, series: linked(1), version: "1", newer: "unknown", fromLink: true },
       ]);
@@ -1067,11 +1072,12 @@ describe("the deck library", () => {
       vi.mocked(deps.deckRepository.listCards).mockResolvedValue([]);
       const useCases = createUseCases(deps);
       await expect(useCases.planLibraryUpgrade(copy)).resolves.toBeNull();
+      // In another page, its creator's catalog shared.
       vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([
         `${RELEASES}v1.ttl`,
         `${RELEASES}v2.ttl`,
       ]);
-      await expect(useCases.planLibraryUpgrade(copy)).resolves.toMatchObject({
+      await expect(createUseCases(deps).planLibraryUpgrade(copy)).resolves.toMatchObject({
         fromVersion: "1",
         toVersion: "2",
         add: [{ id: "norway" }],
@@ -1138,17 +1144,17 @@ describe("the deck library", () => {
           url === bad ? breaking(url) : conforming(url),
         );
       const copy: Deck = { ...deck, sourceUrl: `${RELEASES}v1.ttl` };
-      const useCases = createUseCases(deps);
+      // Each in a page of its own: a failed plan is kept for the page.
       for (const bad of [`${RELEASES}v3.ttl`, `${RELEASES}v2.ttl`]) {
         broken(bad);
-        await expect(useCases.planLibraryUpgrade(copy)).rejects.toMatchObject({
+        await expect(createUseCases(deps).planLibraryUpgrade(copy)).rejects.toMatchObject({
           code: "releaseNotConforming",
           vars: { host: "bob.example", count: 1 },
         });
       }
       // Given the copy as the copies' look found it, its releases are checked all the same.
       await expect(
-        useCases.planLibraryUpgrade(copy, {
+        createUseCases(deps).planLibraryUpgrade(copy, {
           deck: copy,
           series: linked(3),
           version: "1",
@@ -1157,6 +1163,81 @@ describe("the deck library", () => {
         }),
       ).rejects.toMatchObject({ code: "releaseNotConforming" });
       expect(deps.deckLibrary.fetchLibraryDeck).not.toHaveBeenCalledWith(`${RELEASES}v2.ttl`);
+    });
+
+    const norway = {
+      id: "norway",
+      front: { "": "Norway" },
+      back: { "": "Oslo" },
+      formatVersion: 1,
+    };
+    it("planLibraryUpgrade keeps a linked copy's failed plan for the page, retries included, until the learner reads its release again (GHSA-7xfp-q438-m2gv)", async () => {
+      const deps = makeDeps();
+      vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([
+        `${RELEASES}v1.ttl`,
+        `${RELEASES}v2.ttl`,
+      ]);
+      // v2 adds a card.
+      vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) => ({
+        ...libraryContent,
+        url,
+        version: url.slice(-5, -4),
+        cards: url.endsWith("v2.ttl") ? [...libraryContent.cards, norway] : libraryContent.cards,
+      }));
+      vi.mocked(deps.deckRepository.listCards).mockResolvedValue([]);
+      reading(deps, [linked(1), linked(2)], (url) =>
+        url === `${RELEASES}v2.ttl` ? breaking(url) : conforming(url),
+      );
+      const copy: Deck = { ...deck, sourceUrl: `${RELEASES}v1.ttl` };
+      const useCases = createUseCases(deps);
+      for (let plan = 0; plan < 3; plan++)
+        await expect(useCases.planLibraryUpgrade(copy)).rejects.toMatchObject({
+          code: "releaseNotConforming",
+        });
+      // Given the copy as the Studio's look found it, too.
+      await expect(
+        useCases.planLibraryUpgrade(copy, {
+          deck: copy,
+          series: linked(2),
+          version: "1",
+          newer: true,
+          fromLink: true,
+        }),
+      ).rejects.toMatchObject({ code: "releaseNotConforming" });
+      // One lookup of the series and one plan's reads, the first time only.
+      expect(deps.deckLibrary.linkedReads).toHaveBeenCalledTimes(2);
+      // The learner adds the release again: its copy is planned afresh, with the server's answer now.
+      reading(deps, [linked(1), linked(2)]);
+      await useCases.readReleaseFromLink(`${RELEASES}v1.ttl`);
+      await expect(useCases.planLibraryUpgrade(copy)).resolves.toMatchObject({ toVersion: "2" });
+      expect(deps.deckLibrary.linkedReads).toHaveBeenCalledTimes(4);
+    });
+
+    it("planLibraryUpgrade keeps no failure of a linked copy's own cards: they are the learner's pod's", async () => {
+      const deps = makeDeps();
+      // v2 adds a card.
+      vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) => ({
+        ...libraryContent,
+        url,
+        version: url.slice(-5, -4),
+        cards: url.endsWith("v2.ttl") ? [...libraryContent.cards, norway] : libraryContent.cards,
+      }));
+      reading(deps, [linked(1), linked(2)]);
+      vi.mocked(deps.deckRepository.listCards).mockRejectedValueOnce(new Error("offline"));
+      vi.mocked(deps.deckRepository.listCards).mockResolvedValue([]);
+      const copy: Deck = { ...deck, sourceUrl: `${RELEASES}v1.ttl` };
+      const found: LibraryCopy = {
+        deck: copy,
+        series: linked(2),
+        version: "1",
+        newer: true,
+        fromLink: true,
+      };
+      const useCases = createUseCases(deps);
+      await expect(useCases.planLibraryUpgrade(copy, found)).rejects.toThrow("offline");
+      await expect(useCases.planLibraryUpgrade(copy, found)).resolves.toMatchObject({
+        toVersion: "2",
+      });
     });
 
     it("planLibraryUpgrade reads no more than sixteen of the releases a linked copy's newer release lists in between, each once, four at once, the newest", async () => {
@@ -1290,12 +1371,9 @@ describe("the deck library", () => {
       const useCases = createUseCases(deps);
       await expect(useCases.planLibraryUpgrade(copy)).resolves.toMatchObject({ toVersion: "3" });
       await useCases.planLibraryUpgrade(copy);
-      // A lookup of the series' reads, then a plan's, each time, none shared with those before.
-      expect(made).toHaveLength(4);
-      const [lookups, plans] = [
-        made.filter((_, at) => at % 2 === 0),
-        made.filter((_, at) => at % 2 === 1),
-      ];
+      // A lookup of the series' reads, kept for the page, then a plan's each time, none shared with those before.
+      expect(made).toHaveLength(3);
+      const [lookups, plans] = [made.slice(0, 1), made.slice(1)];
       for (const reads of lookups) {
         expect(reads.readRelease.mock.calls.map(([url]) => url)).toEqual([
           `${RELEASES}v1.ttl`,
@@ -1317,14 +1395,12 @@ describe("the deck library", () => {
       }
       expect(deps.deckLibrary.fetchLibraryDeck).not.toHaveBeenCalled();
       // Past what the plan's reads may read together, nothing is offered.
-      vi.mocked(deps.deckLibrary.linkedReads)
-        .mockImplementationOnce(planReads)
-        .mockImplementationOnce(() => ({
-          ...planReads(),
-          readRelease: async () => {
-            throw new AppError("linkedReleasesTooLarge", { host: "bob.example" });
-          },
-        }));
+      vi.mocked(deps.deckLibrary.linkedReads).mockImplementationOnce(() => ({
+        ...planReads(),
+        readRelease: async () => {
+          throw new AppError("linkedReleasesTooLarge", { host: "bob.example" });
+        },
+      }));
       await expect(useCases.planLibraryUpgrade(copy)).rejects.toMatchObject({
         code: "linkedReleasesTooLarge",
       });

@@ -39,7 +39,6 @@ import { createSolidReleasePublisher } from "@solid-memo/solid/solidReleasePubli
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
 import { createSolidStorageGateway } from "@solid-memo/solid/solidStorageGateway";
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
-import { etagMarksEveryEdit } from "./serverTraits";
 
 /** A Markdown check that finds nothing, each text one chunk: what these tests publish is plain text. */
 const NO_MARKDOWN_PROBLEMS = { problems: () => [], chunks: () => ({ chunks: 1, empty: 0 }) };
@@ -295,8 +294,8 @@ describe.each(SERVERS)("releases on $name", ({ url: server }) => {
       );
     expect(await listed()).toEqual([{ series: v1, version: "1", newer: false, fromLink: true }]);
     await publisher.publish(creator.url, capitals(v1, 2), v2);
-    // A server whose ETag an edit in the same second keeps answers this page's reads as unchanged: a later visit reads it.
-    const reader = (await etagMarksEveryEdit(server)) ? useCases : page();
+    // A page keeps its look for a linked copy's newer version: a later visit finds it.
+    const reader = page();
     expect(await listed(reader)).toEqual([
       { series: v2, version: "1", newer: true, fromLink: true },
     ]);

@@ -723,12 +723,114 @@ ${padding === 0 ? "" : paddingOf(padding, "sm:padding")}
     // v4 is read on its own first too, as the newest of the series its catalog lists, then as it is checked.
     const once = reads();
     expect([once[2], once[3], once[4]]).toEqual([1, 1, 2]);
-    // Planned again (as an upgrade applied is), they are read again: the library kept none of them.
+    // Planned again (as an upgrade applied is), they are read again: the library kept none of them. The series'
+    // lookup is kept for the page, so v4 is not looked for again.
     await expect(plan()).resolves.toMatchObject({ toVersion: "4" });
     const twice = reads();
-    expect([twice[2], twice[3], twice[4]]).toEqual([2, 2, 4]);
+    expect([twice[2], twice[3], twice[4]]).toEqual([2, 2, 3]);
     await library.fetchLibraryDeck(bob(3));
     expect(reads()[3]).toBe(3);
+  });
+
+  it("asks its creator's server nothing more once it failed, however often it is planned again, until the learner reads the release again (GHSA-7xfp-q438-m2gv)", async () => {
+    const { fetch, validate } = planning(0, [bob(1), bob(4)]);
+    // Bob's v4 reads as a newer release, but breaks the library's shapes.
+    validate.mockImplementation(async (url: string) => ({
+      url,
+      status: "checked",
+      subjects:
+        url === bob(4)
+          ? [
+              {
+                url: `${url}#c0`,
+                status: "checked",
+                shape: "card",
+                version: 5,
+                violations: [
+                  {
+                    path: `${SM}front`,
+                    message: { en: "Less than 1 values" },
+                    severity: "violation",
+                    constraint: "MinCount",
+                  },
+                ],
+              },
+            ]
+          : [],
+    }));
+    const deckLibrary = withLinkedReleasesChecked({
+      ...libraryOver(fetch, validate),
+      readLibraryIndex: async () => ({
+        url: "https://solid-memo.com/decks/index.ttl",
+        publisher: null,
+        releases: [],
+      }),
+    });
+    const deck = {
+      url: "https://alice.example/memo/catalog.ttl#rivers",
+      id: "rivers",
+      sourceUrl: bob(1),
+      cardsDocumentUrl: "https://alice.example/memo/cards/rivers.ttl",
+    } as unknown as Deck;
+    const useCases = createLibraryUseCases({
+      deckLibrary,
+      deckRepository: { listCards: async () => [], listDecks: async () => [deck] } as never,
+      reviewStateRepository: {} as never,
+      courses: {} as never,
+      cardsTurn: (work) => work(),
+    });
+    const toBob = () => fetch.asked.filter((url) => url.startsWith("https://bob.example/")).length;
+    await expect(useCases.planLibraryUpgrade(deck)).rejects.toMatchObject({
+      code: "releaseNotConforming",
+    });
+    const once = toBob();
+    expect(once).toBeGreaterThan(0);
+    for (let plan = 0; plan < 4; plan++)
+      await expect(useCases.planLibraryUpgrade(deck)).rejects.toMatchObject({
+        code: "releaseNotConforming",
+      });
+    expect(toBob()).toBe(once);
+    // The learner adds the release again: its copy is planned afresh.
+    await useCases.readReleaseFromLink(bob(1));
+    await expect(useCases.planLibraryUpgrade(deck)).rejects.toMatchObject({
+      code: "releaseNotConforming",
+    });
+    expect(toBob()).toBeGreaterThan(once + 1);
+  });
+
+  it("asks its creator's server nothing more once its lookup failed or found no catalog, on the deck's page or in the Studio (GHSA-7xfp-q438-m2gv)", async () => {
+    const toBob = (fetch: { asked: string[] }) =>
+      fetch.asked.filter((url) => url.startsWith("https://bob.example/")).length;
+    // The copy's own release unreadable, or its creator's catalog.
+    for (const documents of [{ [bob(1)]: 500 }, { "https://bob.example/memo/catalog.ttl": 500 }]) {
+      const { plan, updates, fetch } = planning(0, [bob(1), bob(4)], { documents });
+      await expect(plan()).resolves.toBeNull();
+      // The lookup's read of the catalogs may still be under way as the release's read fails it.
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      const once = toBob(fetch);
+      expect(once).toBeGreaterThan(0);
+      for (let again = 0; again < 3; again++) {
+        await expect(plan()).resolves.toBeNull();
+        await updates();
+      }
+      expect(toBob(fetch)).toBe(once);
+    }
+  });
+
+  it("is looked up no more by the Studio once its plan failed (GHSA-7xfp-q438-m2gv)", async () => {
+    const { plan, updates, fetch, validate } = planning(0);
+    validate.mockImplementation(async (url: string) => {
+      if (url === bob(4)) throw new Error("no shapes");
+      return conforming(url);
+    });
+    await expect(plan()).rejects.toThrow();
+    const toBob = () => fetch.asked.filter((url) => url.startsWith("https://bob.example/")).length;
+    const once = toBob();
+    for (let again = 0; again < 3; again++) {
+      await updates();
+      await expect(plan()).rejects.toThrow();
+    }
+    expect(toBob()).toBe(once);
   });
 
   it("is not offered when the newer release and those in between are larger together than one release may be", async () => {
