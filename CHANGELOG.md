@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.5.15](https://github.com/solid-memo/website/compare/v8.5.14...v8.5.15) (2026-11-28)
+
+### Fixes
+
+* **ui:** give the message of the day the cards' background ([8025af2](https://github.com/solid-memo/website/commit/8025af221bb467be47b9560449fd61fbb26f7702)), closes [#1036](https://github.com/solid-memo/website/issues/1036)
+
 ## [8.5.14](https://github.com/solid-memo/website/compare/v8.5.13...v8.5.14) (2026-11-27)
 
 ### Fixes
