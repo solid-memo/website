@@ -441,6 +441,8 @@ describe("cards", () => {
         code: "changedElsewhere",
       });
       expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledTimes(3);
+      // A pause before each try again, longer each time.
+      expect(vi.mocked(deps.pause).mock.calls).toEqual([[2], [3]]);
     });
 
     it("stops, writing nothing, once the edit planned again is not the one previewed", async () => {

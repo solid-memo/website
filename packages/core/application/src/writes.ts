@@ -47,6 +47,28 @@ export const EDIT_ATTEMPTS = 3;
  */
 export const PLACE_ATTEMPTS = 3;
 
+/**
+ * The longest wait before the second try of a write refused with a 412,
+ * in milliseconds; each try after waits up to twice as long as the one
+ * before (pauseBefore). Short enough for a learner never to notice it.
+ */
+const PAUSE_BASE_MS = 25;
+
+/**
+ * How long to wait before try `attempt` (2 or later) of a write refused
+ * with a 412: a random time between none and PAUSE_BASE_MS ×
+ * 2^(attempt − 2), so two tabs or devices whose writes met once don't
+ * meet again on the very next try.
+ */
+export function pauseMs(attempt: number, random: () => number = Math.random): number {
+  return random() * PAUSE_BASE_MS * 2 ** (attempt - 2);
+}
+
+/** Wait before try `attempt` of a write refused with a 412, by the clock (pauseMs). */
+export function pauseBefore(attempt: number): Promise<void> {
+  return new Promise<void>((resolve) => setTimeout(resolve, pauseMs(attempt)));
+}
+
 /** A read made without a known version, which always comes with the contents. */
 export async function readNow<T>(
   read: Promise<Since<T>>,

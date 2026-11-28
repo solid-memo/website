@@ -1952,7 +1952,8 @@ sequenceDiagram
   is under way go in the next one. On a 412 it's read and changed
   again, six times in all, waiting longer before each (50 ms, then
   100 ms, …), since a page learning a check's documents writes the
-  digest several times running. When the app or the pod refuses what
+  digest several times running. A random time is added to each wait,
+  as to every write tried again on a 412. When the app or the pod refuses what
   a write says, its changes are written again one at a time, so only
   the refused one fails. Until one of them is written, when the pod
   refuses one alone with an answer it gave already, as it would every
@@ -2514,7 +2515,13 @@ by one.
   reset, an answer undone. The adapter says what its
   edit makes of the document as read; `editDocument` reads, checks,
   saves with `If-Match`, and reads and edits again on a 412, three times
-  in all unless the adapter asks for more (the digest). The other
+  in all unless the adapter asks for more (the digest).
+  Before each try again, a write waits a random time: up to 25 ms
+  before the second, and up to twice as long before each after
+  (`pauseBefore` in
+  [writes.ts](../packages/core/application/src/writes.ts)). Two tabs or
+  devices whose writes met once would meet again if both tried at once.
+  The use cases that plan a write again do the same. The other
   preference writes and a palette's are made once: they write what the
   screen showed, which a 412 says is out of date.
 

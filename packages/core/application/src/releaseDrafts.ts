@@ -78,7 +78,7 @@ import type { FileExchange } from "./ports/device";
 import type { DeckLibrary, ReleaseDraftRepository, ReleasePublisher } from "./ports/library";
 import type { DeckRepository } from "./ports/pod";
 import type { ReadScope } from "./readScope";
-import { EDIT_ATTEMPTS, PLACE_ATTEMPTS, changedOrCreatedElsewhere } from "./writes";
+import { EDIT_ATTEMPTS, PLACE_ATTEMPTS, changedOrCreatedElsewhere, pauseBefore } from "./writes";
 
 /**
  * The drafts of releases (docs/studio.md, Drafts): a creator writes a
@@ -504,6 +504,7 @@ export function createReleaseDraftUseCases({
   readScope,
   releasePublisher,
   now,
+  pause = pauseBefore,
 }: {
   releaseDraftRepository: ReleaseDraftRepository;
   deckRepository: DeckRepository;
@@ -515,6 +516,8 @@ export function createReleaseDraftUseCases({
   /** The releases the instance published, which a draft may follow (isFollowable). */
   releasePublisher: Pick<ReleasePublisher, "listPublished">;
   now: () => Date;
+  /** Waits before a change of a draft refused with a 412 is made again (pauseBefore). */
+  pause?: (attempt: number) => Promise<void>;
 }): ReleaseDraftUseCases {
   /** Each release a draft follows, by URL and whether it is read as no one: releases are frozen, so each is read once. */
   const releases = new Map<string, Promise<ReleaseDraft>>();
@@ -842,6 +845,7 @@ export function createReleaseDraftUseCases({
       /** The attempt a change elsewhere cut short last: some of what it changed may be written. */
       let cut: { before: ReleaseDraft; after: ReleaseDraft } | null = null;
       for (let attempt = 1; ; attempt++) {
+        if (attempt > 1) await pause(attempt);
         const read = await releaseDraftRepository.read(draftUrl);
         const before = await withPublished(read.draft);
         let after = applyDraftChanges(before, changes);

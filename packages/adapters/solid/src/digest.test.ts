@@ -525,6 +525,7 @@ describe("the instance's digest in the pod", () => {
     const digests = createSolidDigestRepository({
       fetch: pod.fetch,
       wait: async (ms) => void waits.push(ms),
+      random: () => 0,
     });
     await digests.updateDigest(INSTANCE, learn);
     pod.failNext("PATCH", DIGEST, 412);
@@ -540,6 +541,20 @@ describe("the instance's digest in the pod", () => {
       digests.updateDigest(INSTANCE, (draft) => addReceipt(draft, REVIEWS, '"r2"', {})),
     ).rejects.toThrow("changed elsewhere");
     expect(waits).toEqual([50, 100, 150, 200, 250]);
+  });
+
+  it("waits a random time on top of the least, up to twice as long for each try", async () => {
+    const pod = fakePod();
+    const waits: number[] = [];
+    const digests = createSolidDigestRepository({
+      fetch: pod.fetch,
+      wait: async (ms) => void waits.push(ms),
+      random: () => 0.5,
+    });
+    await digests.updateDigest(INSTANCE, learn);
+    for (let i = 0; i < 3; i++) pod.failNext("PATCH", DIGEST, 412);
+    await digests.updateDigest(INSTANCE, (draft) => addReceipt(draft, REVIEWS, '"r1"', {}));
+    expect(waits).toEqual([50 + 12.5, 100 + 25, 150 + 50]);
   });
 
   it("waits by the clock when no wait is given", async () => {

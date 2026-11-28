@@ -275,6 +275,7 @@ export function createCardUseCases({
   cardsTurn,
   newId,
   now,
+  pause,
 }: {
   deckRepository: DeckRepository;
   reviewStateRepository: ReviewStateRepository;
@@ -287,6 +288,8 @@ export function createCardUseCases({
   cardsTurn: ReturnType<typeof inTurns>;
   newId: () => string;
   now: () => Date;
+  /** Waits before a write refused with a 412 is planned again (pauseBefore). */
+  pause: (attempt: number) => Promise<void>;
 }): CardUseCases {
   /**
    * Normalized card content, or a throw naming what is missing; `saved`
@@ -320,6 +323,7 @@ export function createCardUseCases({
     cardsWritten: (changes: T) => void = () => undefined,
   ): Promise<T> {
     for (let attempt = 1; ; attempt++) {
+      if (attempt > 1) await pause(attempt);
       const [read, reviews] = await Promise.all([
         readNow(deckRepository.readCardsSince(deck, undefined)),
         readNow(reviewStateRepository.readReviewStatesSince(deck, undefined)),
@@ -587,6 +591,7 @@ export function createCardUseCases({
       // Copied into `to`: each of the source's documents read as the user only when it is the instance's.
       const asNoOne = await readScope.asNoOneOf(instanceUrl, from);
       for (let attempt = 1; ; attempt++) {
+        if (attempt > 1) await pause(attempt);
         try {
           const plan = await transferOnce(from, to, ids, options, asNoOne);
           // The cards are where they go: a digest left behind is brought up to date by the next deck list.

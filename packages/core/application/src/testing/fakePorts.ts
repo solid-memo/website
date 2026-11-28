@@ -363,6 +363,7 @@ export function makeDeps() {
     updateJournal,
     now: () => new Date("2026-09-28T10:00:00.000Z"),
     newId: () => "0f3a",
+    pause: vi.fn(async (_attempt: number) => undefined),
   };
 }
 

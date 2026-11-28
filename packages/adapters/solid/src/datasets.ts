@@ -44,7 +44,7 @@ import { termOf } from "./ntriples";
 import { isWrittenByNewer } from "./records";
 import { refuseUnwritable } from "@solid-memo/solid-client/writableTerms";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
-import { EDIT_ATTEMPTS } from "@solid-memo/application/writes";
+import { EDIT_ATTEMPTS, pauseBefore } from "@solid-memo/application/writes";
 import { AppError } from "@solid-memo/domain/appError";
 import { isSameUrl } from "@solid-memo/domain/instanceLayout";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
@@ -513,7 +513,8 @@ interface DocumentEdit<R> {
 
 /**
  * How editDocument makes an edit: `attempts` in all (EDIT_ATTEMPTS),
- * `pause` waited before each one after the first, given its number,
+ * `pause` waited before each one after the first, given its number
+ * (pauseBefore: a short random wait, longer for each),
  * `checkWrite` checking the subjects an edit names (as an instance's
  * documents, "pod"), the document read by `read` (getSolidDatasetOrNull,
  * so one not there is null), and `failure` what a write that fails for
@@ -546,14 +547,14 @@ export async function editDocument<R, D extends Dataset | null = FetchedDataset 
   edit: (read: D) => DocumentEdit<R> | Promise<DocumentEdit<R>>,
   {
     attempts = EDIT_ATTEMPTS,
-    pause,
+    pause = pauseBefore,
     checkWrite = noWriteCheck,
     read = getSolidDatasetOrNull as (url: string, fetch: typeof globalThis.fetch) => Promise<D>,
     failure = (error) => error,
   }: EditPolicy<D> = {},
 ): Promise<R> {
   for (let attempt = 1; ; attempt++) {
-    if (attempt > 1) await pause?.(attempt);
+    if (attempt > 1) await pause(attempt);
     const { dataset, subjects, whole, result } = await edit(await read(url, fetch));
     if (dataset === undefined) return result;
     try {

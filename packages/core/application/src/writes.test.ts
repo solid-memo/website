@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 import { AppError } from "@solid-memo/domain/appError";
 import type { Deck } from "@solid-memo/domain/deck";
 import { GUEST_INSTANCE_URL } from "@solid-memo/domain/guest";
-import { changedOrCreatedElsewhere, finishCutOffImport } from "./writes";
+import { changedOrCreatedElsewhere, finishCutOffImport, pauseBefore, pauseMs } from "./writes";
 
 const deckAt = (instance: string) => ({ url: `${instance}catalog.ttl#deck-1` }) as Deck;
 const POD_DECK = deckAt("https://pod.example/memo/");
@@ -24,6 +24,35 @@ describe("changedOrCreatedElsewhere", () => {
     expect(changedOrCreatedElsewhere(new AppError("createdElsewhere"))).toBe(true);
     expect(changedOrCreatedElsewhere(new AppError("writeRefused"))).toBe(false);
     expect(changedOrCreatedElsewhere(new Error("changedElsewhere"))).toBe(false);
+  });
+});
+
+describe("pauseMs", () => {
+  it("is a random time up to 25 ms before the second try, twice as long at most for each after", () => {
+    expect([2, 3, 4].map((attempt) => pauseMs(attempt, () => 0))).toEqual([0, 0, 0]);
+    expect([2, 3, 4].map((attempt) => pauseMs(attempt, () => 0.5))).toEqual([12.5, 25, 50]);
+    expect([2, 3, 4].map((attempt) => pauseMs(attempt, () => 0.999))).toEqual([
+      24.975, 49.95, 99.9,
+    ]);
+  });
+});
+
+describe("pauseBefore", () => {
+  it("waits that time by the clock", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    try {
+      let done = false;
+      const paused = pauseBefore(3).then(() => (done = true));
+      await vi.advanceTimersByTimeAsync(24);
+      expect(done).toBe(false);
+      await vi.advanceTimersByTimeAsync(1);
+      await paused;
+      expect(done).toBe(true);
+    } finally {
+      vi.restoreAllMocks();
+      vi.useRealTimers();
+    }
   });
 });
 
