@@ -83,7 +83,7 @@ export function DeckListScreen({
   tree,
   arrangementSetAside = false,
   checking = false,
-  deckHeld = () => false,
+  deckHeld,
   collapsed,
   onToggle,
   onUnfold,
@@ -113,10 +113,13 @@ export function DeckListScreen({
   /** The data is still being checked, and the arrangement may yet be set aside: it cannot be rearranged until the check is done. */
   checking?: boolean;
   /**
-   * A deck that cannot be renamed or deleted now, though its row is
-   * shown (the Studio's, for a deck its data check holds); none in Solid Memo.
+   * A deck that cannot be renamed, paused or deleted now, though its row
+   * is shown: in the Studio, a deck its data check holds; none in Solid
+   * Memo, where a deck set aside keeps its own name, pause and deletion
+   * (docs/validation.md, The invalid data policy). Each list states its
+   * choice.
    */
-  deckHeld?: (deck: Deck) => boolean;
+  deckHeld: (deck: Deck) => boolean;
   /** The groups folded shut, by URL. */
   collapsed: ReadonlySet<string>;
   onToggle: (groupUrl: string) => void;
