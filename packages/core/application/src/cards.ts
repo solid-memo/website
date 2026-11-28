@@ -49,12 +49,14 @@ import type { DeckLibrary, DeckArchive } from "./ports/library";
 import type { DeckRepository, ReviewChanges, ReviewStateRepository } from "./ports/pod";
 import { AppError } from "@solid-memo/domain/appError";
 import {
-  EDIT_ATTEMPTS,
   PLACE_ATTEMPTS,
-  changedOrCreatedElsewhere,
+  atVersion,
+  cutOffOf,
   finishCutOffImport,
   readNow,
   unsent,
+  writeInOrder,
+  type WriteSet,
 } from "./writes";
 import type { DigestStore } from "./digestStore";
 import type { ReadScope } from "./readScope";
@@ -241,23 +243,6 @@ export interface CardUseCases {
 }
 
 /**
- * A bulk edit's write of a cards document: one PUT of the whole document,
- * which no pod cuts short, made only while the document is at the
- * version read (none to check when the pod gave none).
- */
-function wholeAt(version: string | null): { whole: true; version?: string } {
-  return version === null ? { whole: true } : { whole: true, version };
-}
-
-/**
- * A write of a reviews document made from a read: made only while the
- * document is at the version read (none to check when the pod gave none).
- */
-function reviewsAt(version: string | null): { version?: string } {
-  return version === null ? {} : { version };
-}
-
-/**
  * A deck's cards and their review states (domain/cardBulk.ts,
  * domain/cardTransfer.ts): each added, changed and removed, edited,
  * forgotten, set due or moved between decks in bulk, and a deck saved as
@@ -305,68 +290,71 @@ export function createCardUseCases({
   /**
    * Write a bulk edit of the deck's cards (editCards, undoCardEdit): the
    * changes `plan` makes of the cards and review states as they are now,
-   * in one conditional write of the cards document, again from a fresh
-   * read when it changed meanwhile; then one write of the reviews
-   * document, made only while it is as read, else the edit planned again
-   * before anything is sent; one that changed once the cards were sent
-   * has the same changes made of it read afresh. Then the digest is
-   * brought up to date. Both writes are made and checked before the first is sent,
-   * so one that would be refused (a card or a state a newer version
-   * wrote that the edit would rewrite) refuses the edit with nothing
-   * written. `cardsWritten` hears of the changes once the cards are
-   * written, before the reviews are. Resolves to the changes written.
+   * in one conditional write of the cards document (one PUT of the whole
+   * document, which no pod cuts short), then one write of the reviews
+   * document, made only while it is as read (writeInOrder): planned again
+   * from fresh reads while nothing was sent; one that changed once the
+   * cards were sent has the same changes made of it read afresh. A plan
+   * that gives null no longer fits what is there: changedElsewhere, with
+   * nothing written. Then the digest is brought up to date. Both writes
+   * are made and checked before the first is sent, so one that would be
+   * refused (a card or a state a newer version wrote that the edit would
+   * rewrite) refuses the edit with nothing written. `cardsWritten` hears
+   * of the changes once the cards are written, before the reviews are.
+   * Resolves to the changes written.
    */
   async function writeCardEdit<T extends CardChanges>(
     instanceUrl: string,
     deck: Deck,
-    plan: (cards: Card[], reviews: ReviewState[]) => T,
+    plan: (cards: Card[], reviews: ReviewState[]) => T | null,
     cardsWritten: (changes: T) => void = () => undefined,
   ): Promise<T> {
-    for (let attempt = 1; ; attempt++) {
-      if (attempt > 1) await pause(attempt);
-      const [read, reviews] = await Promise.all([
-        readNow(deckRepository.readCardsSince(deck, undefined)),
-        readNow(reviewStateRepository.readReviewStatesSince(deck, undefined)),
-      ]);
-      const changes = plan(read.value, reviews.value.sm2);
-      const cardsChange = changes.save.length > 0 || changes.remove.length > 0;
-      const reviewsChange = changes.reviewSaves.length > 0 || changes.reviewRemovals.length > 0;
-      if (!cardsChange && !reviewsChange) return changes;
-      // A card removed takes every state it has with it, SM-2's and FSRS-6's, as removing a card does;
-      // another scheduler's stays. Undone, its SM-2 states come back, and FSRS-6 estimates from them.
-      const reviewChanges: ReviewChanges = {
-        save: changes.reviewSaves,
-        remove: changes.reviewRemovals,
-        every: true,
-      };
-      let writeReviews: (() => Promise<void>) | undefined;
-      try {
+    const { result: changes, sent } = await writeInOrder<T | null>(
+      async () => {
+        const [read, reviews] = await Promise.all([
+          readNow(deckRepository.readCardsSince(deck, undefined)),
+          readNow(reviewStateRepository.readReviewStatesSince(deck, undefined)),
+        ]);
+        const changes = plan(read.value, reviews.value.sm2);
+        if (changes === null) return { result: null, writes: [] };
+        const cardsChange = changes.save.length > 0 || changes.remove.length > 0;
+        const reviewsChange = changes.reviewSaves.length > 0 || changes.reviewRemovals.length > 0;
+        if (!cardsChange && !reviewsChange) return { result: changes, writes: [] };
+        // A card removed takes every state it has with it, SM-2's and FSRS-6's, as removing a card does;
+        // another scheduler's stays. Undone, its SM-2 states come back, and FSRS-6 estimates from them.
+        const reviewChanges: ReviewChanges = {
+          save: changes.reviewSaves,
+          remove: changes.reviewRemovals,
+          every: true,
+        };
         const writeCards = cardsChange
           ? await deckRepository.prepareCardChanges(
               deck,
               { save: changes.save, remove: changes.remove },
-              wholeAt(read.version),
+              { whole: true, ...atVersion(read.version) },
             )
           : undefined;
-        writeReviews = reviewsChange
+        const writeReviews = reviewsChange
           ? await reviewStateRepository.prepareReviewChanges(
               deck,
               reviewChanges,
-              reviewsAt(reviews.version),
+              atVersion(reviews.version),
             )
           : undefined;
-        await writeCards?.();
-      } catch (error) {
-        if (changedOrCreatedElsewhere(error) && attempt < EDIT_ATTEMPTS) continue;
-        throw error;
-      }
-      cardsWritten(changes);
-      // A card joins before its state, and leaves before it: no state is ever without its card for long.
-      await writeReviews?.();
-      // The edit is made: a digest left behind is brought up to date by the next deck list.
-      await digestStore.refresh(instanceUrl, deck).catch(() => undefined);
-      return changes;
-    }
+        // A card joins before its state, and leaves before it: no state is ever without its card for long.
+        return { result: changes, writes: [writeCards, writeReviews] };
+      },
+      {
+        pause,
+        reached: (at, changes) => {
+          if (at === 1) cardsWritten(changes!);
+        },
+      },
+    );
+    if (changes === null) throw new AppError("changedElsewhere", { url: deck.cardsDocumentUrl });
+    // The edit is made: a digest left behind is brought up to date by the next deck list.
+    if (sent > 0) await digestStore.refresh(instanceUrl, deck).catch(() => undefined);
+    return changes;
   }
   /**
    * Write an edit of the deck's review states (resetCards,
@@ -397,19 +385,18 @@ export function createCardUseCases({
     return new Set([...written.save, ...written.remove].map((key) => key.cardId)).size;
   }
   /**
-   * One attempt at a transfer (transferCards): read both decks, the
-   * source's documents as no one where `asNoOne` says, plan, write the
-   * target's documents, then for a move the source's (its reviews
-   * before its cards), each If-Match its read; every write made and
-   * checked before the first is sent.
+   * One plan of a transfer (transferCards): read both decks, the
+   * source's documents as no one where `asNoOne` says, plan, and make
+   * the writes of the target's documents, then for a move the source's
+   * (its reviews before its cards), each If-Match its read.
    */
-  async function transferOnce(
+  async function planTransfer(
     from: Deck,
     to: Deck,
     ids: readonly string[],
     options: TransferOptions,
     asNoOne: { cards: boolean; reviews: boolean },
-  ): Promise<CardTransferPlan> {
+  ): Promise<WriteSet<CardTransferPlan>> {
     const [sourceCards, sourceStates, targetCards, targetStates] = await Promise.all([
       readNow(deckRepository.readCardsSince(from, undefined, { asNoOne: asNoOne.cards })),
       readNow(
@@ -452,7 +439,6 @@ export function createCardUseCases({
       remove: plan.source.reviewRemovals,
       every: true,
     };
-    const noWrite = async () => undefined;
     // Every write is made and checked before the first is sent: what would refuse one (a card or a
     // state a newer version wrote that the move would rewrite) refuses the move with nothing
     // written. Each is made only while its document is at the version the transfer was planned
@@ -465,7 +451,8 @@ export function createCardUseCases({
             to,
             { save: plan.target.save, remove: [] },
             {
-              ...wholeAt(targetCards.version),
+              whole: true,
+              ...atVersion(targetCards.version),
               carried: {
                 deck: from,
                 asNoOne: asNoOne.cards,
@@ -473,39 +460,43 @@ export function createCardUseCases({
               },
             },
           )
-        : noWrite;
+        : undefined;
     const writeTargetReviews =
       plan.target.reviewSaves.length > 0 || plan.target.reviewRemovals.length > 0
         ? await reviewStateRepository.prepareReviewChanges(
             to,
             targetReviews,
-            reviewsAt(targetStates.version),
+            atVersion(targetStates.version),
           )
-        : noWrite;
+        : undefined;
     const writeSourceReviews =
       plan.source.reviewRemovals.length > 0
         ? await reviewStateRepository.prepareReviewChanges(
             from,
             sourceReviews,
-            reviewsAt(sourceStates.version),
+            atVersion(sourceStates.version),
           )
-        : noWrite;
+        : undefined;
     const writeSourceCards =
       plan.source.remove.length > 0
         ? await deckRepository.prepareCardChanges(
             from,
             { save: [], remove: plan.source.remove },
-            wholeAt(sourceCards.version),
+            { whole: true, ...atVersion(sourceCards.version) },
           )
-        : noWrite;
-    // The target first: a move stopped here leaves the cards in both decks, never in neither.
-    await writeTargetCards();
-    await writeTargetReviews();
-    // The source's states before its cards: a move stopped between leaves the cards in the
-    // source without progress, which the target has, and making it again finishes it.
-    await writeSourceReviews();
-    await writeSourceCards();
-    return plan;
+        : undefined;
+    return {
+      result: plan,
+      writes: [
+        // The target first: a move stopped here leaves the cards in both decks, never in neither.
+        writeTargetCards,
+        writeTargetReviews,
+        // The source's states before its cards: a move stopped between leaves the cards in the
+        // source without progress, which the target has, and making it again finishes it.
+        writeSourceReviews,
+        writeSourceCards,
+      ],
+    };
   }
 
   return {
@@ -555,20 +546,13 @@ export function createCardUseCases({
         deck,
         (cards, reviews) => {
           const plan = planCardEdit(cards, ids, edit, reviews);
-          if (!sameCardEditPlan(plan, previewed))
-            throw new AppError("changedElsewhere", { url: deck.cardsDocumentUrl });
-          return plan;
+          return sameCardEditPlan(plan, previewed) ? plan : null;
         },
         cardsWritten,
       );
     },
     async undoCardEdit(instanceUrl, deck, plan) {
-      await writeCardEdit(instanceUrl, deck, (cards) => {
-        const inverse = planUndo(cards, plan);
-        if (inverse === null)
-          throw new AppError("changedElsewhere", { url: deck.cardsDocumentUrl });
-        return inverse;
-      });
+      await writeCardEdit(instanceUrl, deck, (cards) => planUndo(cards, plan));
     },
     resetCards(instanceUrl, deck, ids, direction) {
       // An FSRS-6 state without an SM-2 state beside it goes too: every removes both kinds.
@@ -590,19 +574,17 @@ export function createCardUseCases({
       if (sharesDocuments(from, to)) throw new AppError("cardTransferSameDeck");
       // Copied into `to`: each of the source's documents read as the user only when it is the instance's.
       const asNoOne = await readScope.asNoOneOf(instanceUrl, from);
-      for (let attempt = 1; ; attempt++) {
-        if (attempt > 1) await pause(attempt);
-        try {
-          const plan = await transferOnce(from, to, ids, options, asNoOne);
-          // The cards are where they go: a digest left behind is brought up to date by the next deck list.
-          await digestStore.refresh(instanceUrl, to).catch(() => undefined);
-          if (options.mode === "move")
-            await digestStore.refresh(instanceUrl, from).catch(() => undefined);
-          return plan;
-        } catch (error) {
-          if (!changedOrCreatedElsewhere(error) || attempt === EDIT_ATTEMPTS) throw error;
-        }
-      }
+      // Planned again on a 412 even once some writes were sent: a card the target holds already, saying
+      // the same, is not written again (planCardTransfer), so the plan made afresh finishes the transfer.
+      const { result: plan } = await writeInOrder(
+        () => planTransfer(from, to, ids, options, asNoOne),
+        { replanAfterSent: true, pause },
+      );
+      // The cards are where they go: a digest left behind is brought up to date by the next deck list.
+      await digestStore.refresh(instanceUrl, to).catch(() => undefined);
+      if (options.mode === "move")
+        await digestStore.refresh(instanceUrl, from).catch(() => undefined);
+      return plan;
     },
     async exportDeckFile(instanceUrl, deck, options) {
       // Saved to a file the user may hand on: each document read as the user only when it is the instance's.
@@ -626,81 +608,68 @@ export function createCardUseCases({
       };
     },
     async importDeckFile(instanceUrl, file, { withProgress }) {
-      let decks = await deckRepository.listDecks(instanceUrl);
+      const decks = await deckRepository.listDecks(instanceUrl);
       // A catalog with no room for its entry is refused before the deck's documents are written.
       if (decks.length >= MAX_CATALOG_LINKS)
         throw new AppError("catalogFull", { limit: MAX_CATALOG_LINKS });
-      for (let attempt = 1; ; attempt++) {
-        const { deck, cards, reviews, fsrsReviews } = importedDeck(instanceUrl, file.content, {
-          withProgress,
-          decks,
-          freshId: `deck-${newId()}`,
-          now: now().toISOString(),
-        });
-        // The progress is made, and refused if no read would take it in, before the cards are written.
-        const sendReviews =
-          reviews.length + fsrsReviews.length > 0
-            ? await reviewStateRepository.prepareReviewChanges(deck, {
-                save: reviews,
-                remove: [],
-                fsrs: { save: fsrsReviews, remove: [] },
-                fromFile: true,
-              })
-            : null;
-        try {
-          // Only where nothing is yet: a deck's documents are never written over.
-          await deckRepository.applyCardChanges(
-            deck,
-            { save: cards, remove: [] },
-            { whole: true, version: ABSENT_VERSION, fromFile: true },
-          );
-        } catch (error) {
-          // A cards document an import cut off before its entry left: the deck takes another id.
-          if (
-            !(error instanceof AppError && error.code === "createdElsewhere") ||
-            attempt === PLACE_ATTEMPTS
-          )
-            throw error;
-          decks = [...decks, deck];
-          continue;
-        }
-        const imported = await completeImport(deck, sendReviews);
-        // The deck is in: a digest left behind is brought up to date by the next deck list.
-        await digestStore.refresh(instanceUrl, imported).catch(() => undefined);
-        return imported;
+      /** Each deck planned so far: a cards document at one's URL makes the next take another id. */
+      const tried: Deck[] = [];
+      let imported: Deck;
+      try {
+        ({ result: imported } = await writeInOrder(
+          async () => {
+            const { deck, cards, reviews, fsrsReviews } = importedDeck(instanceUrl, file.content, {
+              withProgress,
+              decks: [...decks, ...tried],
+              freshId: `deck-${newId()}`,
+              now: now().toISOString(),
+            });
+            tried.push(deck);
+            // The progress is made, and refused if no read would take it in, before the cards are written.
+            const sendReviews =
+              reviews.length + fsrsReviews.length > 0
+                ? await reviewStateRepository.prepareReviewChanges(deck, {
+                    save: reviews,
+                    remove: [],
+                    fsrs: { save: fsrsReviews, remove: [] },
+                    fromFile: true,
+                  })
+                : undefined;
+            return {
+              result: deck,
+              writes: [
+                // Only where nothing is yet: a deck's documents are never written over.
+                () =>
+                  deckRepository.applyCardChanges(
+                    deck,
+                    { save: cards, remove: [] },
+                    { whole: true, version: ABSENT_VERSION, fromFile: true },
+                  ),
+                sendReviews,
+                () => deckRepository.registerDeck(deck),
+              ],
+            };
+          },
+          {
+            // A cards document an import cut off before its entry left: the deck takes another id, at once.
+            attempts: PLACE_ATTEMPTS,
+            replanOn: (error) => error instanceof AppError && error.code === "createdElsewhere",
+            pause: async () => undefined,
+          },
+        ));
+      } catch (error) {
+        const { sent, failedAt } = cutOffOf(error);
+        // Failed at the cards document or before it: the failure stands as it is.
+        if (sent === 0) throw error;
+        // The review states' document too once sent, or when its write may have been made, its answer lost.
+        const deck = tried.at(-1)!;
+        const written = [deck.cardsDocumentUrl];
+        if (sent > 1 || (failedAt === 1 && !unsent(error))) written.push(deck.reviewsDocumentUrl);
+        imported = await finishCutOffImport(deckRepository, deck, written, error);
       }
+      // The deck is in: a digest left behind is brought up to date by the next deck list.
+      await digestStore.refresh(instanceUrl, imported).catch(() => undefined);
+      return imported;
     },
   };
-
-  /**
-   * After the cards document: the deck's review states (sent by
-   * `sendReviews`, made before the cards were written; none to send:
-   * null), then its entry.
-   * A failure before the entry deletes the documents the import wrote
-   * (and one whose write may have been made, its answer lost), which
-   * nothing names, never one the pod refused to create; unless the entry
-   * was written after all, its answer lost on the way: then the deck is
-   * there, whole. A document that may be left is reported (finishCutOffImport).
-   */
-  async function completeImport(
-    deck: Deck,
-    sendReviews: (() => Promise<void>) | null,
-  ): Promise<Deck> {
-    const written = [deck.cardsDocumentUrl];
-    try {
-      if (sendReviews !== null) {
-        try {
-          await sendReviews();
-        } catch (error) {
-          if (!unsent(error)) written.push(deck.reviewsDocumentUrl);
-          throw error;
-        }
-        written.push(deck.reviewsDocumentUrl);
-      }
-      await deckRepository.registerDeck(deck);
-      return deck;
-    } catch (error) {
-      return finishCutOffImport(deckRepository, deck, written, error);
-    }
-  }
 }

@@ -402,47 +402,7 @@ describe("cards", () => {
         expect.anything(),
         { whole: true, version: "v2" },
       );
-    });
-
-    it("plans the edit again on a cards document made since it was read as absent", async () => {
-      const { deps, useCases } = setup();
-      vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValueOnce(
-        new AppError("createdElsewhere", { url: deck.cardsDocumentUrl }),
-      );
-      const edit = { kind: "retire" } as const;
-      await useCases.editCards(
-        instance.url,
-        deck,
-        ["one"],
-        edit,
-        planCardEdit([one, two], ["one"], edit),
-      );
-      expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledTimes(2);
-      expect(deps.deckRepository.applyCardChanges).toHaveBeenLastCalledWith(
-        deck,
-        expect.anything(),
-        { whole: true, version: "v2" },
-      );
-    });
-
-    it("gives up after three attempts on a cards document that keeps changing", async () => {
-      const { deps, useCases } = setup();
-      vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValue(changed());
-      const edit = { kind: "retire" } as const;
-      await expect(
-        useCases.editCards(
-          instance.url,
-          deck,
-          ["one"],
-          edit,
-          planCardEdit([one, two], ["one"], edit),
-        ),
-      ).rejects.toMatchObject({
-        code: "changedElsewhere",
-      });
-      expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledTimes(3);
-      // A pause before each try again, longer each time.
-      expect(vi.mocked(deps.pause).mock.calls).toEqual([[2], [3]]);
+      expect(vi.mocked(deps.pause).mock.calls).toEqual([[2]]);
     });
 
     it("stops, writing nothing, once the edit planned again is not the one previewed", async () => {
@@ -993,21 +953,19 @@ describe("cards", () => {
       expect(again.deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
     });
 
-    it("plans the transfer again when a cards document was made since it was read as absent", async () => {
+    it("plans the transfer again on a 412 even once the target was written, after a pause", async () => {
       const { deps, useCases } = setup();
-      vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValueOnce(
-        new AppError("createdElsewhere", { url: target.cardsDocumentUrl }),
-      );
+      vi.mocked(deps.deckRepository.applyCardChanges)
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(changed());
       await useCases.transferCards(instance.url, deck, target, ["one"], {
-        mode: "copy",
-        keepProgress: true,
+        mode: "move",
+        keepProgress: false,
       });
-      expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledTimes(2);
-      expect(deps.deckRepository.applyCardChanges).toHaveBeenLastCalledWith(
-        target,
-        { save: [oneWritten], remove: [] },
-        { whole: true, version: "v4", carried: carriedFrom({ one: "one" }) },
-      );
+      expect(
+        vi.mocked(deps.deckRepository.applyCardChanges).mock.calls.map(([to]) => to.url),
+      ).toEqual([target.url, deck.url, target.url, deck.url]);
+      expect(vi.mocked(deps.pause).mock.calls).toEqual([[2]]);
     });
 
     it("plans the transfer again when a document changed meanwhile, then gives up", async () => {

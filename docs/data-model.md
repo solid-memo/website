@@ -2521,7 +2521,19 @@ by one.
   (`pauseBefore` in
   [writes.ts](../packages/core/application/src/writes.ts)). Two tabs or
   devices whose writes met once would meet again if both tried at once.
-  The use cases that plan a write again do the same. The other
+
+  A use case that writes several documents from one plan does so
+  through `writeInOrder` in the same file: a bulk edit of cards, a
+  transfer of cards, an upgrade of a library copy and a deck file's
+  import. It reads each document with its version, makes and checks
+  every write, then sends them in a fixed order. A 412 has the whole
+  plan made again from fresh reads, after the same pause, three times
+  in all (`EDIT_ATTEMPTS`). That happens only while nothing was sent,
+  except for a transfer, whose plan made afresh skips the cards already
+  in the target. The upgrade is tried once, as the learner approved the
+  plan they were offered. The import plans again at once, only when its deck's
+  place is taken, under another id, three times in all
+  (`PLACE_ATTEMPTS`, as a new draft's name). The other
   preference writes and a palette's are made once: they write what the
   screen showed, which a 412 says is out of date.
 

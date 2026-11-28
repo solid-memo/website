@@ -38,7 +38,7 @@ import { AppError } from "@solid-memo/domain/appError";
 import { outlineOfCards } from "@solid-memo/domain/course";
 import { mapAtOnce, type inTurns } from "./atOnce";
 import type { Course, CourseUseCases } from "./courses";
-import { readNow, unsent } from "./writes";
+import { atVersion, cutOffOf, readNow, unsent, writeInOrder } from "./writes";
 import { stepReporter } from "./progress";
 
 export interface LibraryUseCases {
@@ -152,6 +152,13 @@ export interface LibraryUseCases {
     onProgress?: (progress: DeckUpgradeProgress) => void,
   ): Promise<DeckUpgradeOutcome>;
 }
+
+/** The step of a library upgrade each of its writes is, in the order they are sent. */
+const UPGRADE_WRITE_STEPS = [
+  "cards",
+  "reviews",
+  "entry",
+] as const satisfies readonly DeckUpgradeStep[];
 
 /**
  * How many of the releases a creator's catalog links are read for the
@@ -464,7 +471,7 @@ export function createLibraryUseCases({
         ? await deckRepository.prepareCardChanges(
             deck,
             { save, remove: plan.remove.map((card) => card.id) },
-            { whole: true, ...(version === null ? {} : { version }) },
+            { whole: true, ...atVersion(version) },
           )
         : undefined;
     const changes: ReviewChanges = {
@@ -680,71 +687,78 @@ export function createLibraryUseCases({
     },
     async applyLibraryUpgrade(offered, offeredPlan, onProgress = () => undefined) {
       const progress = stepReporter<DeckUpgradeStep>("read", DECK_UPGRADE_STEPS.length, onProgress);
-      /** Whether a document of the deck was written, or may have been (a write whose answer was lost). */
-      let changed = false;
-      /** Make one of the upgrade's writes: it changed the deck, unless its failure says it was never made. */
-      const write = async (made: () => Promise<unknown>) => {
-        try {
-          await made();
-        } catch (error) {
-          if (!unsent(error)) changed = true;
-          throw error;
-        }
-        changed = true;
-      };
       let releaseUrl: string | undefined;
       try {
         // The deck, its cards, the releases (to plan again), and its review states when some are to go.
         progress.start();
-        const deck = await deckRepository.readDeck(offered.url);
-        if (deck === null) throw new AppError("deckGone", { deck: offered.title });
-        if (deck.cardsDocumentUrl !== offered.cardsDocumentUrl)
-          throw new AppError("deckChangedSinceOffer");
-        const cards = await readNow(deckRepository.readCardsSince(deck, undefined));
-        const plan = await planUpgrade(deck, async () => cards.value);
-        if (plan === null || !sameCardChanges(plan, offeredPlan))
-          throw new AppError("deckChangedSinceOffer");
-        // The cards the newer release adds or changes are held to the bound on ids a release added is.
-        refuseLongCardIds([...plan.add, ...plan.change]);
-        releaseUrl = plan.releaseUrl;
-        // The states of the cards the release removes go with them, and those left of any it removed already.
-        const removed = new Set([...plan.remove.map((card) => card.id), ...plan.gone]);
-        const states =
-          removed.size === 0 ? null : await reviewStateRepository.listReviewStates(deck);
-        const of = <T extends ReviewKey>(list: readonly T[] = []) =>
-          list.filter((state) => removed.has(state.cardId));
-        const dropped = of(states?.sm2);
-        const droppedFsrs = of(states?.fsrs);
-        // Checked before the first write: an entry that would be refused leaves the deck as it is.
-        const upgradedEntry = applyLibraryUpgrade(deck, plan);
-        await deckRepository.checkDeckEntryUpgrade(deck, upgradedEntry);
-        // Both writes made and checked before the first is sent (prepareUpgradeWrites). Made once, never
-        // planned again on a 412 as other writes are (EDIT_ATTEMPTS): the learner approved the plan offered.
-        const { writeCards, writeReviews } = await prepareUpgradeWrites(deck, plan, cards.version, {
-          sm2: dropped,
-          fsrs: droppedFsrs,
-        });
-
-        // The cards first, the deck readable with them, still naming the release it came from.
-        progress.finished("cards");
-        if (writeCards !== undefined) await write(writeCards);
-        // Then the review states of the cards removed: made again from a fresh read when the document
-        // changed since it was read (a grade on another device).
-        progress.finished("reviews");
-        if (writeReviews !== undefined) await write(writeReviews);
-        // Last the entry, which moves the deck to the new release, only while it says what was read.
-        progress.finished("entry");
-        const upgraded = await deckRepository.upgradeDeckEntry(deck, upgradedEntry);
+        const { result } = await writeInOrder(
+          async () => {
+            const deck = await deckRepository.readDeck(offered.url);
+            if (deck === null) throw new AppError("deckGone", { deck: offered.title });
+            if (deck.cardsDocumentUrl !== offered.cardsDocumentUrl)
+              throw new AppError("deckChangedSinceOffer");
+            const cards = await readNow(deckRepository.readCardsSince(deck, undefined));
+            const plan = await planUpgrade(deck, async () => cards.value);
+            if (plan === null || !sameCardChanges(plan, offeredPlan))
+              throw new AppError("deckChangedSinceOffer");
+            // The cards the newer release adds or changes are held to the bound on ids a release added is.
+            refuseLongCardIds([...plan.add, ...plan.change]);
+            releaseUrl = plan.releaseUrl;
+            // The states of the cards the release removes go with them, and those left of any it removed already.
+            const removed = new Set([...plan.remove.map((card) => card.id), ...plan.gone]);
+            const states =
+              removed.size === 0 ? null : await reviewStateRepository.listReviewStates(deck);
+            const of = <T extends ReviewKey>(list: readonly T[] = []) =>
+              list.filter((state) => removed.has(state.cardId));
+            const dropped = of(states?.sm2);
+            const droppedFsrs = of(states?.fsrs);
+            // Checked before the first write: an entry that would be refused leaves the deck as it is.
+            const upgradedEntry = applyLibraryUpgrade(deck, plan);
+            await deckRepository.checkDeckEntryUpgrade(deck, upgradedEntry);
+            // Both writes made and checked before the first is sent (prepareUpgradeWrites).
+            const { writeCards, writeReviews } = await prepareUpgradeWrites(
+              deck,
+              plan,
+              cards.version,
+              { sm2: dropped, fsrs: droppedFsrs },
+            );
+            const written: { deck?: Deck } = {};
+            return {
+              result: written,
+              writes: [
+                // The cards first, the deck readable with them, still naming the release it came from.
+                writeCards,
+                // Then the review states of the cards removed: made again from a fresh read when the document
+                // changed since it was read (a grade on another device).
+                writeReviews,
+                // Last the entry, which moves the deck to the new release, only while it says what was read.
+                async () => {
+                  written.deck = await deckRepository.upgradeDeckEntry(deck, upgradedEntry);
+                },
+              ],
+            };
+          },
+          {
+            // Made once, never planned again on a 412 as other writes are (EDIT_ATTEMPTS): the learner
+            // approved the plan offered, and one that no longer holds is offered again.
+            attempts: 1,
+            reached: (at) => progress.finished(UPGRADE_WRITE_STEPS[at]),
+          },
+        );
         progress.finished();
-        return { ok: true, deck: upgraded };
+        return { ok: true, deck: result.deck! };
       } catch (error) {
         const step = progress.step();
+        const { sent, failedAt } = cutOffOf(error);
         if (step === "entry" && !unsent(error)) {
           // A write of the entry whose answer was lost may have been made: the entry says, when it can be read.
           const deck = await deckRepository.readDeck(offered.url).catch(() => undefined);
-          if (deck === undefined) changed = true;
-          else if (deck !== null && deck.sourceUrl === releaseUrl) return { ok: true, deck };
+          if (deck === undefined) return { ok: false, step, error, changed: true };
+          if (deck !== null && deck.sourceUrl === releaseUrl) return { ok: true, deck };
         }
+        // Whether a document of the deck was written, or may have been (a write of the cards or the review
+        // states whose answer was lost; the entry's is read above).
+        const changed = sent > 0 || (failedAt !== null && step !== "entry" && !unsent(error));
         // Nothing is put back: the deck reads as its documents are, and planned again, the upgrade finishes.
         return { ok: false, step, error, changed };
       }

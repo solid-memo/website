@@ -79,6 +79,104 @@ export async function readNow<T>(
 }
 
 /**
+ * A write's condition made of a read: made only while the document is
+ * at the version read (If-Match), none to check when the pod gave none.
+ */
+export function atVersion(version: string | null): { version?: string } {
+  return version === null ? {} : { version };
+}
+
+/**
+ * What one plan of writes to several documents (writeInOrder) comes to:
+ * what it says, and its writes, each made and checked, none sent, in the
+ * order they are sent; undefined where there is nothing to write.
+ */
+export interface WriteSet<T> {
+  readonly result: T;
+  readonly writes: readonly ((() => Promise<unknown>) | undefined)[];
+}
+
+/**
+ * How writeInOrder plans and writes: `attempts` in all (EDIT_ATTEMPTS),
+ * planned again on a failure `replanOn` says (changedOrCreatedElsewhere),
+ * only while nothing was sent unless `replanAfterSent`, after `pause`
+ * (pauseBefore); `reached` hears of each place in the order, a write in
+ * it or none, once those before it were sent, with what the plan says.
+ */
+export interface WriteSetPolicy<T> {
+  readonly attempts?: number;
+  readonly replanOn?: (error: unknown) => boolean;
+  readonly replanAfterSent?: boolean;
+  readonly pause?: (attempt: number) => Promise<void>;
+  readonly reached?: (at: number, result: T) => void;
+}
+
+/** How far a write set got before it failed (cutOffOf). */
+interface CutOff {
+  /** How many of its writes were sent. */
+  readonly sent: number;
+  /** The place of the write that failed, which may have been made unless unsent() says it was not; null when its plan failed. */
+  readonly failedAt: number | null;
+}
+
+/** How far each failed write set got, by what it failed with. */
+const cutOffs = new WeakMap<object, CutOff>();
+
+/**
+ * How far the write set that failed with `failure` got (writeInOrder):
+ * nothing sent and no write failed for any other failure.
+ */
+export function cutOffOf(failure: unknown): CutOff {
+  const cut = typeof failure === "object" && failure !== null ? cutOffs.get(failure) : undefined;
+  return cut ?? { sent: 0, failedAt: null };
+}
+
+/**
+ * Write to several documents from one plan: `plan` reads them, with
+ * their versions, and makes and checks every write (WriteSet), so one
+ * that would be refused refuses them all with nothing sent; then each is
+ * sent in order. A write refused because a document changed, or was
+ * made, since it was read (a 412) has the whole set planned again, from
+ * fresh reads, as the policy says (WriteSetPolicy). By default that is
+ * only while nothing was sent: once a write went out, the rest have no
+ * plan to go back to. Its result, and how many writes were sent; a
+ * failure is thrown as it is, and how far the set got before it is
+ * cutOffOf it.
+ */
+export async function writeInOrder<T>(
+  plan: (attempt: number) => Promise<WriteSet<T>>,
+  {
+    attempts = EDIT_ATTEMPTS,
+    replanOn = changedOrCreatedElsewhere,
+    replanAfterSent = false,
+    pause = pauseBefore,
+    reached,
+  }: WriteSetPolicy<T> = {},
+): Promise<{ result: T; sent: number }> {
+  for (let attempt = 1; ; attempt++) {
+    if (attempt > 1) await pause(attempt);
+    let sent = 0;
+    let failedAt: number | null = null;
+    try {
+      const { result, writes } = await plan(attempt);
+      for (const [at, write] of writes.entries()) {
+        reached?.(at, result);
+        if (write === undefined) continue;
+        failedAt = at;
+        await write();
+        failedAt = null;
+        sent += 1;
+      }
+      return { result, sent };
+    } catch (error) {
+      if (attempt < attempts && (sent === 0 || replanAfterSent) && replanOn(error)) continue;
+      if (typeof error === "object" && error !== null) cutOffs.set(error, { sent, failedAt });
+      throw error;
+    }
+  }
+}
+
+/**
  * Whether a write's failure says it was never made: the pod refused it
  * (412, the document changed or was created elsewhere), or this app did
  * before sending it (the data would not conform, a newer version of the
