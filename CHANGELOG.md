@@ -21,6 +21,19 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.6.0](https://github.com/solid-memo/website/compare/v8.5.15...v8.6.0) (2026-11-28)
+
+### Features
+
+* **solid:** send the user's pod at most six requests at once ([dc5045c](https://github.com/solid-memo/website/commit/dc5045c6eb204dfb1ad56aa3325ca7ab468f844f)), closes [#1087](https://github.com/solid-memo/website/issues/1087)
+* **ui:** tell the learner while a server asks the app to wait ([86f3841](https://github.com/solid-memo/website/commit/86f38416895e70bc939ec7b87a255f9f3dfacd33)), closes [#1087](https://github.com/solid-memo/website/issues/1087)
+
+### Fixes
+
+* **application:** pause a random, growing time before trying a 412 again ([2e7d222](https://github.com/solid-memo/website/commit/2e7d2227bba5354c7e63afb719c6a47484641aaa)), closes [#1086](https://github.com/solid-memo/website/issues/1086)
+* **solid:** wait as long as a server asks after it refuses a request as too many ([9a9b617](https://github.com/solid-memo/website/commit/9a9b617a27b5e54725d3a2d6a67efd1a4623c26b)), closes [#1087](https://github.com/solid-memo/website/issues/1087)
+* **ui:** try a failed read again after a wait partly at random ([b3db09d](https://github.com/solid-memo/website/commit/b3db09dad87af9890f6bfb23555fbf45d7d84410)), closes [#1087](https://github.com/solid-memo/website/issues/1087)
+
 ## [8.5.15](https://github.com/solid-memo/website/compare/v8.5.14...v8.5.15) (2026-11-28)
 
 ### Fixes
