@@ -12,6 +12,7 @@ import { makeCardUseCasesFake } from "./fakes/cards";
 import { makeLibraryUseCasesFake } from "./fakes/library";
 import { makeMistakeReportUseCasesFake } from "./fakes/mistakeReports";
 import { makeWhatsNewUseCasesFake } from "./fakes/whatsNew";
+import { makePodWaitUseCasesFake } from "./fakes/podWaits";
 import { makeDeviceValuesFake } from "./fakes/deviceValues";
 import { makeCourseUseCasesFake } from "./fakes/courses";
 import { makeStudyUseCasesFake } from "./fakes/study";
@@ -39,6 +40,7 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
   makeLibraryUseCasesFake({}, fake);
   makeMistakeReportUseCasesFake({}, fake);
   makeWhatsNewUseCasesFake({}, fake);
+  makePodWaitUseCasesFake({}, fake);
   // The values the device keeps, in memory: `stored` and `tab` on the fake show them.
   Object.assign(fake, makeDeviceValuesFake());
   makeCourseUseCasesFake({}, fake);

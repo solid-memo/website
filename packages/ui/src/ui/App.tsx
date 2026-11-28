@@ -31,6 +31,7 @@ import { I18nProvider, loadLocale, useI18n, type MessageKey } from "./i18n";
 import { LanguageSelector } from "./LanguageSelector";
 import { Loading } from "./Loading";
 import { MakerNote } from "./onboarding/MakerNote";
+import { PodWaitStatus } from "./PodWaitStatus";
 import { OnboardingFlow } from "./onboarding/OnboardingFlow";
 import { PodConnectionScreen } from "./onboarding/PodConnectionScreen";
 import { useConnectedScreen } from "./onboarding/useConnectedScreen";
@@ -272,6 +273,7 @@ export function AppShell({
             <AppVersion.Provider value={source.version}>
               <DeviceValues.Provider value={useCases}>
                 <SkipLink />
+                <PodWaitStatus useCases={useCases} />
                 <AppContent
                   useCases={useCases}
                   source={source}

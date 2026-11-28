@@ -898,6 +898,27 @@ export interface InstanceCopier {
 }
 
 /**
+ * A wait a server asked of the app (docs/architecture.md#a-request-on-its-way-to-a-pod):
+ * no request goes to `host` before `until`. `asked` says the server
+ * refused a request as too many, or as unavailable for a while; without
+ * it, many of its requests failed at once with no status, which a rate
+ * limit without CORS headers looks like, and a server that is down too.
+ */
+export interface PodWait {
+  readonly host: string;
+  readonly until: Date;
+  readonly asked: boolean;
+}
+
+/** Driven port: the waits servers asked of the app, as the requests to them keep them. */
+export interface PodWaits {
+  /** The waits not over yet, the one that ends first first. */
+  current(): PodWait[];
+  /** Calls `listener` each time a wait starts or grows longer. Returns a function that stops it. */
+  listen(listener: () => void): () => void;
+}
+
+/**
  * Driven port: makes a container read-only for a while. Moving a guest's
  * study holds the guest's instance, so nothing else in this tab writes to
  * it until the move is over. A move another tab runs is held the same

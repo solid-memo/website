@@ -204,6 +204,18 @@ request passes on its way to the gate makes a request as the learner
 while that request holds a turn, so no request waits for a turn it
 holds itself.
 
+While a server's wait lasts, every screen says so above its content
+([PodWaitStatus.tsx](../packages/ui/src/ui/PodWaitStatus.tsx)): "The
+server pod.example asked Solid Memo to slow down. Trying again in 40
+s.", counting down. Where only failures with no status started the
+wait, the line says the server isn't answering for now. The screen goes
+on meanwhile. The line is a polite live region, which tells a screen
+reader of each wait once, as it starts or grows longer. The screens
+learn of the waits through the `podWaits` use cases, over the
+`PodWaits` port the gate implements, since `ui` doesn't import `solid`
+([boundaries.md](boundaries.md#layers)). Once the gate gives a request
+up, `podBusy` says the server is busy and that waiting helps.
+
 ## Runtime: a grade
 
 A grade shows the layers at work. The screen calls a use case, the use
@@ -423,8 +435,9 @@ npm run crosscheck # the pySHACL cross-check CI runs (Python, scripts/requiremen
   feature:
   - the session and the guest (`session`), the instances, the
     preferences, the decks, the cards and the deck library;
-  - where a mistake is reported (`mistakeReports`) and what's new in a
-    version (`whatsNew`);
+  - where a mistake is reported (`mistakeReports`), what's new in a
+    version (`whatsNew`) and the waits servers asked of the app
+    (`podWaits`);
   - the courses, study, the statistics and the instance checks
     (`instanceChecks`);
   - the Studio's drafts, publishing, instance graph and trial.

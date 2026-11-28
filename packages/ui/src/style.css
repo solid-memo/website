@@ -284,6 +284,19 @@ main.workspace {
   padding-top: 0;
 }
 
+/* A server's wait (PodWaitStatus): above every screen, as wide as its main content, holding none of it up. */
+.pod-waits {
+  width: 100%;
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.pod-waits p {
+  margin: 0.75rem 0 0;
+  overflow-wrap: anywhere;
+}
+
 /* The first Tab stop, out of sight until focused: past the header to the main content. */
 .skip-link {
   position: absolute;

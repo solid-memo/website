@@ -359,6 +359,72 @@ describe("createRateLimitGate", () => {
     expect((await paced("data:text/plain,a")).status).toBe(429);
   });
 
+  describe("as the waits servers asked for", () => {
+    it("names each server whose wait lasts, the one that ends first first, and tells a listener when one starts or grows", async () => {
+      const shared = gate();
+      const listener = vi.fn();
+      const stop = shared.listen(listener);
+      const start = Date.now();
+      const pod = server(() => tooMany("30"), ok);
+      const other = server(() => tooMany("10"), ok);
+      const reads = [
+        shared.pace(pod.fetch)(`${POD}a.ttl`),
+        shared.pace(other.fetch)("https://other.example:8443/a.ttl"),
+      ];
+      await vi.advanceTimersByTimeAsync(0);
+      expect(shared.current()).toEqual([
+        { host: "other.example:8443", until: new Date(start + 10_000), asked: true },
+        { host: "pod.example", until: new Date(start + 30_000), asked: true },
+      ]);
+      expect(listener).toHaveBeenCalledTimes(2);
+      stop();
+      await vi.advanceTimersByTimeAsync(10_000);
+      expect(shared.current()).toMatchObject([{ host: "pod.example" }]);
+      await vi.advanceTimersByTimeAsync(20_000);
+      await Promise.all(reads);
+      expect(shared.current()).toEqual([]);
+      expect(listener).toHaveBeenCalledTimes(2);
+    });
+
+    it("tells no listener of a wait that grows no longer", async () => {
+      const shared = gate();
+      const listener = vi.fn();
+      shared.listen(listener);
+      const pod = server(
+        () => tooMany("30"),
+        () => tooMany("5"),
+        ok,
+      );
+      const paced = shared.pace(pod.fetch);
+      const reads = [paced(`${POD}a.ttl`), paced(`${POD}b.ttl`)];
+      await vi.advanceTimersByTimeAsync(30_000);
+      await Promise.all(reads);
+      expect(listener).toHaveBeenCalledTimes(1);
+    });
+
+    it("says a wait after many failures with no status wasn't asked for", async () => {
+      const shared = gate();
+      const pod = server(corsLess, corsLess, corsLess, ok);
+      const paced = shared.pace(pod.fetch);
+      const burst = Promise.allSettled([1, 2, 3].map((n) => paced(`${POD}${n}.ttl`)));
+      await vi.advanceTimersByTimeAsync(0);
+      expect(shared.current()).toMatchObject([{ host: "pod.example", asked: false }]);
+      await vi.advanceTimersByTimeAsync(1000);
+      await burst;
+    });
+
+    it("keeps a wait the server asked for one it asked for, though a failure with no status makes it longer", async () => {
+      const shared = gate();
+      const pod = server(() => tooMany("1"), corsLess, ok);
+      const paced = shared.pace(pod.fetch);
+      const reads = [paced(`${POD}a.ttl`), paced(`${POD}b.ttl`)];
+      await vi.advanceTimersByTimeAsync(0);
+      expect(shared.current()).toMatchObject([{ asked: true }]);
+      await vi.advanceTimersByTimeAsync(2000);
+      await Promise.all(reads);
+    });
+  });
+
   describe("requests at once", () => {
     /** A server that answers each request only when the test says, by its address. */
     function held() {

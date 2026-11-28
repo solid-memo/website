@@ -518,6 +518,8 @@ export function createAppUseCases({
     deviceStore: createWebStorageDeviceStore(),
     tabStore: createWebStorageDeviceStore(() => globalThis.sessionStorage),
     writeFence,
+    // The waits the rate-limit gate keeps, for the learner to be told of them.
+    podWaits: rateLimits,
     digestRepository: createSolidDigestRepository({ fetch: dataFetch, checkWrite }),
     answerLog: createSolidAnswerLog({ fetch: dataFetch, checkWrite }),
     ruleset,

@@ -1828,6 +1828,10 @@
     "tryReleaseChooseInstance": "Dans quelle instance ouvrir le paquet publié sur {host} ?",
     "triedUnknown": "Le paquet vers lequel mène ce lien n’est pas dans la bibliothèque. Voici ce qu’elle contient."
   },
+  "podWait": {
+    "asked": "Le serveur {host} a demandé à Solid Memo de ralentir. Nouvel essai dans {seconds} s.",
+    "unanswered": "Le serveur {host} ne répond pas pour le moment. Nouvel essai dans {seconds} s."
+  },
   "errors": {
     "cardFrontImageNotWebUrl": "L’image du recto doit être une URL http(s).",
     "cardBackImageNotWebUrl": "L’image du verso doit être une URL http(s).",

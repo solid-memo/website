@@ -1828,6 +1828,10 @@
     "tryReleaseChooseInstance": "¿En qué instancia quieres abrir el mazo publicado en {host}?",
     "triedUnknown": "El mazo al que lleva el enlace no está en la biblioteca. Esto es lo que tiene la biblioteca."
   },
+  "podWait": {
+    "asked": "El servidor {host} pidió a Solid Memo que fuera más despacio. Se volverá a intentar en {seconds} s.",
+    "unanswered": "El servidor {host} no responde por ahora. Se volverá a intentar en {seconds} s."
+  },
   "errors": {
     "cardFrontImageNotWebUrl": "La imagen del anverso debe ser una URL http(s).",
     "cardBackImageNotWebUrl": "La imagen del reverso debe ser una URL http(s).",

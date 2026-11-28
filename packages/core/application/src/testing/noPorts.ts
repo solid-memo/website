@@ -11,6 +11,7 @@ import type {
   PaletteRepository,
   WriteFence,
   InstanceGraphReader,
+  PodWaits,
 } from "../ports/pod";
 import { AppError } from "@solid-memo/domain/appError";
 import { UNKEPT_STORE } from "../deviceValues";
@@ -67,6 +68,8 @@ const NO_JOURNAL: UpdateJournal = {
 };
 
 const NO_FENCE: WriteFence = { hold: () => () => undefined };
+
+const NO_POD_WAITS: PodWaits = { current: () => [], listen: () => () => undefined };
 
 const NO_GUEST_POD: GuestPod = {
   exists: async () => false,
@@ -128,6 +131,7 @@ export const NO_PORTS = {
   updateJournal: NO_JOURNAL,
   logoutChannel: NO_LOGOUT_CHANNEL,
   writeFence: NO_FENCE,
+  podWaits: NO_POD_WAITS,
   guestPod: NO_GUEST_POD,
   answerLog: NO_ANSWER_LOG,
   digestRepository: NO_DIGESTS,

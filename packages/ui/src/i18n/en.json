@@ -1740,6 +1740,10 @@
     "tryReleaseChooseInstance": "Which instance should the deck published on {host} open in?",
     "triedUnknown": "The deck that link leads to is not in the library. Here is what the library has."
   },
+  "podWait": {
+    "asked": "The server {host} asked Solid Memo to slow down. Trying again in {seconds} s.",
+    "unanswered": "The server {host} isn't answering for now. Trying again in {seconds} s."
+  },
   "errors": {
     "cardFrontImageNotWebUrl": "The front image must be an http(s) URL.",
     "cardBackImageNotWebUrl": "The back image must be an http(s) URL.",

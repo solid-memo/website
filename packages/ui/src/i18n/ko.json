@@ -1652,6 +1652,10 @@
     "tryReleaseChooseInstance": "{host}에 게시된 덱을 어느 인스턴스에서 열까요?",
     "triedUnknown": "링크가 가리키는 덱이 라이브러리에 없어요. 라이브러리에 있는 덱은 다음과 같아요."
   },
+  "podWait": {
+    "asked": "{host} 서버가 Solid Memo에 속도를 늦춰 달라고 요청했어요. {seconds}초 후에 다시 시도해요.",
+    "unanswered": "{host} 서버가 지금은 응답하지 않아요. {seconds}초 후에 다시 시도해요."
+  },
   "errors": {
     "cardFrontImageNotWebUrl": "앞면 그림은 http(s) URL이어야 해요.",
     "cardBackImageNotWebUrl": "뒷면 그림은 http(s) URL이어야 해요.",

@@ -13,6 +13,7 @@
  * the queries' own retries nor the answer queue send into the limit.
  */
 
+import type { PodWaits } from "@solid-memo/application/ports/pod";
 import { AppError } from "@solid-memo/domain/appError";
 
 /** Methods that only read; every other one writes. */
@@ -80,6 +81,8 @@ interface Origin {
   host: string;
   /** The time no request is sent before, in milliseconds since the epoch; 0 when none. */
   until: number;
+  /** Whether the server refused with a status for the wait now, not only failed with none (PodWait). */
+  asked: boolean;
   /** The refusals in a row, which the backoff grows with; a response that isn't one starts it again. */
   refusals: number;
   /** When the server last refused a request, with a status or a failure counted as one, in milliseconds since the epoch. */
@@ -109,9 +112,11 @@ export interface GateOptions {
 /**
  * The gate: `pace` wraps a fetch, its requests passing the gate, every
  * wrapped fetch sharing its waits; with `limited`, its requests share
- * each server's turns too, `atOnce` of them under way at most.
+ * each server's turns too, `atOnce` of them under way at most. As the
+ * PodWaits port, it says which servers' waits last, for the learner to
+ * be told.
  */
-export interface RateLimitGate {
+export interface RateLimitGate extends PodWaits {
   pace(fetch: typeof globalThis.fetch, options?: { limited?: boolean }): typeof globalThis.fetch;
 }
 
@@ -149,6 +154,7 @@ export function createRateLimitGate({
   atOnce = REQUESTS_AT_ONCE,
 }: GateOptions = {}): RateLimitGate {
   const origins = new Map<string, Origin>();
+  const listeners = new Set<() => void>();
 
   function originOf(url: URL): Origin {
     let origin = origins.get(url.origin);
@@ -156,6 +162,7 @@ export function createRateLimitGate({
       origin = {
         host: url.host,
         until: 0,
+        asked: false,
         refusals: 0,
         refusedAt: -Infinity,
         failures: [],
@@ -167,9 +174,12 @@ export function createRateLimitGate({
     return origin;
   }
 
-  /** Pauses `origin` for `ms` from now, unless it is paused longer already. */
+  /** Pauses `origin` for `ms` from now, unless it is paused longer already, telling the listeners when it is paused longer. */
   function pause(origin: Origin, ms: number): void {
-    origin.until = Math.max(origin.until, now() + ms);
+    const until = now() + ms;
+    if (until <= origin.until) return;
+    origin.until = until;
+    for (const listener of listeners) listener();
   }
 
   /** The backoff's next wait: doubling from BACKOFF_FIRST_MS up to BACKOFF_CAP_MS, half of it random. */
@@ -182,6 +192,7 @@ export function createRateLimitGate({
   /** Pauses `origin` after `response` refused a request: as long as it asks, or for the backoff. */
   function refused(origin: Origin, response: Response): void {
     origin.refusedAt = now();
+    origin.asked = true;
     const asked = retryAfterMs(response.headers.get("Retry-After"), now());
     if (asked === undefined) pause(origin, backoff(origin));
     else {
@@ -202,6 +213,8 @@ export function createRateLimitGate({
       origin.failures.length >= BURST_FAILURES;
     if (refusing) {
       origin.refusedAt = at;
+      // A wait the server asked for stays one it asked for, though a failure makes it longer.
+      if (at >= origin.until) origin.asked = false;
       pause(origin, backoff(origin));
     }
     return refusing;
@@ -271,6 +284,19 @@ export function createRateLimitGate({
   }
 
   return {
+    current() {
+      const at = now();
+      return [...origins.values()]
+        .filter(({ until }) => until > at)
+        .sort((a, b) => a.until - b.until)
+        .map(({ host, until, asked }) => ({ host, until: new Date(until), asked }));
+    },
+    listen(listener) {
+      // Each listening is its own, though the same function listens twice.
+      const own = () => listener();
+      listeners.add(own);
+      return () => listeners.delete(own);
+    },
     pace(fetch, { limited = false } = {}) {
       /**
        * One try: its turn waited for, then the request sent, and its

@@ -1740,6 +1740,10 @@
     "tryReleaseChooseInstance": "In welcher Instanz soll der auf {host} veröffentlichte Stapel geöffnet werden?",
     "triedUnknown": "Der Stapel, zu dem der Link führt, ist nicht in der Bibliothek. Das hier hat die Bibliothek."
   },
+  "podWait": {
+    "asked": "Der Server {host} hat Solid Memo gebeten, langsamer zu machen. Neuer Versuch in {seconds} s.",
+    "unanswered": "Der Server {host} antwortet gerade nicht. Neuer Versuch in {seconds} s."
+  },
   "errors": {
     "cardFrontImageNotWebUrl": "Das Bild auf der Vorderseite muss eine http(s)-URL sein.",
     "cardBackImageNotWebUrl": "Das Bild auf der Rückseite muss eine http(s)-URL sein.",

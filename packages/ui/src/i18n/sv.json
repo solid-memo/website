@@ -1740,6 +1740,10 @@
     "tryReleaseChooseInstance": "Vilken instans ska kortleken som är publicerad på {host} öppnas i?",
     "triedUnknown": "Kortleken som länken leder till finns inte i biblioteket. Här är vad biblioteket har."
   },
+  "podWait": {
+    "asked": "Servern {host} bad Solid Memo att sakta ner. Försöker igen om {seconds} s.",
+    "unanswered": "Servern {host} svarar inte just nu. Försöker igen om {seconds} s."
+  },
   "errors": {
     "cardFrontImageNotWebUrl": "Bilden på framsidan måste vara en http(s)-adress.",
     "cardBackImageNotWebUrl": "Bilden på baksidan måste vara en http(s)-adress.",
