@@ -1625,7 +1625,7 @@
         "one": "{count} Kante zu einem Vokabularbegriff wird nur für den ausgewählten Knoten oder den, auf den gezeigt wird, gezeichnet.",
         "other": "{count} Kanten zu Vokabularbegriffen werden nur für den ausgewählten Knoten oder den, auf den gezeigt wird, gezeichnet."
       },
-      "tooLarge": "Das würde {nodes} Knoten und {edges} Kanten zeichnen, mehr als die Seite flüssig zeichnet. Blende einige mit den Filtern aus, zeige ihn als Tabelle oder zeichne ihn trotzdem.",
+      "tooLarge": "Der Graph hat {nodes} Knoten und {edges} Kanten, mehr als die Seite flüssig anordnet und zeichnet, egal, was die Filter ausblenden. Zeige ihn als Tabelle oder zeichne ihn trotzdem.",
       "drawAnyway": "Trotzdem zeichnen",
       "placing": "Die Knoten werden platziert",
       "prompt": "Zeige auf einen Knoten oder nutze die Pfeiltasten, um zu sehen, was er ist; die Eingabetaste oder ein Klick öffnet ihn, ein Klick auf den Hintergrund hebt die Auswahl auf. +, − und 0 zoomen hinein, heraus und auf den ganzen Graphen, und Ziehen verschiebt ihn.",

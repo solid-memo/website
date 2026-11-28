@@ -6,9 +6,10 @@
  * Instance graphs for the graph screen's tests, built as the app builds
  * them (instanceGraphOf) from a few documents of instance A: a node of
  * every kind, edges of every kind, a literal in a language and one with
- * a datatype; a large one, of as many cards as asked; and one whose
+ * a datatype; a large one, of as many cards as asked; one whose
  * card, and the wrong option it links to, have as many classes and
- * values as asked.
+ * values as asked; and one of as many cards as asked, each of the same
+ * classes, as many as asked.
  */
 
 import {
@@ -173,4 +174,21 @@ export function collidingGraphs(): [InstanceGraph, InstanceGraph] {
     ],
   });
   return [graphOf(COLLIDING[0]), graphOf(COLLIDING[1])];
+}
+
+/** An instance of `cards` cards, each of the same `classes` classes: few nodes, and many edges to vocabulary terms. */
+export function typedGraph(cards: number, classes: number): InstanceGraph {
+  const kinds = Array.from({ length: classes }, (_, k) => `https://vocab.example/ns#Class${k}`);
+  return instanceGraphOf({
+    instanceUrl: INSTANCE,
+    storages: [STORAGE],
+    documents: [
+      found(
+        CARDS,
+        Array.from({ length: cards }, (_, n) =>
+          kinds.map((kind) => triple(`${CARDS}#card-${n}`, TYPE, iri(kind))),
+        ).flat(),
+      ),
+    ],
+  });
 }

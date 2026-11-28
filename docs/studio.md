@@ -3181,9 +3181,12 @@ draws no node again.
 - The drawing resized (the window, say) is measured again once it has
   been still as long.
 - Selecting a node looks its edges up, never searching all of them.
-- Past 20,000 nodes or 60,000 edges shown, it isn't drawn until asked:
-  the screen says how many there would be, and offers **Draw anyway**,
-  the filters and the tables. No node is ever left out unsaid.
+- Past 20,000 nodes or 60,000 edges in the whole graph, hidden ones
+  included, it isn't laid out or drawn until asked: the layout places
+  every node and routes every edge, the hidden ones too. The screen says
+  how many the graph has, and offers **Draw anyway** and the tables.
+  **Draw anyway** holds for that graph only: another one, read later, is
+  weighed again. No node is ever left out unsaid.
 
 **Keys.** The drawing is one tab stop, as a chart is
 ([statistics.md](statistics.md)):

@@ -1723,7 +1723,7 @@
         "many": "{count} d’arêtes vers des termes de vocabulaire ne sont dessinées que pour le nœud sélectionné ou pointé.",
         "other": "{count} arêtes vers des termes de vocabulaire ne sont dessinées que pour le nœud sélectionné ou pointé."
       },
-      "tooLarge": "Cela dessinerait {nodes} nœuds et {edges} arêtes, plus que la page ne dessine de façon fluide. Masquez-en avec les filtres, affichez-le sous forme de tableau ou dessinez-le quand même.",
+      "tooLarge": "Le graphe compte {nodes} nœuds et {edges} arêtes, plus que la page ne place et ne dessine de façon fluide, quoi que masquent les filtres. Affichez-le sous forme de tableau ou dessinez-le quand même.",
       "drawAnyway": "Dessiner quand même",
       "placing": "Placement des nœuds",
       "prompt": "Pointez un nœud, ou utilisez les flèches, pour voir ce qu’il est ; Entrée ou un clic l’ouvre, et un clic sur le fond le désélectionne. +, − et 0 agrandissent, réduisent et montrent tout le graphe, et le faire glisser le déplace.",

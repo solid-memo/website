@@ -14,9 +14,13 @@
  * nodes and edges are shown of all, and, in the drawing, how many of
  * those to vocabulary terms are drawn only for the node selected or
  * pointed at (GraphView). A graph too large to draw smoothly
- * (DRAW_LIMIT) is not drawn until asked to: it says so instead, and no
- * node is ever left out unsaid. The filters are kept for the page's
- * life. The node selected is the route's (`selected`), and opens in the
+ * (DRAW_LIMIT) is not laid out or drawn until asked to: it says so
+ * instead, and no node is ever left out unsaid. It is the whole graph
+ * that is weighed, the nodes and edges hidden too, as the layout places
+ * all of them (useLayout): hiding some makes the drawing no quicker to
+ * lay out. Drawing it anyway holds for that graph alone: another, read
+ * later, is weighed afresh. The filters are kept for the page's life.
+ * The node selected is the route's (`selected`), and opens in the
  * aside (GraphNodePane). What the filters show is worked out apart from
  * the node selected unless only its neighbors are shown: selecting
  * another node leaves the layers drawn as they are.
@@ -156,8 +160,11 @@ export function GraphScreen({
     DEFAULT_FILTERS,
   );
   const [search, setSearch] = useState("");
-  const [drawAnyway, setDrawAnyway] = useState(false);
+  // The graph drawn anyway: asked for that graph alone, not for a later one, larger still.
+  const [drawnAnyway, setDrawnAnyway] = useState<InstanceGraph | null>(null);
   const labels = useLabels(graph, instance);
+  // The whole graph, as it is laid out in full whatever the filters hide; what they show is no more.
+  const held = tooLarge(graph) && drawnAnyway !== graph;
   const chosen = selected !== null && labels.has(selected) ? selected : null;
   const searchRef = useRef<HTMLInputElement>(null);
   const filtered = useMemo(
@@ -279,7 +286,7 @@ export function GraphScreen({
           }),
         })}
       </p>
-      {!filters.table && !(tooLarge(shown) && !drawAnyway) && undrawn > 0 && (
+      {!filters.table && !held && undrawn > 0 && (
         <p class="hint">{t("studio.graph.vocabularyUndrawn", { count: undrawn })}</p>
       )}
       {filters.table ? (
@@ -289,15 +296,15 @@ export function GraphScreen({
           onSelect={onSelect}
           kindOf={(node) => kindText(node, t)}
         />
-      ) : tooLarge(shown) && !drawAnyway ? (
+      ) : held ? (
         <div class="graph-large" role="note">
           <p>
             {t("studio.graph.tooLarge", {
-              nodes: shown.nodes.length,
-              edges: shown.edges.length,
+              nodes: graph.nodes.length,
+              edges: graph.edges.length,
             })}
           </p>
-          <button type="button" onClick={() => setDrawAnyway(true)}>
+          <button type="button" onClick={() => setDrawnAnyway(graph)}>
             {t("studio.graph.drawAnyway")}
           </button>
         </div>
