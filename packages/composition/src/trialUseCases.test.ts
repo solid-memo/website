@@ -14,6 +14,19 @@ import { createAppUseCases } from "./appUseCases";
 import { createTrialUseCases, NO_DEVICE, readOnlyFetch } from "./trialUseCases";
 import { inProcessWorker } from "@solid-memo/solid/testing/inProcessWorker";
 
+/** Who is logged in. */
+const login = vi.hoisted(() => ({ webId: undefined as string | undefined }));
+vi.mock("@solid-memo/solid/solidSession", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@solid-memo/solid/solidSession")>();
+  return {
+    ...original,
+    createSolidSession: (...args: Parameters<typeof original.createSolidSession>) => ({
+      ...original.createSolidSession(...args),
+      webId: () => login.webId,
+    }),
+  };
+});
+
 const SERVED = "http://localhost:5173/";
 
 /** The requests that reached the network, each by its address and method. */
@@ -32,6 +45,7 @@ beforeEach(() => {
   vi.stubGlobal("fetch", vi.fn(servedSiteNetwork));
 });
 afterEach(() => {
+  login.webId = undefined;
   vi.unstubAllGlobals();
 });
 
@@ -164,5 +178,36 @@ describe("createTrialUseCases", () => {
     expect(requests.every(({ url, method }) => url.startsWith(SERVED) && method === "GET")).toBe(
       true,
     );
+  });
+
+  it("checks a trial's documents in its own pod without asking for the user's folders, which cannot be read", {
+    timeout: 60_000,
+  }, async () => {
+    const alice = "https://alice.example/";
+    const asked: string[] = [];
+    vi.stubGlobal("fetch", (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input instanceof Request ? input.url : input);
+      if (!url.startsWith(alice)) return servedSiteNetwork(input, init);
+      asked.push(url);
+      return Promise.resolve(new Response("", { status: 500 }));
+    });
+    const app = createAppUseCases({
+      clientName: "Solid Memo",
+      servedSite: SERVED,
+      ruleset: "test",
+      indexedDB: undefined,
+      spawnWorker: () => inProcessWorker(),
+    });
+    await app.startGuest("My study");
+    const [instance] = await app.listInstances(GUEST_SESSION);
+    login.webId = `${alice}profile/card#me`;
+    const opened = await app.openTrial(playableCourseDraft(), instance!.url);
+    if (!opened.ok) throw new Error("The course can be played.");
+    const { useCases, instance: played, deck } = opened.trial;
+    const question = (await useCases.getCourse(deck)).cards.get("q-a-1a")!;
+    await useCases.answerCourseQuestion(played.url, deck, question, { correct: true }, new Date());
+    // The session over, its reviews document is checked.
+    await expect(useCases.refreshStudyDigest(played.url, deck)).resolves.toBeUndefined();
+    expect(asked).toEqual([]);
   });
 });

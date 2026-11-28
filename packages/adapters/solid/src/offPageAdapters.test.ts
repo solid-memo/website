@@ -23,7 +23,7 @@ import {
 import { sourceOf } from "@solid-memo/solid-client/rdf";
 import { readDocument } from "@solid-memo/solid-client/resources";
 import { keyOf, quadsOf, termOf } from "./mappers/releaseDraftMapper";
-import { createOffPage } from "./offPage";
+import { createOffPage, OFF_PAGE_WORKERS, type OffPage, type OffPageJob } from "./offPage";
 import {
   offPageDeckArchive,
   offPageDocumentReader,
@@ -96,13 +96,17 @@ async function podWithDeck() {
 describe("offPageShapeValidator", () => {
   const inPage = (fetch: typeof globalThis.fetch) =>
     createShaclShapeValidator({ fetch, shapesFetch, ...SHAPE_SOURCES });
+  /** No document elsewhere: every check in the workers of `offPage`. */
+  const nowhere = (offPage: OffPage) => ({ offPage, isElsewhere: () => false });
 
   it("checks a document, and a draft as a release, as the validator in the page does, with the page's fetches and budget", async () => {
     const { pod } = await podWithDeck();
     const validator = inPage(pod.fetch);
-    const off = offPageShapeValidator(offPageOf(), validator, {
+    const offPage = offPageOf();
+    const off = offPageShapeValidator(offPage, validator, {
       fetch: pod.fetch,
       siteFetch: shapesFetch,
+      elsewhere: nowhere(offPage),
     });
     const catalog = catalogUrlOf(INSTANCE);
     const expected = await validator.validateDocument(catalog);
@@ -132,21 +136,21 @@ describe("offPageShapeValidator", () => {
   it("checks with another fetch as `over` gives it, and with the shapes read in this process for jobs run here", async () => {
     const { pod } = await podWithDeck();
     const empty = fakePod();
-    const off = offPageShapeValidator(
-      offPageOf(offPageJobs({ shapesFetch })),
-      inPage(empty.fetch),
-      {
-        fetch: empty.fetch,
-        siteFetch: shapesFetch,
-      },
-    ).over(pod.fetch);
+    const offPage = offPageOf(offPageJobs({ shapesFetch }));
+    const off = offPageShapeValidator(offPage, inPage(empty.fetch), {
+      fetch: empty.fetch,
+      siteFetch: shapesFetch,
+      elsewhere: nowhere(offPage),
+    }).over(pod.fetch);
     expect(await off.validateDocument(catalogUrlOf(INSTANCE))).toMatchObject({ status: "checked" });
   });
 
   it("reports a document past its deadline unreadable, as too large to read, and refuses a draft as releaseTooLarge", async () => {
-    const off = offPageShapeValidator(offPageOf(NEVER, 10), inPage(fakePod().fetch), {
+    const offPage = offPageOf(NEVER, 10);
+    const off = offPageShapeValidator(offPage, inPage(fakePod().fetch), {
       fetch: fakePod().fetch,
       siteFetch: shapesFetch,
+      elsewhere: nowhere(offPage),
     });
     const url = catalogUrlOf(INSTANCE);
     expect(await off.validateDocument(url)).toMatchObject({
@@ -191,7 +195,11 @@ describe("offPageShapeValidator", () => {
       workers: 1,
       deadlineMs: 5000,
     });
-    const off = offPageShapeValidator(offPage, inPage(fetch), { fetch, siteFetch: shapesFetch });
+    const off = offPageShapeValidator(offPage, inPage(fetch), {
+      fetch,
+      siteFetch: shapesFetch,
+      elsewhere: nowhere(offPage),
+    });
     expect(await off.validateDocument(url, "pod", readBudget(20))).toMatchObject({
       status: "unreadable",
     });
@@ -201,9 +209,11 @@ describe("offPageShapeValidator", () => {
 
   it("throws what fails the whole check, as the validator in the page does", async () => {
     const shapes = new AppError("releaseUnreadable", { url: "x" });
-    const off = offPageShapeValidator(offPageOf(failing(shapes)), inPage(fakePod().fetch), {
+    const offPage = offPageOf(failing(shapes));
+    const off = offPageShapeValidator(offPage, inPage(fakePod().fetch), {
       fetch: fakePod().fetch,
       siteFetch: shapesFetch,
+      elsewhere: nowhere(offPage),
     });
     await expect(off.validateDocument("https://pod.example/doc")).rejects.toMatchObject({
       code: "releaseUnreadable",
@@ -213,6 +223,103 @@ describe("offPageShapeValidator", () => {
     ).rejects.toMatchObject({
       code: "releaseUnreadable",
     });
+  });
+
+  it("checks a document elsewhere in the workers it is given for those, with another fetch too", async () => {
+    const { pod } = await podWithDeck();
+    const catalog = catalogUrlOf(INSTANCE);
+    const own = offPageOf();
+    const others = offPageOf();
+    const ran: string[] = [];
+    const recording: OffPage = {
+      run: <T>(job: OffPageJob) => {
+        ran.push(`${job.job} ${(job.input as { url: string }).url}`);
+        return others.run<T>(job);
+      },
+    };
+    const elsewhere = `${INSTANCE}elsewhere.ttl`;
+    const off = offPageShapeValidator(own, inPage(pod.fetch), {
+      fetch: pod.fetch,
+      siteFetch: shapesFetch,
+      elsewhere: { offPage: recording, isElsewhere: async (url) => url === elsewhere },
+    });
+    expect(await off.validateDocument(catalog)).toMatchObject({ status: "checked" });
+    expect(await off.validateDocumentSince(catalog, undefined)).toMatchObject({ unchanged: false });
+    expect(ran).toEqual([]);
+    expect(await off.validateDocument(elsewhere)).toMatchObject({ url: elsewhere });
+    expect(await off.over(pod.fetch).validateDocumentSince(elsewhere, undefined)).toMatchObject({
+      unchanged: false,
+    });
+    expect(ran).toEqual([`validateDocument ${elsewhere}`, `validateDocumentSince ${elsewhere}`]);
+  });
+
+  it("checks a document whose lookup fails in the workers of the user's own work, as the read would have gone without that lookup", async () => {
+    const { pod } = await podWithDeck();
+    const catalog = catalogUrlOf(INSTANCE);
+    const ran: string[] = [];
+    const others: OffPage = {
+      run: (job) => {
+        ran.push(job.job);
+        return Promise.reject(new Error("not these workers"));
+      },
+    };
+    const failing = [
+      () => Promise.reject(new Error("folders unreadable")),
+      () => {
+        throw new Error("folders unreadable");
+      },
+    ];
+    for (const isElsewhere of failing) {
+      const off = offPageShapeValidator(offPageOf(), inPage(pod.fetch), {
+        fetch: pod.fetch,
+        siteFetch: shapesFetch,
+        elsewhere: { offPage: others, isElsewhere },
+      });
+      expect(await off.validateDocument(catalog)).toMatchObject({ status: "checked" });
+      expect(await off.validateDocumentSince(catalog, undefined)).toMatchObject({
+        unchanged: false,
+      });
+    }
+    expect(ran).toEqual([]);
+  });
+
+  it("checks the user's own document while checks of documents elsewhere, more than there are workers, wait for a host that never answers", {
+    timeout: 30_000,
+  }, async () => {
+    const { pod } = await podWithDeck();
+    const slow = "https://slow.example/";
+    const asked: string[] = [];
+    // The slow host takes each request and never answers it.
+    const fetch: typeof globalThis.fetch = (input, init) => {
+      const url = String(input instanceof Request ? input.url : input);
+      if (!url.startsWith(slow)) return pod.fetch(input, init);
+      asked.push(url);
+      return new Promise(() => {});
+    };
+    const spawn = () => inProcessWorker(offPageJobs({ shapesFetch }));
+    const off = offPageShapeValidator(
+      createOffPage({ spawn, config: SHAPE_SOURCES }),
+      inPage(fetch),
+      {
+        fetch,
+        siteFetch: shapesFetch,
+        elsewhere: {
+          offPage: createOffPage({ spawn, config: SHAPE_SOURCES, freeWhileWaiting: true }),
+          isElsewhere: (url) => url.startsWith(slow),
+        },
+      },
+    );
+    let settled = 0;
+    for (let at = 0; at < OFF_PAGE_WORKERS * 2; at++)
+      void off
+        .validateDocumentSince(`${slow}${at}/cards.ttl`, undefined, "pod", readBudget(60_000))
+        .finally(() => settled++);
+    // Every check waits on the host, more of them than the user's own work has workers.
+    while (asked.length < OFF_PAGE_WORKERS * 2) await new Promise((r) => setTimeout(r, 10));
+    expect(await off.validateDocument(catalogUrlOf(INSTANCE))).toMatchObject({
+      status: "checked",
+    });
+    expect(settled).toBe(0);
   });
 });
 
