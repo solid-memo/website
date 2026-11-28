@@ -17,6 +17,7 @@ import {
   type DigestChange,
   type InstanceDigest,
 } from "@solid-memo/domain/studyDigest";
+import { pauseMs } from "@solid-memo/application/writes";
 import { AppError } from "@solid-memo/domain/appError";
 import { HttpError } from "@solid-memo/solid-client/interface";
 import { editDocument, getSolidDatasetOrNull, PreconditionFailedError } from "./datasets";
@@ -36,14 +37,20 @@ export interface SolidDigestRepositoryDeps {
   checkWrite?: WriteCheck;
   /** Waits before a write is made again (tests: at once). */
   wait?: (ms: number) => Promise<void>;
+  /** A number in [0, 1), for how much longer than its least a wait is (pauseMs); injected for tests. */
+  random?: () => number;
 }
 
 /**
  * How often a write is made, in all, while the digest keeps changing
- * elsewhere (412), and how long it waits before each try again. Another
- * page learning a check's documents writes the digest several times
- * running; trying again at once, a write could lose to each of those and
- * be dropped, so it waits a little longer each time, for them to be done.
+ * elsewhere (412), and how long it waits before each try again: more
+ * often than an edit of another document (EDIT_ATTEMPTS). Another page
+ * learning a check's documents writes the digest several times running;
+ * trying again at once, a write could lose to each of those and be
+ * dropped, so it waits a little longer each time, for them to be done:
+ * PAUSE_MS more for each try, at least, and on top a random time as any
+ * write refused with a 412 waits (pauseMs), so two pages writing the
+ * digest at once don't try again together.
  */
 const ATTEMPTS = 6;
 const PAUSE_MS = 50;
@@ -106,6 +113,7 @@ export function createSolidDigestRepository({
   fetch,
   checkWrite = noWriteCheck,
   wait = sleep,
+  random = Math.random,
 }: SolidDigestRepositoryDeps): DigestRepository {
   const queues = new Map<string, { waiting: Waiting[]; writing: boolean }>();
 
@@ -128,7 +136,7 @@ export function createSolidDigestRepository({
       },
       {
         attempts: ATTEMPTS,
-        pause: (attempt) => wait(PAUSE_MS * (attempt - 1)),
+        pause: (attempt) => wait(PAUSE_MS * (attempt - 1) + pauseMs(attempt, random)),
         checkWrite,
         // Only a write is asked whether it was refused for what it says, never the read.
         failure: (error) => (isRefusal(error) ? new Refused(error) : error),

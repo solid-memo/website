@@ -52,6 +52,7 @@ import {
 import { createInstanceGraphUseCases, type InstanceGraphUseCases } from "./instanceGraph";
 import { inTurns, READS_AT_ONCE } from "./atOnce";
 import { createTrialOpeningUseCases, type TrialOpeningUseCases, type TrialSandbox } from "./trial";
+import { pauseBefore } from "./writes";
 
 /**
  * Every use case the app and the Studio call: the intersection of the
@@ -121,6 +122,8 @@ export interface Dependencies {
   now?: () => Date;
   /** Fresh identifiers (a deck group, an answer, a guest's deck); injected for tests. */
   newId?: () => string;
+  /** Waits before try `attempt` of a write refused with a 412 (pauseBefore); injected for tests. */
+  pause?: (attempt: number) => Promise<void>;
   /** Keeps a guest's study read-only to anything else in the tab while it moves. */
   writeFence: WriteFence;
   /** Where each instance's digest is kept. */
@@ -171,6 +174,7 @@ export function createUseCases({
   tabStore,
   now = () => new Date(),
   newId = () => crypto.randomUUID(),
+  pause = pauseBefore,
   writeFence,
   digestRepository,
   answerLog,
@@ -217,6 +221,7 @@ export function createUseCases({
     readScope,
     releasePublisher,
     now,
+    pause,
   });
   const instances = createInstanceUseCases({
     webId,
@@ -297,6 +302,7 @@ export function createUseCases({
       cardsTurn,
       newId,
       now,
+      pause,
     }),
     ...createLibraryUseCases({
       deckLibrary,

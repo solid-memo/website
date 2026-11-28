@@ -78,6 +78,7 @@ import type { FileExchange } from "./ports/device";
 import type { DeckLibrary, ReleaseDraftRepository, ReleasePublisher } from "./ports/library";
 import type { DeckRepository } from "./ports/pod";
 import type { ReadScope } from "./readScope";
+import { EDIT_ATTEMPTS, PLACE_ATTEMPTS, changedOrCreatedElsewhere, pauseBefore } from "./writes";
 
 /**
  * The drafts of releases (docs/studio.md, Drafts): a creator writes a
@@ -229,12 +230,6 @@ export interface ReleaseDraftUseCases {
   diffReleaseDraft(draft: ReleaseDraft): Promise<DraftDiff | DiffElsewhere | null>;
 }
 
-/** How often a change of a draft is made, in all, while its documents keep changing elsewhere. */
-const EDIT_ATTEMPTS = 3;
-
-/** How often a new draft is given another name, in all, while its place is taken elsewhere. */
-const NAME_ATTEMPTS = 3;
-
 /**
  * Whether the release `prev` that the draft at `draftUrl` follows is
  * read as no one: it is, unless it is the draft's instance's
@@ -251,14 +246,6 @@ export async function followedAsNoOne(
   // A draft is read only at a draft's place.
   const { instanceUrl } = draftPlaceOf(draftUrl)!;
   return !(await readScope.isInstances(instanceUrl, prev));
-}
-
-/** Whether a write was refused because a document changed, or was made, since it was read. */
-function raced(error: unknown): boolean {
-  return (
-    error instanceof AppError &&
-    (error.code === "changedElsewhere" || error.code === "createdElsewhere")
-  );
 }
 
 /** Whether a new draft's release document was refused because one was made at `url` meanwhile: its place is taken, and nothing was written. */
@@ -517,6 +504,7 @@ export function createReleaseDraftUseCases({
   readScope,
   releasePublisher,
   now,
+  pause = pauseBefore,
 }: {
   releaseDraftRepository: ReleaseDraftRepository;
   deckRepository: DeckRepository;
@@ -528,6 +516,8 @@ export function createReleaseDraftUseCases({
   /** The releases the instance published, which a draft may follow (isFollowable). */
   releasePublisher: Pick<ReleasePublisher, "listPublished">;
   now: () => Date;
+  /** Waits before a change of a draft refused with a 412 is made again (pauseBefore). */
+  pause?: (attempt: number) => Promise<void>;
 }): ReleaseDraftUseCases {
   /** Each release a draft follows, by URL and whether it is read as no one: releases are frozen, so each is read once. */
   const releases = new Map<string, Promise<ReleaseDraft>>();
@@ -728,7 +718,7 @@ export function createReleaseDraftUseCases({
         return await releaseDraftRepository.create(instanceUrl, readable(make(url)));
       } catch (error) {
         // Only a place taken is tried again: any other failure took back what it wrote (the repository's create).
-        if (!placeTaken(error, url) || attempt === NAME_ATTEMPTS) throw error;
+        if (!placeTaken(error, url) || attempt === PLACE_ATTEMPTS) throw error;
         taken.push(chosen);
       }
     }
@@ -855,6 +845,7 @@ export function createReleaseDraftUseCases({
       /** The attempt a change elsewhere cut short last: some of what it changed may be written. */
       let cut: { before: ReleaseDraft; after: ReleaseDraft } | null = null;
       for (let attempt = 1; ; attempt++) {
+        if (attempt > 1) await pause(attempt);
         const read = await releaseDraftRepository.read(draftUrl);
         const before = await withPublished(read.draft);
         let after = applyDraftChanges(before, changes);
@@ -866,7 +857,7 @@ export function createReleaseDraftUseCases({
           await releaseDraftRepository.applyChanges(before, after, read.version);
           return { ok: true, draft: after };
         } catch (error) {
-          if (!raced(error) || attempt === EDIT_ATTEMPTS) throw error;
+          if (!changedOrCreatedElsewhere(error) || attempt === EDIT_ATTEMPTS) throw error;
           cut = { before, after };
         }
       }

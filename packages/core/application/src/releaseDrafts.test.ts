@@ -118,6 +118,7 @@ function setUp({
     ),
   };
   const releasePublisher = { listPublished: vi.fn(async (_instanceUrl: string) => published) };
+  const pause = vi.fn(async (_attempt: number) => undefined);
   const useCases = createReleaseDraftUseCases({
     releaseDraftRepository: repository,
     deckRepository,
@@ -127,9 +128,11 @@ function setUp({
     readScope: createReadScope({ storageGateway, webId: () => webId }),
     releasePublisher,
     now: () => new Date(NOW),
+    pause,
   });
   const created = () => repository.create.mock.calls.at(-1)![1];
   return {
+    pause,
     repository,
     deckRepository,
     deckLibrary,
@@ -1390,17 +1393,19 @@ describe("editReleaseDraft", () => {
   });
 
   it("reads the draft and makes the changes again when it changed elsewhere, or a new document was made there, a few times", async () => {
-    const { useCases, repository } = setUp();
+    const { useCases, repository, pause } = setUp();
     repository.applyChanges.mockRejectedValueOnce(new AppError("changedElsewhere", { url: "x" }));
     await expect(
       useCases.editReleaseDraft(courseDraft().url, [{ kind: "retire", of: "card", id: "q-loose" }]),
     ).resolves.toMatchObject({ ok: true });
     expect(repository.read).toHaveBeenCalledTimes(2);
+    expect(pause.mock.calls).toEqual([[2]]);
     repository.applyChanges.mockRejectedValueOnce(new AppError("createdElsewhere", { url: "x" }));
     await expect(
       useCases.editReleaseDraft(courseDraft().url, [{ kind: "retire", of: "card", id: "q-loose" }]),
     ).resolves.toMatchObject({ ok: true });
     repository.read.mockClear();
+    pause.mockClear();
     repository.applyChanges.mockRejectedValue(new AppError("changedElsewhere", { url: "x" }));
     await expect(
       useCases.editReleaseDraft(courseDraft().url, [{ kind: "retire", of: "card", id: "q-loose" }]),
@@ -1408,6 +1413,7 @@ describe("editReleaseDraft", () => {
       code: "changedElsewhere",
     });
     expect(repository.read).toHaveBeenCalledTimes(3);
+    expect(pause.mock.calls).toEqual([[2], [3]]);
     repository.applyChanges.mockRejectedValue(new Error("offline"));
     await expect(
       useCases.editReleaseDraft(courseDraft().url, [{ kind: "retire", of: "card", id: "q-loose" }]),

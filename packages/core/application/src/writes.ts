@@ -19,6 +19,56 @@ export function changedElsewhere(error: unknown): boolean {
   return error instanceof AppError && error.code === "changedElsewhere";
 }
 
+/**
+ * Whether a write was refused because its document changed since it was
+ * read, or was made since it was read as absent (a 412 either way): what
+ * it was planned from is out of date, and planned again it may be made.
+ */
+export function changedOrCreatedElsewhere(error: unknown): boolean {
+  return (
+    changedElsewhere(error) || (error instanceof AppError && error.code === "createdElsewhere")
+  );
+}
+
+/**
+ * How often a write made from a read is made, in all, while its document
+ * keeps changing elsewhere (412), each time from a fresh read: the
+ * adapters' edits of one document (editDocument) and the use cases'
+ * writes of several. Two exceptions say why beside them: the digest,
+ * which another page writes several times running, tries more often,
+ * and a library upgrade, whose plan the learner approved, only once.
+ */
+export const EDIT_ATTEMPTS = 3;
+
+/**
+ * How often a write that makes something new at a place of its own (a
+ * new draft's name, an imported deck's id) is made, in all, while the
+ * place it chose was taken elsewhere meanwhile, each time at the next.
+ */
+export const PLACE_ATTEMPTS = 3;
+
+/**
+ * The longest wait before the second try of a write refused with a 412,
+ * in milliseconds; each try after waits up to twice as long as the one
+ * before (pauseBefore). Short enough for a learner never to notice it.
+ */
+const PAUSE_BASE_MS = 25;
+
+/**
+ * How long to wait before try `attempt` (2 or later) of a write refused
+ * with a 412: a random time between none and PAUSE_BASE_MS ×
+ * 2^(attempt − 2), so two tabs or devices whose writes met once don't
+ * meet again on the very next try.
+ */
+export function pauseMs(attempt: number, random: () => number = Math.random): number {
+  return random() * PAUSE_BASE_MS * 2 ** (attempt - 2);
+}
+
+/** Wait before try `attempt` of a write refused with a 412, by the clock (pauseMs). */
+export function pauseBefore(attempt: number): Promise<void> {
+  return new Promise<void>((resolve) => setTimeout(resolve, pauseMs(attempt)));
+}
+
 /** A read made without a known version, which always comes with the contents. */
 export async function readNow<T>(
   read: Promise<Since<T>>,
@@ -26,6 +76,104 @@ export async function readNow<T>(
   const since = await read;
   if (since.unchanged) throw new Error("A read without a version came back unchanged.");
   return since;
+}
+
+/**
+ * A write's condition made of a read: made only while the document is
+ * at the version read (If-Match), none to check when the pod gave none.
+ */
+export function atVersion(version: string | null): { version?: string } {
+  return version === null ? {} : { version };
+}
+
+/**
+ * What one plan of writes to several documents (writeInOrder) comes to:
+ * what it says, and its writes, each made and checked, none sent, in the
+ * order they are sent; undefined where there is nothing to write.
+ */
+export interface WriteSet<T> {
+  readonly result: T;
+  readonly writes: readonly ((() => Promise<unknown>) | undefined)[];
+}
+
+/**
+ * How writeInOrder plans and writes: `attempts` in all (EDIT_ATTEMPTS),
+ * planned again on a failure `replanOn` says (changedOrCreatedElsewhere),
+ * only while nothing was sent unless `replanAfterSent`, after `pause`
+ * (pauseBefore); `reached` hears of each place in the order, a write in
+ * it or none, once those before it were sent, with what the plan says.
+ */
+export interface WriteSetPolicy<T> {
+  readonly attempts?: number;
+  readonly replanOn?: (error: unknown) => boolean;
+  readonly replanAfterSent?: boolean;
+  readonly pause?: (attempt: number) => Promise<void>;
+  readonly reached?: (at: number, result: T) => void;
+}
+
+/** How far a write set got before it failed (cutOffOf). */
+interface CutOff {
+  /** How many of its writes were sent. */
+  readonly sent: number;
+  /** The place of the write that failed, which may have been made unless unsent() says it was not; null when its plan failed. */
+  readonly failedAt: number | null;
+}
+
+/** How far each failed write set got, by what it failed with. */
+const cutOffs = new WeakMap<object, CutOff>();
+
+/**
+ * How far the write set that failed with `failure` got (writeInOrder):
+ * nothing sent and no write failed for any other failure.
+ */
+export function cutOffOf(failure: unknown): CutOff {
+  const cut = typeof failure === "object" && failure !== null ? cutOffs.get(failure) : undefined;
+  return cut ?? { sent: 0, failedAt: null };
+}
+
+/**
+ * Write to several documents from one plan: `plan` reads them, with
+ * their versions, and makes and checks every write (WriteSet), so one
+ * that would be refused refuses them all with nothing sent; then each is
+ * sent in order. A write refused because a document changed, or was
+ * made, since it was read (a 412) has the whole set planned again, from
+ * fresh reads, as the policy says (WriteSetPolicy). By default that is
+ * only while nothing was sent: once a write went out, the rest have no
+ * plan to go back to. Its result, and how many writes were sent; a
+ * failure is thrown as it is, and how far the set got before it is
+ * cutOffOf it.
+ */
+export async function writeInOrder<T>(
+  plan: (attempt: number) => Promise<WriteSet<T>>,
+  {
+    attempts = EDIT_ATTEMPTS,
+    replanOn = changedOrCreatedElsewhere,
+    replanAfterSent = false,
+    pause = pauseBefore,
+    reached,
+  }: WriteSetPolicy<T> = {},
+): Promise<{ result: T; sent: number }> {
+  for (let attempt = 1; ; attempt++) {
+    if (attempt > 1) await pause(attempt);
+    let sent = 0;
+    let failedAt: number | null = null;
+    try {
+      const { result, writes } = await plan(attempt);
+      for (const [at, write] of writes.entries()) {
+        reached?.(at, result);
+        if (write === undefined) continue;
+        failedAt = at;
+        await write();
+        failedAt = null;
+        sent += 1;
+      }
+      return { result, sent };
+    } catch (error) {
+      if (attempt < attempts && (sent === 0 || replanAfterSent) && replanOn(error)) continue;
+      if (typeof error === "object" && error !== null) cutOffs.set(error, { sent, failedAt });
+      throw error;
+    }
+  }
 }
 
 /**
