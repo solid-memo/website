@@ -155,7 +155,10 @@ describe("App", () => {
     let arrive!: (module: StudioModule) => void;
     renderApp(useCases, () => new Promise((resolve) => (arrive = resolve)));
     await waitFor(() =>
-      expect(screen.getByRole("status")).toHaveTextContent("Opening the Studio…"),
+      // The other status above every screen is the servers' waits' (PodWaitStatus), empty here.
+      expect(screen.getAllByRole("status").map((status) => status.textContent)).toContain(
+        "Opening the Studio…",
+      ),
     );
     expect(screen.getByRole("link", { name: "Solid Memo Studio" })).toBeInTheDocument();
     expect(screen.getByRole("main")).toHaveAttribute("id");

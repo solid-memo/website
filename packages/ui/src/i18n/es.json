@@ -1828,6 +1828,10 @@
     "tryReleaseChooseInstance": "¿En qué instancia quieres abrir el mazo publicado en {host}?",
     "triedUnknown": "El mazo al que lleva el enlace no está en la biblioteca. Esto es lo que tiene la biblioteca."
   },
+  "podWait": {
+    "asked": "El servidor {host} pidió a Solid Memo que fuera más despacio. Se volverá a intentar en {seconds} s.",
+    "unanswered": "El servidor {host} no responde por ahora. Se volverá a intentar en {seconds} s."
+  },
   "errors": {
     "cardFrontImageNotWebUrl": "La imagen del anverso debe ser una URL http(s).",
     "cardBackImageNotWebUrl": "La imagen del reverso debe ser una URL http(s).",
@@ -1930,6 +1934,7 @@
     "alreadyExists": "Ya hay algo guardado en ese lugar de tu Pod. Elige otro lugar.",
     "cannotCheck": "Solid Memo no pudo comprobar tu Pod. Comprueba tu conexión e inténtalo de nuevo.",
     "podNoAnswer": "El servidor no respondió a tiempo. Comprueba tu conexión e inténtalo de nuevo.",
+    "podBusy": "El servidor está ocupado y pidió a Solid Memo que fuera más despacio, así que esto no se hizo. Espera unos minutos y vuelve a intentarlo.",
     "documentCheckTooLong": "Solid Memo dejó de leer y comprobar este documento tras {seconds} segundos de trabajo. Inténtalo de nuevo más tarde o compruébalo con otra herramienta.",
     "dataNotConforming": "Solid Memo no guardó esto: no está en el formato que espera Solid Memo. No se cambió nada. Vuelve a cargar la página e inténtalo de nuevo.",
     "deckGone": "El mazo «{deck}» ya no existe. Quizá se eliminó en otra pestaña o aplicación.",

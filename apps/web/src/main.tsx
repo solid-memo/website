@@ -8,7 +8,7 @@ import { createAppUseCases } from "@solid-memo/composition/appUseCases";
 import { ErrorGuard } from "@solid-memo/ui/ErrorGuard";
 import { loadLocale } from "@solid-memo/ui/i18n";
 import { boundedQueryKeyHash } from "@solid-memo/ui/queryKeys";
-import { retryable } from "@solid-memo/ui/retryable";
+import { retryable, retryDelay } from "@solid-memo/ui/retryable";
 import "@solid-memo/ui/style.css";
 import { App } from "./App";
 import { siteConfig, siteVersion } from "./config";
@@ -35,12 +35,14 @@ const useCases = createAppUseCases({
   indexedDB: globalThis.indexedDB,
 });
 
-// A failed read is tried three times more only when another try may pass, so a checked outcome shows at once (retryable).
+// A failed read is tried three times more only when another try may pass, so a checked outcome shows at once (retryable),
+// each after a wait partly at random, so a screen's reads aren't tried again together (retryDelay).
 // A key's hash stays short, however long the IRIs in it (boundedQueryKeyHash).
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: (count, error) => count < 3 && retryable(error),
+      retryDelay: (count) => retryDelay(count),
       queryKeyHashFn: boundedQueryKeyHash(),
     },
   },

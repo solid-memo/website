@@ -97,6 +97,11 @@ With `verbatimModuleSyntax`, a type is imported with `import type` or
   didn't answer in time (`podNoAnswer`,
   [boundaries.md](boundaries.md#the-pod-fence)) is tried three times
   more first ([retryable.ts](../packages/ui/src/ui/retryable.ts)).
+  Each try waits from 1 second, doubling up to 30, half of each wait
+  chosen at random, so a screen's reads aren't tried again together. A
+  server that asked the app to slow down (`podBusy`) was waited for
+  already ([architecture.md](architecture.md#a-request-on-its-way-to-a-pod)),
+  so its read is shown at once.
 - **Lists grow in place.** A list gathered under a key takes each
   value with `push`, or a `Set` with `add`. It is never copied with the
   value added (`map.set(key, [...(map.get(key) ?? []), value])`): a

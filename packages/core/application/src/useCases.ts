@@ -22,6 +22,7 @@ import type {
   PaletteRepository,
   WriteFence,
   InstanceGraphReader,
+  PodWaits,
 } from "./ports/pod";
 import type { SessionGateway, StorageGateway, WebIdDocumentRepository } from "./ports/session";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
@@ -38,6 +39,7 @@ import { createCardUseCases, type CardUseCases } from "./cards";
 import { createLibraryUseCases, withLinkedReleasesChecked, type LibraryUseCases } from "./library";
 import { createMistakeReportUseCases, type MistakeReportUseCases } from "./mistakeReports";
 import { createWhatsNewUseCases, type WhatsNewUseCases } from "./whatsNew";
+import { createPodWaitUseCases, type PodWaitUseCases } from "./podWaits";
 import { deviceChoices } from "./deviceChoices";
 import { createDeviceValueUseCases, type DeviceValueUseCases } from "./deviceValues";
 import { createCourseUseCases, type CourseUseCases } from "./courses";
@@ -70,6 +72,7 @@ export interface UseCases
     LibraryUseCases,
     MistakeReportUseCases,
     WhatsNewUseCases,
+    PodWaitUseCases,
     DeviceValueUseCases,
     CourseUseCases,
     StudyUseCases,
@@ -126,6 +129,8 @@ export interface Dependencies {
   pause?: (attempt: number) => Promise<void>;
   /** Keeps a guest's study read-only to anything else in the tab while it moves. */
   writeFence: WriteFence;
+  /** The waits servers asked of the app, for the learner to be told of them. */
+  podWaits: PodWaits;
   /** Where each instance's digest is kept. */
   digestRepository: DigestRepository;
   /** Where each instance's answer log is kept. */
@@ -176,6 +181,7 @@ export function createUseCases({
   newId = () => crypto.randomUUID(),
   pause = pauseBefore,
   writeFence,
+  podWaits,
   digestRepository,
   answerLog,
   ruleset = "",
@@ -313,6 +319,7 @@ export function createUseCases({
     }),
     ...createMistakeReportUseCases({ deckLibrary }),
     ...createWhatsNewUseCases({ seenHighlights }),
+    ...createPodWaitUseCases({ podWaits }),
     ...createDeviceValueUseCases({ deviceStore, tabStore }),
     ...courses,
     ...createStudyUseCases({

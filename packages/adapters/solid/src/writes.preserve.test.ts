@@ -566,6 +566,8 @@ const ROWS: { [Name in keyof UseCases]: Row } = {
   reportPlace: async ({ u, courseRelease }) => void (await u.reportPlace(courseRelease.url)),
   unseenHighlights: local((u) => u.unseenHighlights(["a"])),
   dismissHighlights: local((u) => u.dismissHighlights(["a"])),
+  podWaits: local((u) => u.podWaits()),
+  watchPodWaits: local((u) => u.watchPodWaits(() => undefined)()),
   deviceValue: local((u) => u.deviceValue("k", DEVICE_TEXT).write("a")),
   instanceDeviceValues: local((u) => u.instanceDeviceValues("k", DEVICE_TEXT).write(POD, "a")),
   tabValue: local((u) => u.tabValue("k", DEVICE_TEXT).write("a")),

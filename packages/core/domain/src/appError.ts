@@ -193,6 +193,8 @@ export const ERROR_TEMPLATES = {
   alreadyExists: "Something is already kept at that place in your Pod. Choose another place.",
   cannotCheck: "Solid Memo could not check your Pod. Check your connection and try again.",
   podNoAnswer: "The server did not answer in time. Check your connection and try again.",
+  podBusy:
+    "The server is busy and asked Solid Memo to slow down, so this wasn't done. Wait a few minutes, then try again.",
   documentCheckTooLong:
     "Solid Memo stopped reading and checking this document after {seconds} seconds of work. Try again later, or check it with another tool.",
   dataNotConforming:
