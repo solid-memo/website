@@ -718,7 +718,8 @@ export function createLibraryUseCases({
         // Checked before the first write: an entry that would be refused leaves the deck as it is.
         const upgradedEntry = applyLibraryUpgrade(deck, plan);
         await deckRepository.checkDeckEntryUpgrade(deck, upgradedEntry);
-        // Both writes made and checked before the first is sent (prepareUpgradeWrites).
+        // Both writes made and checked before the first is sent (prepareUpgradeWrites). Made once, never
+        // planned again on a 412 as other writes are (EDIT_ATTEMPTS): the learner approved the plan offered.
         const { writeCards, writeReviews } = await prepareUpgradeWrites(deck, plan, cards.version, {
           sm2: dropped,
           fsrs: droppedFsrs,

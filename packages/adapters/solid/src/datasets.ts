@@ -44,6 +44,7 @@ import { termOf } from "./ntriples";
 import { isWrittenByNewer } from "./records";
 import { refuseUnwritable } from "@solid-memo/solid-client/writableTerms";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
+import { EDIT_ATTEMPTS } from "@solid-memo/application/writes";
 import { AppError } from "@solid-memo/domain/appError";
 import { isSameUrl } from "@solid-memo/domain/instanceLayout";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
@@ -495,9 +496,6 @@ export async function saveDataset<T extends Dataset>(
   ETAGS.set(sourceOf(written.dataset)!.key, version);
   readsOf(fetch).known.set(documentUrlOf(url), { etag: version, dataset: written.dataset });
 }
-
-/** How many times editDocument makes an edit, in all, while the document keeps changing elsewhere (412). */
-const EDIT_ATTEMPTS = 3;
 
 /**
  * What an edit (editDocument) makes of a document as read: what it

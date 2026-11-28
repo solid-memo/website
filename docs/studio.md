@@ -1654,7 +1654,7 @@ write after the cards document fails, the import deletes the documents
 it wrote, which no entry names, unless the entry was written after all.
 A cards
 document left behind by an import cut off makes the deck take a fresh
-id, once. Then the deck's schedule in the digest is brought up to
+id, three times in all. Then the deck's schedule in the digest is brought up to
 date, the screen links to the deck's cards, and the instance's decks
 are read afresh.
 

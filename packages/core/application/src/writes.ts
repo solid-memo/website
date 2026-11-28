@@ -19,6 +19,34 @@ export function changedElsewhere(error: unknown): boolean {
   return error instanceof AppError && error.code === "changedElsewhere";
 }
 
+/**
+ * Whether a write was refused because its document changed since it was
+ * read, or was made since it was read as absent (a 412 either way): what
+ * it was planned from is out of date, and planned again it may be made.
+ */
+export function changedOrCreatedElsewhere(error: unknown): boolean {
+  return (
+    changedElsewhere(error) || (error instanceof AppError && error.code === "createdElsewhere")
+  );
+}
+
+/**
+ * How often a write made from a read is made, in all, while its document
+ * keeps changing elsewhere (412), each time from a fresh read: the
+ * adapters' edits of one document (editDocument) and the use cases'
+ * writes of several. Two exceptions say why beside them: the digest,
+ * which another page writes several times running, tries more often,
+ * and a library upgrade, whose plan the learner approved, only once.
+ */
+export const EDIT_ATTEMPTS = 3;
+
+/**
+ * How often a write that makes something new at a place of its own (a
+ * new draft's name, an imported deck's id) is made, in all, while the
+ * place it chose was taken elsewhere meanwhile, each time at the next.
+ */
+export const PLACE_ATTEMPTS = 3;
+
 /** A read made without a known version, which always comes with the contents. */
 export async function readNow<T>(
   read: Promise<Since<T>>,

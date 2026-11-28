@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 import { AppError } from "@solid-memo/domain/appError";
 import type { Deck } from "@solid-memo/domain/deck";
 import { GUEST_INSTANCE_URL } from "@solid-memo/domain/guest";
-import { finishCutOffImport } from "./writes";
+import { changedOrCreatedElsewhere, finishCutOffImport } from "./writes";
 
 const deckAt = (instance: string) => ({ url: `${instance}catalog.ttl#deck-1` }) as Deck;
 const POD_DECK = deckAt("https://pod.example/memo/");
@@ -17,6 +17,15 @@ const lost = new Error("lost");
 function repository(entry: () => Promise<Deck | null>, deleted = async () => undefined) {
   return { readDeck: vi.fn(entry), deleteDocument: vi.fn(deleted) };
 }
+
+describe("changedOrCreatedElsewhere", () => {
+  it("is a 412 either way: the document changed since it was read, or was made since it was read as absent", () => {
+    expect(changedOrCreatedElsewhere(new AppError("changedElsewhere"))).toBe(true);
+    expect(changedOrCreatedElsewhere(new AppError("createdElsewhere"))).toBe(true);
+    expect(changedOrCreatedElsewhere(new AppError("writeRefused"))).toBe(false);
+    expect(changedOrCreatedElsewhere(new Error("changedElsewhere"))).toBe(false);
+  });
+});
 
 describe("finishCutOffImport", () => {
   it("is the deck when its entry was written after all, and deletes nothing", async () => {

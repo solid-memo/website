@@ -1480,20 +1480,29 @@ describe("cards", () => {
       expect(deps.deckRepository.registerDeck).not.toHaveBeenCalled();
     });
 
-    it("gives the deck a fresh id when a cards document is at its URL already, once", async () => {
-      const { deps, useCases } = withFiles();
-      vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValueOnce(
-        new AppError("createdElsewhere"),
-      );
+    it("gives the deck a fresh id when a cards document is at its URL already, three times in all", async () => {
+      const { deps, deckArchive, fileExchange } = withFiles();
+      const ids = ["a1", "b2"];
+      const useCases = createUseCases({
+        ...deps,
+        deckArchive,
+        fileExchange,
+        newId: () => ids.shift() ?? "c3",
+      });
+      vi.mocked(deps.deckRepository.applyCardChanges)
+        .mockRejectedValueOnce(new AppError("createdElsewhere"))
+        .mockRejectedValueOnce(new AppError("createdElsewhere"));
       const imported = await useCases.importDeckFile(instance.url, file, { withProgress: true });
-      expect(imported.id).toBe("deck-0f3a");
-      expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledTimes(2);
+      expect(imported.id).toBe("deck-c3");
+      expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledTimes(3);
+      vi.mocked(deps.deckRepository.applyCardChanges).mockClear();
       vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValue(
         new AppError("createdElsewhere"),
       );
       await expect(
         useCases.importDeckFile(instance.url, file, { withProgress: true }),
       ).rejects.toMatchObject({ code: "createdElsewhere" });
+      expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledTimes(3);
     });
 
     it("deletes the documents it wrote when the entry's write fails, throwing what failed (GHSA-5hqv-c3r3-7mx9)", async () => {

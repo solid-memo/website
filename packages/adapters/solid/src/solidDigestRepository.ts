@@ -40,10 +40,11 @@ export interface SolidDigestRepositoryDeps {
 
 /**
  * How often a write is made, in all, while the digest keeps changing
- * elsewhere (412), and how long it waits before each try again. Another
- * page learning a check's documents writes the digest several times
- * running; trying again at once, a write could lose to each of those and
- * be dropped, so it waits a little longer each time, for them to be done.
+ * elsewhere (412), and how long it waits before each try again: more
+ * often than an edit of another document (EDIT_ATTEMPTS). Another page
+ * learning a check's documents writes the digest several times running;
+ * trying again at once, a write could lose to each of those and be
+ * dropped, so it waits a little longer each time, for them to be done.
  */
 const ATTEMPTS = 6;
 const PAUSE_MS = 50;

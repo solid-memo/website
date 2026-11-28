@@ -48,7 +48,14 @@ import type { FileExchange } from "./ports/device";
 import type { DeckLibrary, DeckArchive } from "./ports/library";
 import type { DeckRepository, ReviewChanges, ReviewStateRepository } from "./ports/pod";
 import { AppError } from "@solid-memo/domain/appError";
-import { changedElsewhere, finishCutOffImport, readNow, unsent } from "./writes";
+import {
+  EDIT_ATTEMPTS,
+  PLACE_ATTEMPTS,
+  changedOrCreatedElsewhere,
+  finishCutOffImport,
+  readNow,
+  unsent,
+} from "./writes";
 import type { DigestStore } from "./digestStore";
 import type { ReadScope } from "./readScope";
 import type { inTurns } from "./atOnce";
@@ -234,22 +241,6 @@ export interface CardUseCases {
 }
 
 /**
- * How often a bulk edit of a deck's cards is planned and written, in
- * all, while the cards document keeps changing elsewhere (412).
- */
-const CARD_EDIT_ATTEMPTS = 3;
-
-/**
- * Whether a write of a cards document was refused because it changed
- * since it was read, or was made since it was read as absent (a 412).
- */
-function cardsChangedElsewhere(error: unknown): boolean {
-  return (
-    changedElsewhere(error) || (error instanceof AppError && error.code === "createdElsewhere")
-  );
-}
-
-/**
  * A bulk edit's write of a cards document: one PUT of the whole document,
  * which no pod cuts short, made only while the document is at the
  * version read (none to check when the pod gave none).
@@ -362,7 +353,7 @@ export function createCardUseCases({
           : undefined;
         await writeCards?.();
       } catch (error) {
-        if (cardsChangedElsewhere(error) && attempt < CARD_EDIT_ATTEMPTS) continue;
+        if (changedOrCreatedElsewhere(error) && attempt < EDIT_ATTEMPTS) continue;
         throw error;
       }
       cardsWritten(changes);
@@ -604,7 +595,7 @@ export function createCardUseCases({
             await digestStore.refresh(instanceUrl, from).catch(() => undefined);
           return plan;
         } catch (error) {
-          if (!cardsChangedElsewhere(error) || attempt === CARD_EDIT_ATTEMPTS) throw error;
+          if (!changedOrCreatedElsewhere(error) || attempt === EDIT_ATTEMPTS) throw error;
         }
       }
     },
@@ -660,7 +651,10 @@ export function createCardUseCases({
           );
         } catch (error) {
           // A cards document an import cut off before its entry left: the deck takes another id.
-          if (!(error instanceof AppError && error.code === "createdElsewhere") || attempt === 2)
+          if (
+            !(error instanceof AppError && error.code === "createdElsewhere") ||
+            attempt === PLACE_ATTEMPTS
+          )
             throw error;
           decks = [...decks, deck];
           continue;
