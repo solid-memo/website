@@ -55,9 +55,10 @@ export const DEFAULT_FILTERS: GraphFilters = {
 };
 
 /**
- * Past this many nodes or edges shown, the graph is not drawn until asked
- * to: a browser draws an instance of the ten largest library decks
- * (about 14,500 nodes and 48,000 edges) smoothly, and slows beyond.
+ * Past this many nodes or edges in the graph, shown or hidden, it is not
+ * laid out or drawn until asked to (tooLarge): a browser draws an
+ * instance of the ten largest library decks (about 14,500 nodes and
+ * 48,000 edges) smoothly, and slows beyond.
  */
 export const DRAW_LIMIT = { nodes: 20_000, edges: 60_000 };
 
@@ -129,9 +130,16 @@ function neighborsOf(edges: readonly GraphEdge[], id: string): Set<string> {
   return near;
 }
 
-/** Whether a graph is too large to draw without being asked (DRAW_LIMIT). */
-export function tooLarge(shown: ShownGraph): boolean {
-  return shown.nodes.length > DRAW_LIMIT.nodes || shown.edges.length > DRAW_LIMIT.edges;
+/**
+ * Whether a graph is too large to lay out and draw without being asked
+ * (DRAW_LIMIT): weighed in full, as the layout places every node and
+ * routes every edge, those the filters hide too.
+ */
+export function tooLarge(graph: {
+  readonly nodes: readonly unknown[];
+  readonly edges: readonly unknown[];
+}): boolean {
+  return graph.nodes.length > DRAW_LIMIT.nodes || graph.edges.length > DRAW_LIMIT.edges;
 }
 
 /** The namespaces a term is named by in short ("sm:Card"), the vocabularies the documents use. */

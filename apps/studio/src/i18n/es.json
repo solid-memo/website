@@ -1723,7 +1723,7 @@
         "many": "{count} de aristas hacia términos de vocabulario solo se dibujan para el nodo seleccionado o señalado.",
         "other": "{count} aristas hacia términos de vocabulario solo se dibujan para el nodo seleccionado o señalado."
       },
-      "tooLarge": "Esto dibujaría {nodes} nodos y {edges} aristas, más de lo que la página dibuja con fluidez. Oculta algunos con los filtros, muéstralo como tabla o dibújalo de todos modos.",
+      "tooLarge": "El grafo tiene {nodes} nodos y {edges} aristas, más de los que la página coloca y dibuja con fluidez, oculten lo que oculten los filtros. Muéstralo como tabla o dibújalo de todos modos.",
       "drawAnyway": "Dibujar de todos modos",
       "placing": "Colocando los nodos",
       "prompt": "Señala un nodo, o usa las flechas, para ver qué es; Intro o un clic lo abre, y un clic en el fondo lo deselecciona. +, − y 0 acercan, alejan y muestran el grafo entero, y arrastrar lo mueve.",

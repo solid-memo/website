@@ -1625,7 +1625,7 @@
         "one": "{count} edge to a vocabulary term is drawn only for the node selected or pointed at.",
         "other": "{count} edges to vocabulary terms are drawn only for the node selected or pointed at."
       },
-      "tooLarge": "This would draw {nodes} nodes and {edges} edges, more than the page draws smoothly. Hide some with the filters, show it as a table, or draw it anyway.",
+      "tooLarge": "The graph has {nodes} nodes and {edges} edges, too many for the page to lay out and draw smoothly, even with the filters hiding some. Show it as a table, or draw it anyway.",
       "drawAnyway": "Draw anyway",
       "placing": "Placing the nodes",
       "prompt": "Point at a node, or use the arrow keys, to see what it is; Enter or a click opens it, and a click on the background lets go of it. +, − and 0 zoom in, out and to the whole graph, and dragging moves it.",

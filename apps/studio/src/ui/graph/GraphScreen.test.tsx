@@ -8,14 +8,28 @@ import { instanceGraphOf, type InstanceGraph } from "@solid-memo/domain/instance
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { forget } from "@solid-memo/ui/remembered";
 import { instanceA } from "../../test/fixtures";
-import { CARD, CARDS, crowdedGraph, largeGraph, REVIEW, smallGraph } from "../../test/graph";
+import {
+  CARD,
+  CARDS,
+  crowdedGraph,
+  largeGraph,
+  REVIEW,
+  smallGraph,
+  typedGraph,
+} from "../../test/graph";
 import { WithKeys } from "../../test/keys";
 import { searchedText } from "../searchText";
 import { GraphScreen } from "./GraphScreen";
+import { createLayout } from "./layout";
 
 vi.mock("../searchText", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../searchText")>();
   return { searchedText: vi.fn(actual.searchedText) };
+});
+
+vi.mock("./layout", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./layout")>();
+  return { ...actual, createLayout: vi.fn(actual.createLayout) };
 });
 
 function show(graph: InstanceGraph = smallGraph(), selected: string | null = null) {
@@ -37,6 +51,7 @@ const counts = () => screen.getByText(/ shown$/).textContent;
 const box = (name: string) => screen.getByRole("checkbox", { name });
 
 afterEach(() => {
+  vi.mocked(createLayout).mockClear();
   forget(`studio.graphFilters.${instanceA.url}`);
   forget(`studio.graphLayout.${instanceA.url}`);
 });
@@ -268,18 +283,18 @@ describe("GraphScreen", () => {
     expect(onSelect).toHaveBeenCalledTimes(4);
   });
 
-  it("does not draw a graph too large to draw smoothly until asked, and never leaves a node out unsaid", () => {
+  it("does not lay out or draw a graph too large to draw smoothly until asked, and never leaves a node out unsaid", () => {
     const graph = largeGraph(7000);
     show(graph);
-    fireEvent.click(box("Vocabulary terms"));
     expect(screen.queryByRole("img")).toBeNull();
     const many = (count: number) => count.toLocaleString("en");
     expect(
       screen.getByText(
-        `This would draw ${many(graph.nodes.length)} nodes and ${many(graph.edges.length)} edges, more than the page draws smoothly. Hide some with the filters, show it as a table, or draw it anyway.`,
+        `The graph has ${many(graph.nodes.length)} nodes and ${many(graph.edges.length)} edges, too many for the page to lay out and draw smoothly, even with the filters hiding some. Show it as a table, or draw it anyway.`,
       ),
     ).toBeInTheDocument();
     // Nor says what of it is drawn for the node selected alone.
+    fireEvent.click(box("Vocabulary terms"));
     const undrawn = /vocabulary terms are drawn only/;
     expect(screen.queryByText(undrawn)).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Draw anyway" }));
@@ -288,10 +303,54 @@ describe("GraphScreen", () => {
     expect(screen.getByRole("progressbar")).toHaveAttribute("value", "0");
   });
 
-  it("draws a graph made small enough by the filters", () => {
-    show(largeGraph(7000));
+  it("weighs the whole graph, the nodes and edges the filters hide too, as all of them are laid out", async () => {
+    // Few nodes shown, and tens of thousands of edges to vocabulary terms hidden.
+    const graph = crowdedGraph(30_001);
+    show(graph);
+    expect(counts()).toMatch(/^\d of [\d,]+ nodes and \d of [\d,]+ edges shown$/);
+    expect(screen.getByRole("button", { name: "Draw anyway" })).toBeInTheDocument();
+    // Hiding more makes it no smaller to lay out.
     fireEvent.click(box("Wrong options"));
-    expect(screen.queryByRole("button", { name: "Draw anyway" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Draw anyway" })).toBeInTheDocument();
+    expect(screen.queryByText("Placing the nodes")).toBeNull();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(createLayout).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Draw anyway" }));
     expect(screen.getByText("Placing the nodes")).toBeInTheDocument();
+  });
+
+  it("weighs the edges alone: a graph of few nodes and a great many hidden edges to vocabulary terms is not laid out until asked", async () => {
+    const graph = typedGraph(2_000, 31);
+    expect(graph.nodes.length).toBeLessThan(20_000);
+    expect(graph.edges.filter((edge) => edge.kind === "vocabulary").length).toBeGreaterThan(60_000);
+    show(graph);
+    // The vocabulary terms, and their edges, hidden as they are at first.
+    expect(counts()).toMatch(/^[\d,]+ of [\d,]+ nodes and [\d,]+ of [\d,]+ edges shown$/);
+    expect(screen.getByRole("button", { name: "Draw anyway" })).toBeInTheDocument();
+    expect(screen.queryByText("Placing the nodes")).toBeNull();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(createLayout).not.toHaveBeenCalled();
+  });
+
+  it("asks again for another graph too large, once one was drawn anyway", async () => {
+    const view = (graph: InstanceGraph, selected: string | null = null) => (
+      <WithKeys>
+        <GraphScreen instance={instanceA} graph={graph} selected={selected} onSelect={vi.fn()} />
+      </WithKeys>
+    );
+    const first = largeGraph(7000);
+    const { rerender } = render(view(first));
+    fireEvent.click(screen.getByRole("button", { name: "Draw anyway" }));
+    expect(screen.getByText("Placing the nodes")).toBeInTheDocument();
+    // The same graph stays drawn, whatever node is selected.
+    rerender(view(first, CARD));
+    expect(screen.getByText("Placing the nodes")).toBeInTheDocument();
+    // A larger one, read later, is weighed afresh.
+    vi.mocked(createLayout).mockClear();
+    rerender(view(largeGraph(8000)));
+    expect(screen.getByRole("button", { name: "Draw anyway" })).toBeInTheDocument();
+    expect(screen.queryByText("Placing the nodes")).toBeNull();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(createLayout).not.toHaveBeenCalled();
   });
 });
