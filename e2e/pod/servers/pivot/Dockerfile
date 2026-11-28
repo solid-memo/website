@@ -10,7 +10,7 @@
 # Corepack installs with the npm package.json names: the npm that wrote the
 # lockfile, as this Node's own npm 10 refuses a lockfile that npm 12 wrote
 # when an optional peer dependency's range excludes the version locked.
-FROM node:22.23.5-bookworm-slim@sha256:e9f565d32859f0cbfb52125eafe8be39390f24dac302dc3cdf566e8ba3ab21ee
+FROM node:22.23.5-bookworm-slim@sha256:be979e5523c76fa4d5ca4ebd3099078f220aa47ec39c48ad5b5df9314debd6eb
 WORKDIR /srv/pivot
 COPY package.json package-lock.json ./
 RUN corepack npm ci --ignore-scripts --omit=dev --no-audit --no-fund && ln -s node_modules/@solid/pivot/templates templates
