@@ -35,7 +35,6 @@ function renderContainer(useCases: UseCases, onStarted = vi.fn()) {
       <ReleasesContainer
         useCases={useCases}
         instance={instanceA}
-        webId="https://alice.example/profile/card#me"
         healthHref="#/health"
         draftsHref="#/drafts"
         draftHref={(draft) => `#/draft/${draft.name}`}
@@ -69,11 +68,7 @@ describe("ReleasesContainer", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Make solid, version 1 public" }));
     confirmMakePublic();
     expect(await screen.findByRole("cell", { name: "Everyone" })).toBeInTheDocument();
-    expect(useCases.makeReleasePublic).toHaveBeenCalledWith(
-      instanceA.url,
-      SOLID,
-      "https://alice.example/profile/card#me",
-    );
+    expect(useCases.makeReleasePublic).toHaveBeenCalledWith(instanceA.url, SOLID);
     expect(invalidate).toHaveBeenCalledWith({ queryKey: queryKeys.releasePublic(SOLID) });
     expect(invalidate).toHaveBeenCalledWith({
       queryKey: queryKeys.publishedReleases(instanceA.url),
@@ -113,14 +108,10 @@ describe("ReleasesContainer", () => {
     await waitFor(() => expect(start).toBeEnabled());
     fireEvent.click(start);
     await waitFor(() => expect(onStarted).toHaveBeenCalledWith({ draft: next }));
-    expect(useCases.createReleaseDraft).toHaveBeenCalledWith(
-      instanceA.url,
-      {
-        kind: "nextVersionOf",
-        url: SOLID,
-      },
-      "https://alice.example/profile/card#me",
-    );
+    expect(useCases.createReleaseDraft).toHaveBeenCalledWith(instanceA.url, {
+      kind: "nextVersionOf",
+      url: SOLID,
+    });
     expect(remove).toHaveBeenCalledWith({ queryKey: queryKeys.releaseDraft(next.url) });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: queryKeys.releaseDrafts(instanceA.url) });
   });

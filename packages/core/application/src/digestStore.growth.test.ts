@@ -15,6 +15,7 @@ import { emptyDigest, type InstanceDigest } from "@solid-memo/domain/studyDigest
 import { growthAfterSetup } from "@solid-memo/domain/testing/growth";
 import { createDigestStore, noting } from "./digestStore";
 import { makeDeps } from "./testing/fakePorts";
+import { createReadScope } from "./readScope";
 
 const INSTANCE = "https://pod.example/solid-memo/main/";
 
@@ -32,8 +33,10 @@ it("notes many receipts in a digest of many in time that grows with them, not th
   const ratio = await growthAfterSetup(
     (count) => async () => {
       const stored = receipts(count);
+      const deps = makeDeps();
       const store = createDigestStore({
-        ...makeDeps(),
+        ...deps,
+        readScope: createReadScope(deps),
         digestRepository: { readDigest: async () => stored, updateDigest: async () => undefined },
         ruleset: "rules",
         preferenceStore: { get: async () => ({}) as never },

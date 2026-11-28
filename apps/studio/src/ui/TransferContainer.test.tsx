@@ -21,8 +21,6 @@ const file: DeckFile = {
   content: { deck: capitals, cards: [makeCard(capitals, "a")], upgraded: [], dropped: [] },
 };
 
-const WEB_ID = "https://alice.example/profile/card#me";
-
 function renderContainer(useCases: UseCases, chosen: readonly string[] = []) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const invalidate = vi.spyOn(queryClient, "invalidateQueries");
@@ -32,7 +30,6 @@ function renderContainer(useCases: UseCases, chosen: readonly string[] = []) {
       <TransferContainer
         useCases={useCases}
         instance={instanceA}
-        webId={WEB_ID}
         chosen={chosen}
         onChoose={onChoose}
         cardsHref={(deck) => `#/cards?deck=${deck.id}`}
@@ -58,22 +55,10 @@ describe("TransferContainer", () => {
     expect(await screen.findByText("Exporting Kanji N5 (1 of 2)…")).toBeInTheDocument();
     finish();
     expect(await screen.findByText(/^Handed 2 decks to your browser/)).toBeInTheDocument();
-    // Each read as the user only in the instance's pod: the use case is told which instance, and who.
+    // Each read as the user only in the instance's pod: the use case is told which instance.
     const options = { format: "turtle", withProgress: false };
-    expect(useCases.exportDeckFile).toHaveBeenNthCalledWith(
-      1,
-      instanceA.url,
-      kanji,
-      options,
-      WEB_ID,
-    );
-    expect(useCases.exportDeckFile).toHaveBeenNthCalledWith(
-      2,
-      instanceA.url,
-      verbs,
-      options,
-      WEB_ID,
-    );
+    expect(useCases.exportDeckFile).toHaveBeenNthCalledWith(1, instanceA.url, kanji, options);
+    expect(useCases.exportDeckFile).toHaveBeenNthCalledWith(2, instanceA.url, verbs, options);
   });
 
   it("says why an export failed", async () => {

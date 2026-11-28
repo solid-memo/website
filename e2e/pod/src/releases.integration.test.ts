@@ -176,11 +176,6 @@ async function seed(server: string) {
   );
 }
 
-/** The user an instance seeded for them is the user of (seed). */
-function ownerOf(instance: { url: string }): string {
-  return new URL("../profile/card.ttl#me", instance.url).href;
-}
-
 /** What the access control of the document says, as its server links it (rel="acl"): its own ACL, or its ACR. */
 async function accessControlOf(url: string): Promise<string> {
   const links = (await fetch(url, { method: "HEAD" })).headers.get("link") ?? "";
@@ -197,14 +192,10 @@ describe.each(SERVERS)("releases on $name", ({ url: server }) => {
   }, async () => {
     const instance = await seed(server);
     const useCases = page();
-    const made = await useCases.createReleaseDraft(
-      instance.url,
-      {
-        kind: "nextVersionOf",
-        url: STARS,
-      },
-      ownerOf(instance),
-    );
+    const made = await useCases.createReleaseDraft(instance.url, {
+      kind: "nextVersionOf",
+      url: STARS,
+    });
     const draftUrl = made!.draft.url;
     const target = releaseUrlIn(releasesContainerOf(instance.url), "brightest-stars", 2);
 
@@ -239,14 +230,10 @@ describe.each(SERVERS)("releases on $name", ({ url: server }) => {
     ).rejects.toMatchObject({ code: "draftReleased" });
 
     // Another draft published at the same address is refused, and the release is as it was.
-    const other = await useCases.createReleaseDraft(
-      instance.url,
-      {
-        kind: "nextVersionOf",
-        url: STARS,
-      },
-      ownerOf(instance),
-    );
+    const other = await useCases.createReleaseDraft(instance.url, {
+      kind: "nextVersionOf",
+      url: STARS,
+    });
     await expect(
       useCases.publishRelease(other!.draft.url, target, NO_MARKDOWN_PROBLEMS),
     ).rejects.toMatchObject({ code: "releaseTaken", vars: { url: target } });
@@ -311,14 +298,10 @@ describe.each(SERVERS)("releases on $name", ({ url: server }) => {
     timeout: 180_000,
   }, async () => {
     const instance = await seed(server);
-    const made = await page().createReleaseDraft(
-      instance.url,
-      {
-        kind: "nextVersionOf",
-        url: STARS,
-      },
-      ownerOf(instance),
-    );
+    const made = await page().createReleaseDraft(instance.url, {
+      kind: "nextVersionOf",
+      url: STARS,
+    });
     const draftUrl = made!.draft.url;
     const target = releaseUrlIn(releasesContainerOf(instance.url), "brightest-stars", 2);
 

@@ -65,7 +65,6 @@ import { queries } from "./queries";
 export function CardWorkbenchContainer({
   useCases,
   instance,
-  webId,
   deck,
   decks,
   query,
@@ -81,8 +80,6 @@ export function CardWorkbenchContainer({
 }: {
   useCases: UseCases;
   instance: Instance;
-  /** Who moves or copies cards (transferCards). */
-  webId: string;
   deck: Deck;
   /** The instance's decks, this one among them. */
   decks: readonly Deck[];
@@ -227,14 +224,10 @@ export function CardWorkbenchContainer({
   });
   const transferMutation = useWrite({
     mutationFn: ({ ids, transfer }: { ids: readonly string[]; transfer: CardTransfer }) =>
-      useCases.transferCards(
-        instance.url,
-        deck,
-        transfer.to,
-        ids,
-        { mode: transfer.mode, keepProgress: transfer.keepProgress },
-        webId,
-      ),
+      useCases.transferCards(instance.url, deck, transfer.to, ids, {
+        mode: transfer.mode,
+        keepProgress: transfer.keepProgress,
+      }),
     changes: ({ transfer }) => [
       changes.cardsAndReviews(deck),
       changes.cardsAndReviews(transfer.to),

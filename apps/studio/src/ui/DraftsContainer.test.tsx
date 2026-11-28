@@ -37,7 +37,6 @@ function renderContainer(
       <DraftsContainer
         useCases={useCases}
         instance={instanceA}
-        webId="https://alice.example/profile/card#me"
         healthHref="#/health"
         releasesHref="#/releases"
         draftHref={(draft) => `#/draft/${draft.name}`}
@@ -64,14 +63,10 @@ describe("DraftsContainer", () => {
     fireEvent.click(screen.getByRole("radio", { name: "A deck of this instance" }));
     fireEvent.click(screen.getByRole("button", { name: "Create the draft" }));
     expect(await screen.findByText("Created the draft Kanji N5, version 1.")).toBeInTheDocument();
-    expect(useCases.createReleaseDraft).toHaveBeenCalledWith(
-      instanceA.url,
-      {
-        kind: "fromDeck",
-        deck: kanji,
-      },
-      "https://alice.example/profile/card#me",
-    );
+    expect(useCases.createReleaseDraft).toHaveBeenCalledWith(instanceA.url, {
+      kind: "fromDeck",
+      deck: kanji,
+    });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: queryKeys.releaseDrafts(instanceA.url) });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["validation", instanceA.url] });
     expect(onCreated).not.toHaveBeenCalled();

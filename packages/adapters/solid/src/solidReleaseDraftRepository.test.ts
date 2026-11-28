@@ -7,6 +7,7 @@ import { join } from "node:path";
 import type { Quad } from "@rdfjs/types";
 import { describe, expect, it, vi } from "vitest";
 import { createReleaseDraftUseCases } from "@solid-memo/application/releaseDrafts";
+import { createReadScope } from "@solid-memo/application/readScope";
 import { createReleasePublishingUseCases } from "@solid-memo/application/releasePublishing";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import { newestRelease } from "@solid-memo/domain/library";
@@ -295,21 +296,19 @@ describe("create", () => {
         open: async () => ({ name: "release.ttl", text: `${text}\n${chapters}\n` }),
         save: () => undefined,
       },
-      storageGateway: { discoverStorages: async () => [] },
-      webId: () => undefined,
+      readScope: createReadScope({
+        storageGateway: { discoverStorages: async () => [] },
+        webId: () => undefined,
+      }),
       releasePublisher: { listPublished: async () => [] },
       now: () => new Date(NOW),
     });
-    await expect(
-      useCases.createReleaseDraft(
-        INSTANCE,
-        { kind: "fromFile" },
-        "https://pod.example/profile/card#me",
-      ),
-    ).rejects.toMatchObject({
-      code: "draftTooManyDocuments",
-      vars: { limit: MAX_DRAFT_DOCUMENTS },
-    });
+    await expect(useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" })).rejects.toMatchObject(
+      {
+        code: "draftTooManyDocuments",
+        vars: { limit: MAX_DRAFT_DOCUMENTS },
+      },
+    );
     expect(writes(pod)).toEqual([]);
   });
 
@@ -336,17 +335,15 @@ describe("create", () => {
       deckLibrary: {} as never,
       shapeValidator: pod.validator,
       fileExchange: {} as never,
-      storageGateway: { discoverStorages: async () => [] },
-      webId: () => undefined,
+      readScope: createReadScope({
+        storageGateway: { discoverStorages: async () => [] },
+        webId: () => undefined,
+      }),
       releasePublisher: { listPublished: async () => [] },
       now: () => new Date(NOW),
     });
     await expect(
-      useCases.createReleaseDraft(
-        INSTANCE,
-        { kind: "nextVersionOf", url: other },
-        "https://pod.example/profile/card#me",
-      ),
+      useCases.createReleaseDraft(INSTANCE, { kind: "nextVersionOf", url: other }),
     ).rejects.toMatchObject({
       code: "draftTooManyDocuments",
       vars: { limit: MAX_DRAFT_DOCUMENTS },
@@ -384,8 +381,10 @@ describe("create", () => {
           open: async () => ({ name: "release.ttl", text: file }),
           save: () => undefined,
         },
-        storageGateway: { discoverStorages: async () => [] },
-        webId: () => undefined,
+        readScope: createReadScope({
+          storageGateway: { discoverStorages: async () => [] },
+          webId: () => undefined,
+        }),
         releasePublisher: { listPublished: async () => [] },
         now: () => new Date(NOW),
       });
@@ -401,9 +400,9 @@ describe("create", () => {
           `${release(OTHER)}\n${extra}\n`,
         );
         for (const from of [{ kind: "fromFile" }, { kind: "nextVersionOf", url: OTHER }] as const) {
-          await expect(
-            useCases.createReleaseDraft(INSTANCE, from, "https://pod.example/profile/card#me"),
-          ).rejects.toMatchObject({ code: "unwritableTerm" });
+          await expect(useCases.createReleaseDraft(INSTANCE, from)).rejects.toMatchObject({
+            code: "unwritableTerm",
+          });
         }
         expect(writes(pod)).toEqual([]);
       },
@@ -417,11 +416,7 @@ describe("create", () => {
         release(OTHER),
       );
       for (const from of [{ kind: "fromFile" }, { kind: "nextVersionOf", url: OTHER }] as const) {
-        const made = await useCases.createReleaseDraft(
-          INSTANCE,
-          from,
-          "https://pod.example/profile/card#me",
-        );
+        const made = await useCases.createReleaseDraft(INSTANCE, from);
         const url = made!.draft.url;
         const edited = await useCases.editReleaseDraft(url, [
           { kind: "setMakingNotes", notes: { en: "Edited." } },
@@ -1673,16 +1668,14 @@ describe("assemble", () => {
           }),
           save: () => undefined,
         },
-        storageGateway: { discoverStorages: async () => [] },
-        webId: () => undefined,
+        readScope: createReadScope({
+          storageGateway: { discoverStorages: async () => [] },
+          webId: () => undefined,
+        }),
         releasePublisher: { listPublished: async () => [] },
         now: () => new Date(NOW),
       });
-      const created = await useCases.createReleaseDraft(
-        INSTANCE,
-        { kind: "fromFile" },
-        "https://pod.example/profile/card#me",
-      );
+      const created = await useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" });
       const draft = await useCases.getReleaseDraft(created!.draft.url);
       expect(draft.url).toBe(`${container}release.ttl`);
       const target = `${INSTANCE}releases/capitals-of-the-world/v1.ttl`;
@@ -1734,16 +1727,14 @@ describe("assemble", () => {
         deckLibrary: {} as never,
         shapeValidator: {} as never,
         fileExchange: {} as never,
-        storageGateway: { discoverStorages: async () => [] },
-        webId: () => undefined,
+        readScope: createReadScope({
+          storageGateway: { discoverStorages: async () => [] },
+          webId: () => undefined,
+        }),
         releasePublisher: { listPublished: async () => [] },
         now: () => new Date(NOW),
       });
-      const created = await useCases.createReleaseDraft(
-        INSTANCE,
-        { kind: "fromDeck", deck },
-        `${POD}profile/card#me`,
-      );
+      const created = await useCases.createReleaseDraft(INSTANCE, { kind: "fromDeck", deck });
       const draft = await useCases.getReleaseDraft(created!.draft.url);
       expect(draft.url).toBe(`${container}release.ttl`);
       const turtle = await pod.repository.assemble(
@@ -1807,16 +1798,14 @@ describe("assemble", () => {
       deckLibrary: {} as never,
       shapeValidator: {} as never,
       fileExchange: {} as never,
-      storageGateway: { discoverStorages: async () => [] },
-      webId: () => undefined,
+      readScope: createReadScope({
+        storageGateway: { discoverStorages: async () => [] },
+        webId: () => undefined,
+      }),
       releasePublisher: { listPublished: async () => [] },
       now: () => new Date(NOW),
     });
-    const created = await useCases.createReleaseDraft(
-      INSTANCE,
-      { kind: "fromDeck", deck },
-      `${POD}profile/card#me`,
-    );
+    const created = await useCases.createReleaseDraft(INSTANCE, { kind: "fromDeck", deck });
     const draft = await useCases.getReleaseDraft(created!.draft.url);
     const [agent] = draft.agents;
     expect(agent!.data).toEqual({ name: "Bob" });
@@ -1870,16 +1859,14 @@ describe("assemble", () => {
       deckLibrary: {} as never,
       shapeValidator: pod.validator,
       fileExchange: { open: async () => ({ name: "verbs.ttl", text }), save: () => undefined },
-      storageGateway: { discoverStorages: async () => [] },
-      webId: () => undefined,
+      readScope: createReadScope({
+        storageGateway: { discoverStorages: async () => [] },
+        webId: () => undefined,
+      }),
       releasePublisher: { listPublished: async () => [] },
       now: () => new Date(NOW),
     });
-    const created = await useCases.createReleaseDraft(
-      INSTANCE,
-      { kind: "fromFile" },
-      "https://pod.example/profile/card#me",
-    );
+    const created = await useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" });
     const draft = await useCases.getReleaseDraft(created!.draft.url);
     expect(draft.root.inSeries).toBe(`${draft.url}#series`);
     expect(draft.root.isVersionOf).toBe(`${draft.url}#series`);
@@ -1916,16 +1903,14 @@ describe("assemble", () => {
       deckLibrary: {} as never,
       shapeValidator: pod.validator,
       fileExchange: { open: async () => ({ name: "git.ttl", text }), save: () => undefined },
-      storageGateway: { discoverStorages: async () => [] },
-      webId: () => undefined,
+      readScope: createReadScope({
+        storageGateway: { discoverStorages: async () => [] },
+        webId: () => undefined,
+      }),
       releasePublisher: { listPublished: async () => [] },
       now: () => new Date(NOW),
     });
-    const created = await useCases.createReleaseDraft(
-      INSTANCE,
-      { kind: "fromFile" },
-      "https://pod.example/profile/card#me",
-    );
+    const created = await useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" });
     const draft = await useCases.getReleaseDraft(created!.draft.url);
     expect(draft.root.version).toBe("2");
     expect(draft.root.prev).toBeUndefined();
@@ -2000,16 +1985,17 @@ describe("assemble", () => {
         deckLibrary: {} as never,
         shapeValidator: pod.validator,
         fileExchange: {} as never,
-        storageGateway: { discoverStorages: async () => [] },
-        webId: () => undefined,
+        readScope: createReadScope({
+          storageGateway: { discoverStorages: async () => [] },
+          webId: () => undefined,
+        }),
         releasePublisher: { listPublished: async () => [] },
         now: () => new Date(NOW),
       });
-      const created = await useCases.createReleaseDraft(
-        INSTANCE,
-        { kind: "nextVersionOf", url: other },
-        "https://alice.example/profile/card#me",
-      );
+      const created = await useCases.createReleaseDraft(INSTANCE, {
+        kind: "nextVersionOf",
+        url: other,
+      });
       const draft = await useCases.getReleaseDraft(created!.draft.url);
       expect(draft.root).toMatchObject({ inSeries: series, prev: other, version: "999" });
       expect(
@@ -2997,8 +2983,10 @@ ${versions
       deckLibrary: { readLibraryIndex: async () => ({ url: `${DECKS}index.ttl` }) } as never,
       shapeValidator: pod.validator,
       fileExchange: {} as never,
-      storageGateway: { discoverStorages: async () => [] },
-      webId: () => undefined,
+      readScope: createReadScope({
+        storageGateway: { discoverStorages: async () => [] },
+        webId: () => undefined,
+      }),
       releasePublisher: { listPublished: async () => [...published] },
       now: () => new Date(NOW),
     });
@@ -3010,8 +2998,10 @@ ${versions
       shapeValidator: { validateRelease: async () => [] },
       deckLibrary: {} as never,
       fileExchange: {} as never,
-      storageGateway: { discoverStorages: async () => [] },
-      webId: () => undefined,
+      readScope: createReadScope({
+        storageGateway: { discoverStorages: async () => [] },
+        webId: () => undefined,
+      }),
       now: () => new Date(NOW),
     });
     return { pod, d2, d3, drafts, publishing, publish };
@@ -3162,8 +3152,10 @@ describe("publishing a draft whose root a newer app wrote (GHSA-9grp-qx53-cphh)"
       deckLibrary: {} as never,
       shapeValidator: pod.validator,
       fileExchange: {} as never,
-      storageGateway: { discoverStorages: async () => [] },
-      webId: () => undefined,
+      readScope: createReadScope({
+        storageGateway: { discoverStorages: async () => [] },
+        webId: () => undefined,
+      }),
       releasePublisher: publisher,
       now: () => new Date(NOW),
     });
@@ -3175,8 +3167,10 @@ describe("publishing a draft whose root a newer app wrote (GHSA-9grp-qx53-cphh)"
       shapeValidator: { validateRelease: async () => [] },
       deckLibrary: {} as never,
       fileExchange: {} as never,
-      storageGateway: { discoverStorages: async () => [] },
-      webId: () => undefined,
+      readScope: createReadScope({
+        storageGateway: { discoverStorages: async () => [] },
+        webId: () => undefined,
+      }),
       now: () => new Date(NOW),
     });
     return {

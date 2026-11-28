@@ -150,7 +150,7 @@ async function seed(server: string) {
       new Date(),
     );
   }
-  return { main, other, deck, useCases, webId };
+  return { main, other, deck, useCases };
 }
 
 /** A document as N-Triples: every IRI written out in full, whatever the server's Turtle abbreviates. */
@@ -174,10 +174,10 @@ const statesOf = async (deck: Deck) =>
 describe.each(SERVERS)("decks as files on $name", ({ url: server }) => {
   for (const format of DECK_FILE_FORMATS) {
     it(`takes a deck through ${format} into another instance, its progress with it`, async () => {
-      const { main, other, deck, webId } = await seed(server);
+      const { main, other, deck } = await seed(server);
       const exchange = files();
       const useCases = page(exchange);
-      await useCases.exportDeckFile(main.url, deck, { format, withProgress: true }, webId);
+      await useCases.exportDeckFile(main.url, deck, { format, withProgress: true });
       expect(exchange.saved).toHaveLength(1);
       const file = (await useCases.openDeckFile())!;
       expect(file).toMatchObject({
@@ -214,10 +214,10 @@ describe.each(SERVERS)("decks as files on $name", ({ url: server }) => {
   }
 
   it("imports a deck without its progress, and one exported and removed back at its URLs", async () => {
-    const { main, other, deck, webId } = await seed(server);
+    const { main, other, deck } = await seed(server);
     const exchange = files();
     const useCases = page(exchange);
-    await useCases.exportDeckFile(main.url, deck, { format: "turtle", withProgress: false }, webId);
+    await useCases.exportDeckFile(main.url, deck, { format: "turtle", withProgress: false });
     const file = (await useCases.openDeckFile())!;
     expect(file.content.reviews).toBeUndefined();
     const fresh = await useCases.importDeckFile(other.url, file, { withProgress: false });

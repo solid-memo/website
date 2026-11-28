@@ -833,17 +833,10 @@ describe("cards", () => {
 
     it("moves cards with their progress: the target written first, then the source, then both decks' digests", async () => {
       const { deps, useCases } = setup();
-      const plan = await useCases.transferCards(
-        instance.url,
-        deck,
-        target,
-        ["one"],
-        {
-          mode: "move",
-          keepProgress: true,
-        },
-        session.webId,
-      );
+      const plan = await useCases.transferCards(instance.url, deck, target, ["one"], {
+        mode: "move",
+        keepProgress: true,
+      });
       expect(plan.cards).toEqual([{ from: "one", to: "one", present: false }]);
       const { applyCardChanges } = deps.deckRepository;
       expect(vi.mocked(applyCardChanges).mock.calls).toEqual([
@@ -912,14 +905,10 @@ describe("cards", () => {
         vi.mocked(deps.reviewStateRepository.prepareReviewChanges).mockImplementation(refuseSource);
       else vi.mocked(deps.deckRepository.prepareCardChanges).mockImplementation(refuseSource);
       await expect(
-        useCases.transferCards(
-          instance.url,
-          deck,
-          target,
-          ["one"],
-          { mode: "move", keepProgress: true },
-          session.webId,
-        ),
+        useCases.transferCards(instance.url, deck, target, ["one"], {
+          mode: "move",
+          keepProgress: true,
+        }),
       ).rejects.toBe(refused);
       expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
       expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
@@ -927,17 +916,10 @@ describe("cards", () => {
 
     it("copies cards without progress, leaving the source and its digest as they are", async () => {
       const { deps, useCases } = setup();
-      await useCases.transferCards(
-        instance.url,
-        deck,
-        target,
-        ["two"],
-        {
-          mode: "copy",
-          keepProgress: false,
-        },
-        session.webId,
-      );
+      await useCases.transferCards(instance.url, deck, target, ["two"], {
+        mode: "copy",
+        keepProgress: false,
+      });
       expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledExactlyOnceWith(
         target,
         { save: [expect.objectContaining({ id: "two" })], remove: [] },
@@ -952,34 +934,20 @@ describe("cards", () => {
 
     it("moves a card never studied without a write of either reviews document", async () => {
       const { deps, useCases } = setup();
-      await useCases.transferCards(
-        instance.url,
-        deck,
-        target,
-        ["two"],
-        {
-          mode: "move",
-          keepProgress: true,
-        },
-        session.webId,
-      );
+      await useCases.transferCards(instance.url, deck, target, ["two"], {
+        mode: "move",
+        keepProgress: true,
+      });
       expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledTimes(2);
       expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
     });
 
     it("finishes a move stopped after the target was written, writing no card twice", async () => {
       const { deps, useCases } = setup([{ ...one, url: `${target.cardsDocumentUrl}#one` }]);
-      const plan = await useCases.transferCards(
-        instance.url,
-        deck,
-        target,
-        ["one"],
-        {
-          mode: "move",
-          keepProgress: false,
-        },
-        session.webId,
-      );
+      const plan = await useCases.transferCards(instance.url, deck, target, ["one"], {
+        mode: "move",
+        keepProgress: false,
+      });
       expect(plan.cards).toEqual([{ from: "one", to: "one", present: true }]);
       expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledExactlyOnceWith(
         deck,
@@ -994,17 +962,10 @@ describe("cards", () => {
         .mockResolvedValueOnce(undefined)
         .mockRejectedValueOnce(new Error("offline"));
       await expect(
-        useCases.transferCards(
-          instance.url,
-          deck,
-          target,
-          ["one"],
-          {
-            mode: "move",
-            keepProgress: true,
-          },
-          session.webId,
-        ),
+        useCases.transferCards(instance.url, deck, target, ["one"], {
+          mode: "move",
+          keepProgress: true,
+        }),
       ).rejects.toThrow("offline");
       const [, sourceReviews] = vi.mocked(deps.reviewStateRepository.applyReviewChanges).mock
         .invocationCallOrder;
@@ -1017,17 +978,10 @@ describe("cards", () => {
       vi.mocked(again.deps.reviewStateRepository.listReviewStates).mockImplementation(async (d) =>
         sm2s(d.url === deck.url ? [] : [studied]),
       );
-      const plan = await again.useCases.transferCards(
-        instance.url,
-        deck,
-        target,
-        ["one"],
-        {
-          mode: "move",
-          keepProgress: true,
-        },
-        session.webId,
-      );
+      const plan = await again.useCases.transferCards(instance.url, deck, target, ["one"], {
+        mode: "move",
+        keepProgress: true,
+      });
       expect(plan.cards).toEqual([{ from: "one", to: "one", present: true }]);
       expect(again.deps.deckRepository.applyCardChanges).toHaveBeenCalledExactlyOnceWith(
         deck,
@@ -1042,17 +996,10 @@ describe("cards", () => {
       vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValueOnce(
         new AppError("createdElsewhere", { url: target.cardsDocumentUrl }),
       );
-      await useCases.transferCards(
-        instance.url,
-        deck,
-        target,
-        ["one"],
-        {
-          mode: "copy",
-          keepProgress: true,
-        },
-        session.webId,
-      );
+      await useCases.transferCards(instance.url, deck, target, ["one"], {
+        mode: "copy",
+        keepProgress: true,
+      });
       expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledTimes(2);
       expect(deps.deckRepository.applyCardChanges).toHaveBeenLastCalledWith(
         target,
@@ -1064,17 +1011,10 @@ describe("cards", () => {
     it("plans the transfer again when a document changed meanwhile, then gives up", async () => {
       const { deps, useCases } = setup();
       vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValueOnce(changed());
-      await useCases.transferCards(
-        instance.url,
-        deck,
-        target,
-        ["one"],
-        {
-          mode: "copy",
-          keepProgress: true,
-        },
-        session.webId,
-      );
+      await useCases.transferCards(instance.url, deck, target, ["one"], {
+        mode: "copy",
+        keepProgress: true,
+      });
       expect(deps.deckRepository.applyCardChanges).toHaveBeenLastCalledWith(
         target,
         { save: [oneWritten], remove: [] },
@@ -1083,17 +1023,10 @@ describe("cards", () => {
 
       vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValue(changed());
       await expect(
-        useCases.transferCards(
-          instance.url,
-          deck,
-          target,
-          ["one"],
-          {
-            mode: "copy",
-            keepProgress: true,
-          },
-          session.webId,
-        ),
+        useCases.transferCards(instance.url, deck, target, ["one"], {
+          mode: "copy",
+          keepProgress: true,
+        }),
       ).rejects.toMatchObject({ code: "changedElsewhere" });
       expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledTimes(5);
     });
@@ -1102,17 +1035,10 @@ describe("cards", () => {
       const { deps, useCases } = setup();
       vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValueOnce(new Error("offline"));
       await expect(
-        useCases.transferCards(
-          instance.url,
-          deck,
-          target,
-          ["one"],
-          {
-            mode: "move",
-            keepProgress: true,
-          },
-          session.webId,
-        ),
+        useCases.transferCards(instance.url, deck, target, ["one"], {
+          mode: "move",
+          keepProgress: true,
+        }),
       ).rejects.toThrow("offline");
       expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledOnce();
     });
@@ -1127,34 +1053,20 @@ describe("cards", () => {
         .mockImplementationOnce(fine)
         .mockRejectedValue(new Error("offline"));
       await expect(
-        useCases.transferCards(
-          instance.url,
-          deck,
-          target,
-          ["one"],
-          {
-            mode: "move",
-            keepProgress: false,
-          },
-          session.webId,
-        ),
+        useCases.transferCards(instance.url, deck, target, ["one"], {
+          mode: "move",
+          keepProgress: false,
+        }),
       ).resolves.toMatchObject({ missing: [] });
     });
 
     it("writes nothing when no card is left to transfer", async () => {
       const { deps, useCases } = setup();
       await expect(
-        useCases.transferCards(
-          instance.url,
-          deck,
-          target,
-          ["gone"],
-          {
-            mode: "move",
-            keepProgress: true,
-          },
-          session.webId,
-        ),
+        useCases.transferCards(instance.url, deck, target, ["gone"], {
+          mode: "move",
+          keepProgress: true,
+        }),
       ).resolves.toMatchObject({ missing: ["gone"] });
       expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
       expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
@@ -1178,14 +1090,7 @@ describe("cards", () => {
         version: "v1",
       }));
       await expect(
-        useCases.transferCards(
-          foreign,
-          named,
-          into,
-          ["one"],
-          { mode: "copy", keepProgress: true },
-          session.webId,
-        ),
+        useCases.transferCards(foreign, named, into, ["one"], { mode: "copy", keepProgress: true }),
       ).resolves.toMatchObject({ missing: ["one"] });
       expect(deps.deckRepository.readCardsSince).toHaveBeenCalledWith(named, undefined, {
         asNoOne: true,
@@ -1215,14 +1120,10 @@ describe("cards", () => {
         vi.mocked(deps.deckRepository.readCardsSince).mockClear();
         vi.mocked(deps.reviewStateRepository.readReviewStatesSince).mockClear();
         const from = { ...deck, ...documents };
-        await useCases.transferCards(
-          instance.url,
-          from,
-          target,
-          ["one"],
-          { mode: "copy", keepProgress: true },
-          session.webId,
-        );
+        await useCases.transferCards(instance.url, from, target, ["one"], {
+          mode: "copy",
+          keepProgress: true,
+        });
         const [cards] = vi
           .mocked(deps.deckRepository.readCardsSince)
           .mock.calls.filter(([d]) => d === from);
@@ -1249,17 +1150,10 @@ describe("cards", () => {
     it("refuses a transfer to the deck itself before reading anything", async () => {
       const { deps, useCases } = setup();
       await expect(
-        useCases.transferCards(
-          instance.url,
-          deck,
-          deck,
-          ["one"],
-          {
-            mode: "move",
-            keepProgress: true,
-          },
-          session.webId,
-        ),
+        useCases.transferCards(instance.url, deck, deck, ["one"], {
+          mode: "move",
+          keepProgress: true,
+        }),
       ).rejects.toMatchObject({ code: "cardTransferSameDeck" });
       expect(deps.deckRepository.readCardsSince).not.toHaveBeenCalled();
     });
@@ -1298,17 +1192,10 @@ describe("cards", () => {
       async (mode, _document, shared) => {
         const { deps, useCases } = setup();
         await expect(
-          useCases.transferCards(
-            instance.url,
-            deck,
-            { ...target, ...shared },
-            ["one"],
-            {
-              mode,
-              keepProgress: true,
-            },
-            session.webId,
-          ),
+          useCases.transferCards(instance.url, deck, { ...target, ...shared }, ["one"], {
+            mode,
+            keepProgress: true,
+          }),
         ).rejects.toMatchObject({ code: "cardTransferSameDeck" });
         expect(deps.deckRepository.readCardsSince).not.toHaveBeenCalled();
         expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
@@ -1326,7 +1213,6 @@ describe("cards", () => {
           { ...target, cardsDocumentUrl: named("%28basic%29%21") },
           ["one"],
           { mode: "move", keepProgress: true },
-          session.webId,
         ),
       ).rejects.toMatchObject({ code: "cardTransferSameDeck" });
       expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
@@ -1343,7 +1229,6 @@ describe("cards", () => {
           { ...target, cardsDocumentUrl: at("decks", "A"), reviewsDocumentUrl: at("reviews", "A") },
           ["one"],
           { mode: "move", keepProgress: true },
-          session.webId,
         ),
       ).rejects.toMatchObject({ code: "cardTransferSameDeck" });
       expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
@@ -1410,12 +1295,7 @@ describe("cards", () => {
 
     it("saves a deck as a file named after it", async () => {
       const { deckArchive, fileExchange, useCases } = withFiles();
-      await useCases.exportDeckFile(
-        instance.url,
-        deck,
-        { format: "jsonld", withProgress: true },
-        session.webId,
-      );
+      await useCases.exportDeckFile(instance.url, deck, { format: "jsonld", withProgress: true });
       // The instance's own documents: read as the user.
       expect(deckArchive.exportDeck).toHaveBeenCalledWith(
         deck,
@@ -1441,7 +1321,6 @@ describe("cards", () => {
           instance.url,
           { ...deck, ...documents },
           { format: "turtle", withProgress: true },
-          session.webId,
         );
         return (deckArchive.exportDeck.mock.calls[0] as unknown[])[2];
       };

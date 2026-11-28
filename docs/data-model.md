@@ -696,8 +696,8 @@ No document Solid Memo names has any.
   nothing is written (`changedElsewhere`), and the check runs again to show
   the addresses the deck names now. The claim is only for
   documents in the instance's folder, or in one of the user's storages,
-  as found at that moment, that holds the instance too
-  (`isInInstancePod`). An instance attached from someone else's pod may
+  found once for the page, that holds the instance too
+  (`ReadScope.isInstances`). An instance attached from someone else's pod may
   name a document of the user's own, and writes to that document go out
   as the user. Any other document is refused (`claimOutsidePod`), and
   the deck is shown without the button. A document in the instance's
@@ -2048,7 +2048,7 @@ An export holds triples as the pod has them, at the pod's IRIs:
 
 Nothing else of either document goes: a deck may name a document that
 holds more than the deck. Each of the two documents is read as the user
-only when it's the instance's (`isInInstancePod`), as a move or copy of
+only when it's the instance's (`ReadScope.isInstances`), as a move or copy of
 cards reads its source. An instance attached from someone else's pod
 may name a document of the user's own. Any other is read as no one.
 

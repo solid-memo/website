@@ -47,11 +47,10 @@ import {
 import type { FileExchange } from "./ports/device";
 import type { DeckLibrary, DeckArchive } from "./ports/library";
 import type { DeckRepository, ReviewChanges, ReviewStateRepository } from "./ports/pod";
-import type { StorageGateway } from "./ports/session";
 import { AppError } from "@solid-memo/domain/appError";
 import { changedElsewhere, finishCutOffImport, readNow, unsent } from "./writes";
 import type { DigestStore } from "./digestStore";
-import { isInInstancePod } from "./releaseDrafts";
+import type { ReadScope } from "./readScope";
 import type { inTurns } from "./atOnce";
 
 export interface CardUseCases {
@@ -182,8 +181,8 @@ export interface CardUseCases {
    * to `from` itself, or to a deck that shares a cards or reviews
    * document with it (cardTransferSameDeck), before any read. The
    * source's cards and review states are copied into `to`, so each of its
-   * two documents is read as `webId` only when it is the instance's
-   * (isInInstancePod): an instance attached from someone else's pod may
+   * two documents is read as the user only when it is the instance's
+   * (ReadScope.asNoOneOf): an instance attached from someone else's pod may
    * name a deck whose documents are the user's own, kept from everyone.
    * Any other is read as no one. Resolves to the plan as written.
    */
@@ -193,23 +192,17 @@ export interface CardUseCases {
     to: Deck,
     ids: readonly string[],
     options: TransferOptions,
-    webId: string,
   ): Promise<CardTransferPlan>;
   /**
    * Save the deck of the instance as a file (domain/deckFile.ts,
    * DeckArchive.exportDeck), in `options.format`, named after its title
    * (deckFileName), with its progress when `options.withProgress`. Each
-   * of the deck's two documents is read as `webId` only when it is the
-   * instance's (isInInstancePod), any other as no one, as transferCards
+   * of the deck's two documents is read as the user only when it is the
+   * instance's (ReadScope.asNoOneOf), any other as no one, as transferCards
    * reads a source: the file holds what it reads. Writes nothing to the
    * pod.
    */
-  exportDeckFile(
-    instanceUrl: string,
-    deck: Deck,
-    options: DeckFileOptions,
-    webId: string,
-  ): Promise<void>;
+  exportDeckFile(instanceUrl: string, deck: Deck, options: DeckFileOptions): Promise<void>;
   /**
    * The deck file the user picks (Turtle or JSON-LD, by its name, else
    * its text: deckFileFormatOf), read as DeckArchive.readDeckFile reads
@@ -287,7 +280,7 @@ export function createCardUseCases({
   deckArchive,
   fileExchange,
   digestStore,
-  storageGateway,
+  readScope,
   cardsTurn,
   newId,
   now,
@@ -298,7 +291,7 @@ export function createCardUseCases({
   deckArchive: DeckArchive;
   fileExchange: FileExchange;
   digestStore: Pick<DigestStore, "refresh">;
-  storageGateway: Pick<StorageGateway, "discoverStorages">;
+  readScope: Pick<ReadScope, "asNoOneOf">;
   /** The turns whole decks' cards are read in, shared with planLibraryUpgrade (listCardsInTurn). */
   cardsTurn: ReturnType<typeof inTurns>;
   newId: () => string;
@@ -598,16 +591,10 @@ export function createCardUseCases({
         fsrsSave: rescheduleStates(states.fsrs, ids, due, direction),
       }));
     },
-    async transferCards(instanceUrl, from, to, ids, options, webId) {
+    async transferCards(instanceUrl, from, to, ids, options) {
       if (sharesDocuments(from, to)) throw new AppError("cardTransferSameDeck");
       // Copied into `to`: each of the source's documents read as the user only when it is the instance's.
-      const theInstances = (url: string) =>
-        isInInstancePod(storageGateway, instanceUrl, url, webId);
-      const [cardsHere, reviewsHere] = await Promise.all([
-        theInstances(from.cardsDocumentUrl),
-        theInstances(from.reviewsDocumentUrl),
-      ]);
-      const asNoOne = { cards: !cardsHere, reviews: !reviewsHere };
+      const asNoOne = await readScope.asNoOneOf(instanceUrl, from);
       for (let attempt = 1; ; attempt++) {
         try {
           const plan = await transferOnce(from, to, ids, options, asNoOne);
@@ -621,14 +608,10 @@ export function createCardUseCases({
         }
       }
     },
-    async exportDeckFile(instanceUrl, deck, options, webId) {
+    async exportDeckFile(instanceUrl, deck, options) {
       // Saved to a file the user may hand on: each document read as the user only when it is the instance's.
-      const [cardsHere, reviewsHere] = await Promise.all([
-        isInInstancePod(storageGateway, instanceUrl, deck.cardsDocumentUrl, webId),
-        isInInstancePod(storageGateway, instanceUrl, deck.reviewsDocumentUrl, webId),
-      ]);
       const text = await deckArchive.exportDeck(deck, options, {
-        asNoOne: { cards: !cardsHere, reviews: !reviewsHere },
+        asNoOne: await readScope.asNoOneOf(instanceUrl, deck),
       });
       fileExchange.save(
         deckFileName(deck, options.format),

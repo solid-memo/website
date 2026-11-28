@@ -451,24 +451,16 @@ describe.each(SERVERS)("a guest's study on $name", ({ url: server }) => {
       registrationTarget: "private",
     });
     // The instance has a draft of the name the guest's will want.
-    const theirs = await useCases.createReleaseDraft(
-      target.url,
-      {
-        kind: "blankCourse",
-        title: { en: "Solid" },
-      },
-      session.webId,
-    );
+    const theirs = await useCases.createReleaseDraft(target.url, {
+      kind: "blankCourse",
+      title: { en: "Solid" },
+    });
     await useCases.startGuest("My study");
     const [guestInstance] = await useCases.listInstances(GUEST_SESSION);
-    const written = await useCases.createReleaseDraft(
-      guestInstance!.url,
-      {
-        kind: "blankCourse",
-        title: { en: "Solid" },
-      },
-      GUEST_SESSION.webId,
-    );
+    const written = await useCases.createReleaseDraft(guestInstance!.url, {
+      kind: "blankCourse",
+      title: { en: "Solid" },
+    });
     await useCases.editReleaseDraft(written!.draft.url, [
       { kind: "addChapter", id: "ch-a", text: { title: { en: "A" } } },
       {

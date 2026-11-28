@@ -12,7 +12,7 @@ import { DEFAULT_PALETTE } from "@solid-memo/domain/palette";
 import type { DraftChange, QuestionPlace } from "@solid-memo/domain/release/releaseDraft";
 import type { MarkdownCheck } from "@solid-memo/domain/release/markdownFields";
 import { SM } from "../vocab";
-import { POD, SESSION, triplesOf, WEB_ID, wiredApp } from "./wiredApp";
+import { POD, SESSION, triplesOf, wiredApp } from "./wiredApp";
 
 /**
  * One scenario that writes a pod through the app's own use cases
@@ -168,11 +168,8 @@ export async function writeScenarioPod(): Promise<ResourceStore> {
   await study(capitals, [cards[1]!.id]);
 
   // A course drafted and published from the instance, then started from that release.
-  const first = (await u.createReleaseDraft(
-    I,
-    { kind: "blankCourse", title: { en: "Solid" } },
-    WEB_ID,
-  ))!.draft;
+  const first = (await u.createReleaseDraft(I, { kind: "blankCourse", title: { en: "Solid" } }))!
+    .draft;
   await u.editReleaseDraft(first.url, [
     { kind: "setAgent", id: "alice", agent: { name: "Alice", mbox: "mailto:alice@example.org" } },
     {
@@ -248,11 +245,7 @@ export async function writeScenarioPod(): Promise<ResourceStore> {
   await study(capitals, [cards[0]!.id, cards[1]!.id]);
 
   // The course's next version retires a chapter, a step, a card and a wrong option, and is published too.
-  const second = (await u.createReleaseDraft(
-    I,
-    { kind: "nextVersionOf", url: release(1) },
-    WEB_ID,
-  ))!.draft;
+  const second = (await u.createReleaseDraft(I, { kind: "nextVersionOf", url: release(1) }))!.draft;
   await u.editReleaseDraft(second.url, [
     { kind: "setMeta", meta: { versionNotes: "Without the chapter on apps." } },
     { kind: "retire", of: "chapter", id: "ch-apps" },
@@ -262,8 +255,8 @@ export async function writeScenarioPod(): Promise<ResourceStore> {
   ]);
   await publish(u, second.url, release(2));
   // A draft of the version after it, and one of a deck of the user's own, stay drafts.
-  await u.createReleaseDraft(I, { kind: "nextVersionOf", url: release(2) }, WEB_ID);
-  await u.createReleaseDraft(I, { kind: "fromDeck", deck: capitals }, WEB_ID);
+  await u.createReleaseDraft(I, { kind: "nextVersionOf", url: release(2) });
+  await u.createReleaseDraft(I, { kind: "fromDeck", deck: capitals });
 
   capitals = await u.renameDeck(capitals, { en: "Nordic capitals", sv: "Nordens huvudstäder" });
   await u.renameInstance(SESSION, instance, "Main study");

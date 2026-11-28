@@ -5,7 +5,7 @@
 import { AppError } from "@solid-memo/domain/appError";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { KeptDocuments } from "@solid-memo/domain/instance";
-import { catalogUrlOf, isDocumentIn } from "@solid-memo/domain/instanceLayout";
+import { isDocumentIn } from "@solid-memo/domain/instanceLayout";
 import { draftAddressesGuest, isGuestPodIri, isGuestUrl } from "@solid-memo/domain/guest";
 import { DECK_FILE_ACCEPT, deckFileFormatOf } from "@solid-memo/domain/deckFile";
 import { shown, tidiedStated, type LangText } from "@solid-memo/domain/langText";
@@ -77,7 +77,7 @@ import type { ShapeValidator } from "./ports/checks";
 import type { FileExchange } from "./ports/device";
 import type { DeckLibrary, ReleaseDraftRepository, ReleasePublisher } from "./ports/library";
 import type { DeckRepository } from "./ports/pod";
-import type { StorageGateway } from "./ports/session";
+import type { ReadScope } from "./readScope";
 
 /**
  * The drafts of releases (docs/studio.md, Drafts): a creator writes a
@@ -95,15 +95,15 @@ export type NewDraft =
   /**
    * A deck of the instance: what a release would say of it
    * (deckToDraft). Its cards are read as the user only when their
-   * document is the instance's (isInInstancePod), as no one otherwise.
+   * document is the instance's (ReadScope.isInstances), as no one otherwise.
    */
   | { kind: "fromDeck"; deck: Deck }
   /**
    * A release, by its URL: the next version of it (nextVersionDraft),
    * describing the series and publisher it names elsewhere, its sources
    * read one way (withPlainSources). Read as the
-   * user only when it is the instance's (isInInstancePod), as no one
-   * otherwise.
+   * user only when it is the instance's (ReadScope.isInstances), as no
+   * one otherwise.
    */
   | { kind: "nextVersionOf"; url: string }
   /** A release in a Turtle or JSON-LD file the user picks, with only its own statements, in a series of its own and following no version (ownStatements, withOwnSeries, releaseToDraft), its sources read one way (withPlainSources). */
@@ -150,17 +150,13 @@ export interface ReleaseDraftUseCases {
    * instance's other drafts of that version. Null when no file was
    * picked. A name taken meanwhile, elsewhere, gives the next one. A
    * release's next version, or a deck's draft, is written into the
-   * instance, so the release, or the deck's cards, is read as `webId`
-   * only when it is the instance's (isInInstancePod): an instance
+   * instance, so the release, or the deck's cards, is read as the user
+   * only when it is the instance's (ReadScope.isInstances): an instance
    * attached from someone else's pod may name a release, or a deck's
    * cards, of the user's own that was kept from everyone. Any other is
    * read as no one.
    */
-  createReleaseDraft(
-    instanceUrl: string,
-    from: NewDraft,
-    webId: string,
-  ): Promise<CreatedDraft | null>;
+  createReleaseDraft(instanceUrl: string, from: NewDraft): Promise<CreatedDraft | null>;
   /**
    * A copy of the draft at `draftUrl`, another instance's, in this one
    * (a guest's draft, as the guest's study is added to an instance):
@@ -240,47 +236,21 @@ const EDIT_ATTEMPTS = 3;
 const NAME_ATTEMPTS = 3;
 
 /**
- * Whether the document at `url` (a release, a deck's cards) is the
- * instance's: in the instance, or in one of the user's storages (those
- * of `webId`) the instance is in too, each as a request sends the
- * address. None, when they cannot be found or no one is logged in
- * (`webId` undefined). Only such a document is
- * read as the user to be written into the instance, or a release made
- * public by it: an instance attached from someone else's pod may name
- * a document of the user's own that was kept from everyone.
- */
-export async function isInInstancePod(
-  storageGateway: Pick<StorageGateway, "discoverStorages">,
-  instanceUrl: string,
-  url: string,
-  webId: string | undefined,
-): Promise<boolean> {
-  if (isDocumentIn(url, instanceUrl)) return true;
-  if (webId === undefined) return false;
-  const storages = await storageGateway.discoverStorages(webId).catch(() => []);
-  return storages.some(
-    (storage) =>
-      isDocumentIn(url, storage.url) && isDocumentIn(catalogUrlOf(instanceUrl), storage.url),
-  );
-}
-
-/**
  * Whether the release `prev` that the draft at `draftUrl` follows is
  * read as no one: it is, unless it is the draft's instance's
- * (isInInstancePod), as a release made the next version of is. What it
+ * (ReadScope.isInstances), as a release made the next version of is. What it
  * published is held against the draft, and published again with it
  * (assemble): an instance attached from someone else's pod may name a
  * release of the user's own that was kept from everyone.
  */
 export async function followedAsNoOne(
-  storageGateway: Pick<StorageGateway, "discoverStorages">,
-  webId: string | undefined,
+  readScope: Pick<ReadScope, "isInstances">,
   draftUrl: string,
   prev: string,
 ): Promise<boolean> {
   // A draft is read only at a draft's place.
   const { instanceUrl } = draftPlaceOf(draftUrl)!;
-  return !(await isInInstancePod(storageGateway, instanceUrl, prev, webId));
+  return !(await readScope.isInstances(instanceUrl, prev));
 }
 
 /** Whether a write was refused because a document changed, or was made, since it was read. */
@@ -544,9 +514,8 @@ export function createReleaseDraftUseCases({
   deckLibrary,
   shapeValidator,
   fileExchange,
-  storageGateway,
+  readScope,
   releasePublisher,
-  webId,
   now,
 }: {
   releaseDraftRepository: ReleaseDraftRepository;
@@ -554,11 +523,10 @@ export function createReleaseDraftUseCases({
   deckLibrary: DeckLibrary;
   shapeValidator: ShapeValidator;
   fileExchange: FileExchange;
-  storageGateway: Pick<StorageGateway, "discoverStorages">;
+  /** Whose a document is: the releases a draft follows, and what a new draft is made of, are read as the user only when they are the instance's. */
+  readScope: Pick<ReadScope, "isInstances">;
   /** The releases the instance published, which a draft may follow (isFollowable). */
   releasePublisher: Pick<ReleasePublisher, "listPublished">;
-  /** Who is logged in, whose own releases a draft's instance may follow as the user (followedAsNoOne). */
-  webId: () => string | undefined;
   now: () => Date;
 }): ReleaseDraftUseCases {
   /** Each release a draft follows, by URL and whether it is read as no one: releases are frozen, so each is read once. */
@@ -578,14 +546,14 @@ export function createReleaseDraftUseCases({
 
   /** The release `prev` the draft at `draftUrl` follows, read as the user only when it is the instance's (followedAsNoOne). */
   async function followed(draftUrl: string, prev: string): Promise<ReleaseDraft> {
-    return release(prev, await followedAsNoOne(storageGateway, webId(), draftUrl, prev));
+    return release(prev, await followedAsNoOne(readScope, draftUrl, prev));
   }
 
   /** Each release a draft follows, as the release rules read it, by URL and whether it is read as no one. */
   const releaseModels = new Map<string, Promise<ReleaseModel>>();
 
   async function releaseModel(draftUrl: string, prev: string): Promise<ReleaseModel> {
-    const asNoOne = await followedAsNoOne(storageGateway, webId(), draftUrl, prev);
+    const asNoOne = await followedAsNoOne(readScope, draftUrl, prev);
     const key = JSON.stringify([prev, asNoOne]);
     let model = releaseModels.get(key);
     if (model === undefined) {
@@ -771,7 +739,7 @@ export function createReleaseDraftUseCases({
       return releaseDraftRepository.list(instanceUrl);
     },
 
-    async createReleaseDraft(instanceUrl, from, webId) {
+    async createReleaseDraft(instanceUrl, from) {
       const at = now().toISOString();
       switch (from.kind) {
         case "blankDeck":
@@ -786,12 +754,7 @@ export function createReleaseDraftUseCases({
         }
         case "fromDeck": {
           // Written into the instance: read as the user only when its cards are the instance's.
-          const asNoOne = !(await isInInstancePod(
-            storageGateway,
-            instanceUrl,
-            from.deck.cardsDocumentUrl,
-            webId,
-          ));
+          const asNoOne = !(await readScope.isInstances(instanceUrl, from.deck.cardsDocumentUrl));
           const cards = await deckRepository.listCards(from.deck, { asNoOne });
           let basedOn: string | undefined;
           const draft = await create(instanceUrl, { title: from.deck.title, version: 1 }, (url) => {
@@ -804,7 +767,7 @@ export function createReleaseDraftUseCases({
         }
         case "nextVersionOf": {
           // Written into the instance: read as the user only when it is the instance's.
-          const asNoOne = !(await isInInstancePod(storageGateway, instanceUrl, from.url, webId));
+          const asNoOne = !(await readScope.isInstances(instanceUrl, from.url));
           const release = draftable(
             await releaseDraftRepository.readRelease(from.url, { asNoOne }),
           );

@@ -29,7 +29,6 @@ const deck = makeDeck("deck-1", { en: "Kanji N5" });
 const water = { ...makeCard(deck, "water"), back: { en: "**Water**" }, textFormat: SM.markdown };
 const fire = makeCard(deck, "fire");
 const nouns = makeDeck("nouns", { en: "Nouns" });
-const WEB_ID = "https://alice.example/profile/card#me";
 const today = studyDayOf(new Date(), DEFAULT_PREFERENCES.dayBoundaryHour);
 const dueToday: ReviewState = {
   cardId: "fire",
@@ -55,7 +54,6 @@ function renderContainer(
       <CardWorkbenchContainer
         useCases={useCases}
         instance={instanceA}
-        webId={WEB_ID}
         deck={of}
         decks={decks}
         query={query}
@@ -103,7 +101,6 @@ describe("CardWorkbenchContainer", () => {
           <CardWorkbenchContainer
             useCases={useCases}
             instance={instanceA}
-            webId={WEB_ID}
             deck={swedish}
             decks={[swedish]}
             query={query}
@@ -135,7 +132,6 @@ describe("CardWorkbenchContainer", () => {
         <CardWorkbenchContainer
           useCases={useCases}
           instance={instanceA}
-          webId={WEB_ID}
           deck={deck}
           decks={[deck]}
           query={query}
@@ -513,14 +509,10 @@ describe("CardWorkbenchContainer", () => {
         "Moved 1 card to Nouns. 1 card got a new id: the deck already had one with its id. 1 card was left as it was.",
       ),
     ).toBeInTheDocument();
-    expect(useCases.transferCards).toHaveBeenCalledWith(
-      instanceA.url,
-      deck,
-      nouns,
-      ["fire"],
-      { mode: "move", keepProgress: true },
-      WEB_ID,
-    );
+    expect(useCases.transferCards).toHaveBeenCalledWith(instanceA.url, deck, nouns, ["fire"], {
+      mode: "move",
+      keepProgress: true,
+    });
     await waitFor(() => expect(fronts()).toEqual(["water"]));
     expect(screen.queryByRole("group", { name: "Selected cards" })).toBeNull();
   });
@@ -568,7 +560,6 @@ describe("CardWorkbenchContainer", () => {
         <CardWorkbenchContainer
           useCases={useCases}
           instance={instanceA}
-          webId={WEB_ID}
           deck={deck}
           decks={decks}
           query={query}
@@ -623,7 +614,6 @@ describe("CardWorkbenchContainer", () => {
           <CardWorkbenchContainer
             useCases={useCases}
             instance={instanceA}
-            webId={WEB_ID}
             deck={deck}
             decks={[deck, nouns, verbs]}
             query={DEFAULT_CARD_QUERY}

@@ -28,6 +28,7 @@ import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { createPreferenceStore } from "./preferenceStore";
 import { createAnswerStore } from "./answerStore";
 import { createDigestStore } from "./digestStore";
+import { createReadScope } from "./readScope";
 import { createSessionUseCases, type SessionUseCases } from "./session";
 import { createInstanceUseCases, type InstanceUseCases } from "./instances";
 import { createPreferenceUseCases, type PreferenceUseCases } from "./preferences";
@@ -90,8 +91,8 @@ export interface Dependencies {
   random?: () => number;
   /**
    * The WebID of whoever is signed in, asked at each call; none when no
-   * one is (a guest): whose pod a deck's documents must be in to be read
-   * as the user for an instance's digest (isInInstancePod).
+   * one is (a guest): whose storages a document read for an instance
+   * must be in to be read as the user (ReadScope).
    */
   webId: () => string | undefined;
   webIdDocumentRepository: WebIdDocumentRepository;
@@ -193,6 +194,8 @@ export function createUseCases({
     newId,
     now,
   });
+  // Whose a document is, for whoever is signed in: one read for an instance is read as the user only when it is the instance's.
+  const readScope = createReadScope({ storageGateway, webId });
   const digestStore = createDigestStore({
     digestRepository,
     deckRepository,
@@ -201,7 +204,7 @@ export function createUseCases({
     ruleset,
     preferenceStore,
     answerStore,
-    storageGateway,
+    readScope,
     webId,
     now,
   });
@@ -211,9 +214,8 @@ export function createUseCases({
     deckLibrary,
     shapeValidator,
     fileExchange,
-    storageGateway,
+    readScope,
     releasePublisher,
-    webId,
     now,
   });
   const instances = createInstanceUseCases({
@@ -234,8 +236,7 @@ export function createUseCases({
     shapeValidator,
     deckLibrary,
     digestStore,
-    storageGateway,
-    webId,
+    readScope,
     ruleset,
   });
   // Whole decks' cards read for a list of decks, the Studio's deck table's and the copies' plans, a few at a time.
@@ -292,7 +293,7 @@ export function createUseCases({
       deckArchive,
       fileExchange,
       digestStore,
-      storageGateway,
+      readScope,
       cardsTurn,
       newId,
       now,
@@ -335,8 +336,7 @@ export function createUseCases({
       shapeValidator,
       deckLibrary,
       fileExchange,
-      storageGateway,
-      webId,
+      readScope,
       now,
     }),
     ...createInstanceGraphUseCases({

@@ -5,6 +5,7 @@
 import type { TrialSandbox } from "@solid-memo/application/trial";
 import { createAnswerStore } from "@solid-memo/application/answerStore";
 import { createCourseUseCases } from "@solid-memo/application/courses";
+import { createReadScope } from "@solid-memo/application/readScope";
 import { createDigestStore } from "@solid-memo/application/digestStore";
 import { createInstanceUseCases } from "@solid-memo/application/instances";
 import { inTurns } from "@solid-memo/application/atOnce";
@@ -93,7 +94,7 @@ export function createTrialUseCases(
     ruleset,
     preferenceStore,
     answerStore,
-    storageGateway,
+    readScope: createReadScope({ storageGateway, webId: noOne }),
     webId: noOne,
     now,
   });

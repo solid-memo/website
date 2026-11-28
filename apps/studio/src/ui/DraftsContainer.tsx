@@ -36,7 +36,6 @@ import { queries } from "./queries";
 export function DraftsContainer({
   useCases,
   instance,
-  webId,
   healthHref,
   releasesHref,
   draftHref,
@@ -44,8 +43,6 @@ export function DraftsContainer({
 }: {
   useCases: UseCases;
   instance: Instance;
-  /** Who makes a draft (createReleaseDraft). */
-  webId: string;
   healthHref: string;
   releasesHref: string;
   draftHref: (draft: ReleaseDraftSummary) => string;
@@ -65,7 +62,7 @@ export function DraftsContainer({
     queryClient.removeQueries({ queryKey: queryKeys.releaseDraft(draft.url) });
   const createMutation = useWrite({
     scope: { id: catalogScope(instance.url) },
-    mutationFn: (from: NewDraft) => useCases.createReleaseDraft(instance.url, from, webId),
+    mutationFn: (from: NewDraft) => useCases.createReleaseDraft(instance.url, from),
     changes: reread,
     onSuccess: (created) => created !== null && forget(created.draft),
   });

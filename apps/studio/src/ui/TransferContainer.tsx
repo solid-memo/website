@@ -32,7 +32,6 @@ import { queries } from "./queries";
 export function TransferContainer({
   useCases,
   instance,
-  webId,
   chosen,
   onChoose,
   cardsHref,
@@ -40,8 +39,6 @@ export function TransferContainer({
 }: {
   useCases: UseCases;
   instance: Instance;
-  /** The signed-in user: a deck's documents are exported as theirs only in the instance's pod. */
-  webId: string;
   /** The URLs of the decks checked to export (the route's). */
   chosen: readonly string[];
   onChoose: (urls: readonly string[]) => void;
@@ -66,7 +63,7 @@ export function TransferContainer({
       try {
         for (const [index, deck] of decks.entries()) {
           setExporting({ deck, index, total: decks.length });
-          await useCases.exportDeckFile(instance.url, deck, options, webId);
+          await useCases.exportDeckFile(instance.url, deck, options);
         }
       } finally {
         setExporting(null);

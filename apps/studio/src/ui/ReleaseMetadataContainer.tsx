@@ -18,7 +18,6 @@ import type { ReleasePublishLinks } from "./ReleasePublishScreen";
  */
 export function ReleaseMetadataContainer({
   useCases,
-  webId,
   draftUrl,
   links,
   publishLinks,
@@ -26,8 +25,6 @@ export function ReleaseMetadataContainer({
   onStarted,
 }: {
   useCases: UseCases;
-  /** Who makes a release public again (ReleasePublishContainer). */
-  webId: string;
   draftUrl: string;
   links: ReleaseLinks;
   publishLinks: ReleasePublishLinks;
@@ -47,7 +44,6 @@ export function ReleaseMetadataContainer({
       />
       <ReleasePublishContainer
         useCases={useCases}
-        webId={webId}
         editor={editor}
         links={publishLinks}
         onStarted={onStarted}

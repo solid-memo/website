@@ -209,10 +209,10 @@ async function buildWorld(): Promise<World> {
   });
   await u.chooseCustomPalette(palette, INSTANCE);
 
-  const first = await u.createReleaseDraft(INSTANCE, { kind: "fromDeck", deck: capitals }, WEB_ID);
+  const first = await u.createReleaseDraft(INSTANCE, { kind: "fromDeck", deck: capitals });
   const release = `${INSTANCE}releases/${first!.draft.name}/v1.ttl`;
   await u.publishRelease(first!.draft.url, release, markdownCheck);
-  const second = await u.createReleaseDraft(INSTANCE, { kind: "fromDeck", deck: other }, WEB_ID);
+  const second = await u.createReleaseDraft(INSTANCE, { kind: "fromDeck", deck: other });
   const drafts = await u.listReleaseDrafts(INSTANCE);
   const draftAt = (url: string) => drafts.find((draft) => draft.url === url)!;
 
@@ -503,22 +503,14 @@ const ROWS: { [Name in keyof UseCases]: Row } = {
   rescheduleCards: async ({ u, capitals, cards }) =>
     void (await u.rescheduleCards(INSTANCE, capitals, [cards[0]!.id], "2026-12-01")),
   transferCards: async ({ u, capitals, other, cards }) => {
-    const copy = await u.transferCards(
-      INSTANCE,
-      capitals,
-      other,
-      [cards[0]!.id],
-      { mode: "copy", keepProgress: true },
-      WEB_ID,
-    );
-    const move = await u.transferCards(
-      INSTANCE,
-      capitals,
-      other,
-      [cards[1]!.id],
-      { mode: "move", keepProgress: true },
-      WEB_ID,
-    );
+    const copy = await u.transferCards(INSTANCE, capitals, other, [cards[0]!.id], {
+      mode: "copy",
+      keepProgress: true,
+    });
+    const move = await u.transferCards(INSTANCE, capitals, other, [cards[1]!.id], {
+      mode: "move",
+      keepProgress: true,
+    });
     const placeOf = (from: string, to: string) => (address: string) =>
       address
         .replaceAll(capitals.cardsDocumentUrl, other.cardsDocumentUrl)
@@ -534,17 +526,17 @@ const ROWS: { [Name in keyof UseCases]: Row } = {
     };
   },
   exportDeckFile: async ({ u, capitals, saved }) => {
-    await u.exportDeckFile(INSTANCE, capitals, { format: "turtle", withProgress: true }, WEB_ID);
+    await u.exportDeckFile(INSTANCE, capitals, { format: "turtle", withProgress: true });
     // A file is what the user takes elsewhere: it has every term of the deck and its cards.
     expect(saved[0]!.text).toContain(`sm:${LATER.note.slice(SM_NS.length)} "kept"`);
   },
   openDeckFile: async ({ u, capitals, saved, toOpen }) => {
-    await u.exportDeckFile(INSTANCE, capitals, { format: "turtle", withProgress: true }, WEB_ID);
+    await u.exportDeckFile(INSTANCE, capitals, { format: "turtle", withProgress: true });
     toOpen.push(saved[0]!);
     expect(await u.openDeckFile()).not.toBeNull();
   },
   importDeckFile: async ({ u, capitals, saved, toOpen }) => {
-    await u.exportDeckFile(INSTANCE, capitals, { format: "jsonld", withProgress: true }, WEB_ID);
+    await u.exportDeckFile(INSTANCE, capitals, { format: "jsonld", withProgress: true });
     toOpen.push(saved[0]!);
     await u.importDeckFile(INSTANCE, (await u.openDeckFile())!, { withProgress: true });
   },
@@ -653,8 +645,8 @@ const ROWS: { [Name in keyof UseCases]: Row } = {
   // Drafts and releases.
   listReleaseDrafts: async ({ u }) => void (await u.listReleaseDrafts(INSTANCE)),
   createReleaseDraft: async ({ u, capitals, release }) => {
-    await u.createReleaseDraft(INSTANCE, { kind: "fromDeck", deck: capitals }, WEB_ID);
-    await u.createReleaseDraft(INSTANCE, { kind: "nextVersionOf", url: release }, WEB_ID);
+    await u.createReleaseDraft(INSTANCE, { kind: "fromDeck", deck: capitals });
+    await u.createReleaseDraft(INSTANCE, { kind: "nextVersionOf", url: release });
   },
   copyReleaseDraft: async ({ u, draft }) => void (await u.copyReleaseDraft(draft.url, INSTANCE)),
   checkReleaseDraftCopy: async ({ u, draft }) =>
@@ -691,7 +683,7 @@ const ROWS: { [Name in keyof UseCases]: Row } = {
     ).rejects.toMatchObject({ code: "releaseHasErrors" });
   },
   makeReleasePublic: async ({ u, release }) =>
-    void (await u.makeReleasePublic(INSTANCE, release, WEB_ID).catch(() => undefined)),
+    void (await u.makeReleasePublic(INSTANCE, release).catch(() => undefined)),
   isReleasePublic: async ({ u, release }) => void (await u.isReleasePublic(release)),
   downloadRelease: async ({ u, draft, saved }) => {
     await u.downloadRelease(draft.url);

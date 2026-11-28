@@ -38,7 +38,7 @@ export interface StudyUseCases {
    * deck paused today, whose documents are not read); from the deck's schedule in the instance's digest when neither
    * of its documents changed since, else from its documents (and the
    * digest is brought up to date). Each document is read as the user
-   * only when it is the instance's (isInInstancePod), as no one
+   * only when it is the instance's (ReadScope.isInstances), as no one
    * otherwise, and only a deck whose documents both are has its
    * schedule kept in the digest. STUDY_COUNTS_AT_ONCE decks are counted
    * at once, whoever asks, the others waiting their turn: a deck list
@@ -48,7 +48,7 @@ export interface StudyUseCases {
   /**
    * Keep the deck's schedule in the digest, as of now: when a study
    * session ends. Nothing, for a deck whose documents are not both the
-   * instance's (isInInstancePod).
+   * instance's (ReadScope.isInstances).
    */
   refreshStudyDigest(instanceUrl: string, deck: Deck): Promise<void>;
   /**

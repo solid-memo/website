@@ -139,15 +139,11 @@ describe.each(SERVERS)("drafts of releases on $name", ({ url: server }) => {
   it("drafts, opens, edits and deletes the next version of a 466-card course, each within its budget", {
     timeout: 300_000,
   }, async () => {
-    const { session, instance } = await seed(server);
+    const { instance } = await seed(server);
     const useCases = page();
 
     const created = await timed(() =>
-      useCases.createReleaseDraft(
-        instance.url,
-        { kind: "nextVersionOf", url: COURSE },
-        session.webId,
-      ),
+      useCases.createReleaseDraft(instance.url, { kind: "nextVersionOf", url: COURSE }),
     );
     expect(created.took).toBeLessThan(BUDGET.create);
     const summary = created.value!.draft;
@@ -224,15 +220,11 @@ describe.each(SERVERS)("drafts of releases on $name", ({ url: server }) => {
       context.skip("this server ignores If-Match, so a change made elsewhere cannot be detected");
     // The change is made in the same second as the read, which such a server's ETag does not tell apart.
     if (!(await etagMarksEveryEdit(server))) context.skip(ETAG_OUTLIVES_EDITS);
-    const { session, instance } = await seed(server);
-    const made = await page().createReleaseDraft(
-      instance.url,
-      {
-        kind: "blankCourse",
-        title: { en: "Solid" },
-      },
-      session.webId,
-    );
+    const { instance } = await seed(server);
+    const made = await page().createReleaseDraft(instance.url, {
+      kind: "blankCourse",
+      title: { en: "Solid" },
+    });
     const draftUrl = made!.draft.url;
     await page().editReleaseDraft(draftUrl, [
       { kind: "addChapter", id: "ch-a", text: { title: { en: "A" } } },
@@ -269,7 +261,7 @@ describe.each(SERVERS)("drafts of releases on $name", ({ url: server }) => {
     if (!(await preconditionsOf(server)).edits)
       context.skip("this server ignores If-Match, so a change made elsewhere cannot be detected");
     if (!(await etagMarksEveryEdit(server))) context.skip(ETAG_OUTLIVES_EDITS);
-    const { session, instance } = await seed(server);
+    const { instance } = await seed(server);
     const catalog = `${instance.url}catalog.ttl`;
     // Another tab makes a draft of its own just before each write of the catalog: every attempt to link this one is refused.
     let raced = 0;
@@ -278,26 +270,18 @@ describe.each(SERVERS)("drafts of releases on $name", ({ url: server }) => {
       const method = init?.method ?? "GET";
       if (url === catalog && method !== "GET" && method !== "HEAD") {
         raced++;
-        await page().createReleaseDraft(
-          instance.url,
-          {
-            kind: "blankDeck",
-            title: { en: `Other ${raced}` },
-          },
-          session.webId,
-        );
+        await page().createReleaseDraft(instance.url, {
+          kind: "blankDeck",
+          title: { en: `Other ${raced}` },
+        });
       }
       return fetch(input, init);
     };
     await expect(
-      page(racing).createReleaseDraft(
-        instance.url,
-        {
-          kind: "blankCourse",
-          title: { en: "Solid" },
-        },
-        session.webId,
-      ),
+      page(racing).createReleaseDraft(instance.url, {
+        kind: "blankCourse",
+        title: { en: "Solid" },
+      }),
     ).rejects.toMatchObject({
       code: "changedElsewhere",
     });
@@ -316,19 +300,11 @@ describe.each(SERVERS)("drafts of releases on $name", ({ url: server }) => {
   it("leaves nothing of an instance deleted with a draft in it", { timeout: 120_000 }, async () => {
     const { session, instance } = await seed(server);
     const useCases = page();
-    await useCases.createReleaseDraft(
-      instance.url,
-      {
-        kind: "blankCourse",
-        title: { en: "Solid" },
-      },
-      session.webId,
-    );
-    await useCases.createReleaseDraft(
-      instance.url,
-      { kind: "blankDeck", title: { en: "Words" } },
-      session.webId,
-    );
+    await useCases.createReleaseDraft(instance.url, {
+      kind: "blankCourse",
+      title: { en: "Solid" },
+    });
+    await useCases.createReleaseDraft(instance.url, { kind: "blankDeck", title: { en: "Words" } });
     await expect(useCases.deleteInstance(session, instance)).resolves.toEqual({
       keptFolder: null,
       keptReleases: false,

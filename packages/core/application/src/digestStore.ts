@@ -22,10 +22,9 @@ import type { ReviewStates } from "@solid-memo/domain/review";
 import { effectiveStates } from "@solid-memo/domain/fsrs";
 import type { ShapeValidator } from "./ports/checks";
 import type { DeckRepository, ReviewStateRepository, DigestRepository } from "./ports/pod";
-import type { StorageGateway } from "./ports/session";
 import type { AnswerStore } from "./answerStore";
 import type { PreferenceStore } from "./preferenceStore";
-import { isInInstancePod } from "./releaseDrafts";
+import type { DeckPlace, ReadScope } from "./readScope";
 import { allSettledThen } from "./atOnce";
 
 /** A digest change noting a document's receipt: at this version, it conformed or is in the latest format. */
@@ -72,7 +71,7 @@ export function scheduleFrom(
  * it: what this page learned of the instance's documents, its decks'
  * schedules and the documents' receipts, written back as it learns it.
  * Of a deck, only what its documents say when both are the instance's
- * (isInInstancePod) for whoever is signed in: an instance attached from
+ * (ReadScope.isInstances) for whoever is signed in: an instance attached from
  * someone else's pod may name documents of the user's own as a deck's,
  * and what is learned of those is the user's alone, not the digest's.
  */
@@ -84,7 +83,7 @@ export function createDigestStore({
   ruleset,
   preferenceStore,
   answerStore,
-  storageGateway,
+  readScope,
   webId,
   now,
 }: {
@@ -95,49 +94,29 @@ export function createDigestStore({
   ruleset: string;
   preferenceStore: Pick<PreferenceStore, "get">;
   answerStore: Pick<AnswerStore, "flush">;
-  storageGateway: Pick<StorageGateway, "discoverStorages">;
+  readScope: ReadScope;
   /** The WebID of whoever is signed in, asked at each call; none when no one is. */
   webId: () => string | undefined;
   now: () => Date;
 }) {
   /**
-   * The storages of each WebID, found once per WebID for this page's use
-   * cases: a deck list asks of every deck of the catalog, and each would
-   * otherwise read the user's profile again. A search that failed is
-   * not kept, so the next asks again.
-   */
-  const storagesFound = new Map<string, ReturnType<StorageGateway["discoverStorages"]>>();
-  const storages: Pick<StorageGateway, "discoverStorages"> = {
-    discoverStorages(user) {
-      let found = storagesFound.get(user);
-      if (found === undefined) {
-        found = storageGateway.discoverStorages(user);
-        storagesFound.set(user, found);
-        found.catch(() => storagesFound.delete(user));
-      }
-      return found;
-    },
-  };
-  /**
    * Whether what the document at `url` says may be kept in the
-   * instance's digest: it is the instance's (isInInstancePod) for
+   * instance's digest: it is the instance's (ReadScope.isInstances) for
    * whoever is signed in. With no one signed in, nothing is read as
    * anyone, so any is.
    */
   async function isInstances(instanceUrl: string, url: string): Promise<boolean> {
-    const user = webId();
-    return user === undefined || isInInstancePod(storages, instanceUrl, url, user);
+    return webId() === undefined || readScope.isInstances(instanceUrl, url);
   }
   /**
    * Which of the deck's documents are read as no one for the instance:
-   * each that is not the instance's (isInstances).
+   * each that is not the instance's (ReadScope.asNoOneOf). With no one
+   * signed in, none is, as nothing is read as anyone.
    */
   async function asNoOneOf(instanceUrl: string, deck: Deck): Promise<DeckPlace> {
-    const [cards, reviews] = await Promise.all([
-      isInstances(instanceUrl, deck.cardsDocumentUrl),
-      isInstances(instanceUrl, deck.reviewsDocumentUrl),
-    ]);
-    return { cards: !cards, reviews: !reviews };
+    return webId() === undefined
+      ? { cards: false, reviews: false }
+      : readScope.asNoOneOf(instanceUrl, deck);
   }
   /**
    * Each instance's digest as this page knows it: read once, then kept up
@@ -268,12 +247,6 @@ export function createDigestStore({
     noteSchedule,
     recordSchedule,
   };
-}
-
-/** Which of a deck's documents are read as no one for an instance (DigestStore.asNoOneOf). */
-export interface DeckPlace {
-  cards: boolean;
-  reviews: boolean;
 }
 
 /** Whether what a deck's documents say may be kept in the instance's digest: both are the instance's. */
