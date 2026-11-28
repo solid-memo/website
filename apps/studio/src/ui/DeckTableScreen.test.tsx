@@ -499,6 +499,16 @@ describe("DeckTableScreen", () => {
     expect(screen.getByText(/The arrangement of these decks has invalid data/)).toBeInTheDocument();
   });
 
+  it("does not offer a move while the check holds the catalog, its own line saying why", () => {
+    render(<Harness moveLocked="blocked" />);
+    select("Verbs");
+    pick(EDIT, "Move to group");
+    expect(screen.queryByRole("combobox", { name: "Group" })).toBeNull();
+    expect(
+      screen.getByRole("link", { name: "See what does not conform on the health screen." }),
+    ).toHaveAttribute("href", "#/health?instance=a");
+  });
+
   it("selects only the decks that may be changed, saying why the others cannot be, all at once too", () => {
     render(<Harness selectable={(deck) => deck.url !== kanji.url} readOnly="setAside" />);
     expect(screen.getByText(/Decks with invalid data are set aside/)).toBeInTheDocument();

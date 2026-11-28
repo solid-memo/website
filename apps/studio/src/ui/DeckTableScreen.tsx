@@ -189,7 +189,7 @@ export function DeckTableScreen({
   badges: (deck: Deck) => readonly DeckBadge[];
   /** Every group, each with its trail, to move decks into. */
   groups: readonly { group: DeckGroup; trail: readonly DeckGroup[] }[];
-  /** Why no deck can be moved into a group: a newer version arranged them, or the arrangement is set aside. */
+  /** Why no deck can be moved into a group: a newer version arranged them, or the check holds the catalog. */
   moveLocked: MoveLock | null;
   /** Why some decks, or all, cannot be selected now (useDataCheck); null when all can. */
   readOnly: ReadOnlyReason | null;
@@ -493,6 +493,7 @@ export function DeckTableScreen({
           groups={groups}
           moveLocked={moveLocked}
           busy={busy}
+          healthHref={healthHref}
           exportHref={transferHref(selected)}
           onMove={(parent) => {
             const group = groups.find((entry) => entry.group.url === parent)?.group ?? null;

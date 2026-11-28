@@ -3251,7 +3251,8 @@ writes (the instance, its catalog, a list of decks or one deck), which
   every bulk action: Home and the library copies don't let
   it be selected, and moving or copying cards doesn't offer it.
 - **The arrangement set aside** (the catalog or a deck group invalid):
-  Groups can't be rearranged, and Home moves no deck into a group. The
+  Groups can't be rearranged, and Home moves no deck into a group:
+  its move asks the catalog's hold, as the screens below do. The
   instance's name and catalog, an import, making or deleting a draft,
   publishing a release and starting a next version are held.
 - **Under "block the instance"**, invalid data holds every deck and the
