@@ -56,6 +56,24 @@ export const BURST_FAILURES = 3;
 /** The window BURST_FAILURES counts in, in milliseconds. */
 export const BURST_MS = 2_000;
 
+/**
+ * How many requests the gate lets go to one server at once, for a fetch
+ * it paces with `limited`: as many as a browser asks one server for over
+ * HTTP/1.1 (READS_AT_ONCE in the application). Over HTTP/2 a browser
+ * sends a page's requests together, and a server that rate-limits takes
+ * them as a burst.
+ */
+export const REQUESTS_AT_ONCE = 6;
+
+/**
+ * How long a limited request holds its server's turn at most, in
+ * milliseconds: one the server is slow to answer goes on, not aborted,
+ * but holds up only itself after that. A write has no deadline, so
+ * without it a few writes that are never answered would hold every
+ * turn for good.
+ */
+export const TURN_MS = 30_000;
+
 /** What the gate keeps of one origin. */
 interface Origin {
   /** The host, as the learner sees it. */
@@ -68,6 +86,10 @@ interface Origin {
   refusedAt: number;
   /** When requests to it failed with no status lately, within BURST_MS. */
   failures: number[];
+  /** How many limited requests to it are under way. */
+  running: number;
+  /** The limited requests waiting for one under way to end, in the order they came. */
+  waiting: (() => void)[];
 }
 
 /** What the gate is given; each has the browser's own by default, and a test gives its own. */
@@ -80,11 +102,17 @@ export interface GateOptions {
   sleep?: (ms: number, signal: AbortSignal | undefined) => Promise<void>;
   /** Whether the browser thinks it is online: a failure while it isn't is no refusal. */
   online?: () => boolean;
+  /** How many limited requests go to one server at once. */
+  atOnce?: number;
 }
 
-/** The gate: `pace` wraps a fetch, its requests passing the gate, every wrapped fetch sharing its waits. */
+/**
+ * The gate: `pace` wraps a fetch, its requests passing the gate, every
+ * wrapped fetch sharing its waits; with `limited`, its requests share
+ * each server's turns too, `atOnce` of them under way at most.
+ */
 export interface RateLimitGate {
-  pace(fetch: typeof globalThis.fetch): typeof globalThis.fetch;
+  pace(fetch: typeof globalThis.fetch, options?: { limited?: boolean }): typeof globalThis.fetch;
 }
 
 /**
@@ -103,12 +131,22 @@ export interface RateLimitGate {
  * podBusy when the server refused it with a status, with its last
  * failure otherwise, as a server that sends no status may be down
  * instead. A request aborted while it waits fails as its signal says.
+ *
+ * A limited request takes a turn of its server's after its wait, and
+ * gives it up once its answer's headers come or it fails, before any
+ * next try, or after TURN_MS while it is still under way: its body is
+ * read in no turn, so a caller that keeps a body unread holds up no
+ * other request, and a server that never answers holds a turn no
+ * longer than that. A turn is held only while the fetch paced is under
+ * way, so that fetch must make no limited request to the same server on
+ * its way, or it would wait on it.
  */
 export function createRateLimitGate({
   now = () => Date.now(),
   random = () => Math.random(),
   sleep = sleepFor,
   online = () => globalThis.navigator?.onLine !== false,
+  atOnce = REQUESTS_AT_ONCE,
 }: GateOptions = {}): RateLimitGate {
   const origins = new Map<string, Origin>();
 
@@ -121,6 +159,8 @@ export function createRateLimitGate({
         refusals: 0,
         refusedAt: -Infinity,
         failures: [],
+        running: 0,
+        waiting: [],
       };
       origins.set(url.origin, origin);
     }
@@ -173,12 +213,70 @@ export function createRateLimitGate({
       await sleep(left, signal);
   }
 
+  /**
+   * Waits for one of `origin`'s turns, `atOnce` at most under way, and
+   * then while it is paused, giving the turn up meanwhile; fails as
+   * `signal` says once it is aborted.
+   */
+  async function take(origin: Origin, signal: AbortSignal | undefined): Promise<void> {
+    for (;;) {
+      await turn(origin, signal);
+      if (origin.running < atOnce) origin.running++;
+      else await queued(origin, signal);
+      // Paused while it waited: the turn goes to the next, and the wait is waited.
+      if (origin.until <= now()) return;
+      give(origin);
+    }
+  }
+
+  /** Settles once a turn of `origin`'s is handed over, or fails as `signal` says, leaving the line. */
+  function queued(origin: Origin, signal: AbortSignal | undefined): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (signal?.aborted) return reject(signal.reason);
+      const start = () => {
+        signal?.removeEventListener("abort", leave);
+        resolve();
+      };
+      const leave = () => {
+        origin.waiting.splice(origin.waiting.indexOf(start), 1);
+        reject(signal?.reason);
+      };
+      origin.waiting.push(start);
+      signal?.addEventListener("abort", leave, { once: true });
+    });
+  }
+
+  /** Gives a turn of `origin`'s up: to the first waiting for one, if any. */
+  function give(origin: Origin): void {
+    const next = origin.waiting.shift();
+    if (next === undefined) origin.running--;
+    else next();
+  }
+
+  /**
+   * The turn of `origin`'s just taken, given up after TURN_MS: a
+   * function that gives it up sooner, once the request settles. The
+   * turn is given up once, whichever comes first.
+   */
+  function held(origin: Origin): () => void {
+    let given = false;
+    const giveUp = () => {
+      if (given) return;
+      given = true;
+      clearTimeout(timer);
+      give(origin);
+    };
+    const timer = setTimeout(giveUp, TURN_MS);
+    return giveUp;
+  }
+
   return {
-    pace(fetch) {
+    pace(fetch, { limited = false } = {}) {
       /**
-       * One try: its wait waited, then the request sent, and its server
-       * paused if it refused it. A failure comes back as its `error`,
-       * with whether it counts as a refusal.
+       * One try: its turn waited for, then the request sent, and its
+       * server paused if it refused it, before the turn is given up, so
+       * the next in line finds the server paused. A failure comes back as
+       * its `error`, with whether it counts as a refusal.
        */
       const send = async (
         origin: Origin,
@@ -186,7 +284,11 @@ export function createRateLimitGate({
         init: RequestInit | undefined,
         signal: AbortSignal | null | undefined,
       ): Promise<{ response: Response } | { error: unknown; refused: boolean }> => {
-        await turn(origin, signal ?? undefined);
+        let release = () => {};
+        if (limited) {
+          await take(origin, signal ?? undefined);
+          release = held(origin);
+        } else await turn(origin, signal ?? undefined);
         try {
           const response = await fetch(input, init);
           if (isRefusal(response)) refused(origin, response);
@@ -194,6 +296,8 @@ export function createRateLimitGate({
           return { response };
         } catch (error) {
           return { error, refused: !signal?.aborted && failedAsRefused(origin, error) };
+        } finally {
+          release();
         }
       };
       return async (input, init) => {

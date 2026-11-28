@@ -192,6 +192,18 @@ request it waits on. The storages that tell an expired session from a
 refused token are read past the gate, since a request as the learner
 waits on them. A guest's pod is never paced.
 
+The learner's requests take turns at the gate too, so a screen's reads
+don't reach the pod as one burst. At most six are under way to one
+server at once (`REQUESTS_AT_ONCE`), as many as a browser asks one
+server for over HTTP/1.1. A turn ends once the answer's headers come,
+or the request fails, so a body read slowly holds no turn. It ends
+after 30 seconds as well (`TURN_MS`), while the request goes on: a
+write has no deadline, and a server that never answers holds up only
+that request after that. Nothing a
+request passes on its way to the gate makes a request as the learner
+while that request holds a turn, so no request waits for a turn it
+holds itself.
+
 ## Runtime: a grade
 
 A grade shows the layers at work. The screen calls a use case, the use

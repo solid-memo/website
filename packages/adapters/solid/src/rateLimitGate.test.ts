@@ -12,8 +12,10 @@ import {
   GATE_TRIES,
   GATE_WAIT_MS,
   REFUSED_LATELY_MS,
+  REQUESTS_AT_ONCE,
   RETRY_AFTER_CAP_MS,
   retryAfterMs,
+  TURN_MS,
 } from "./rateLimitGate";
 import { READ_DEADLINE_MS, withReadDeadline } from "./readDeadline";
 
@@ -355,6 +357,141 @@ describe("createRateLimitGate", () => {
     const paced = gate().pace(pod.fetch);
     expect((await paced("data:text/plain,a")).status).toBe(429);
     expect((await paced("data:text/plain,a")).status).toBe(429);
+  });
+
+  describe("requests at once", () => {
+    /** A server that answers each request only when the test says, by its address. */
+    function held() {
+      const asked: string[] = [];
+      const answers = new Map<string, (response: Response | Error) => void>();
+      const fetch = vi.fn(
+        (input: RequestInfo | URL) =>
+          new Promise<Response>((resolve, reject) => {
+            const url = String(input);
+            asked.push(url);
+            answers.set(url, (answer) =>
+              answer instanceof Error ? reject(answer) : resolve(answer),
+            );
+          }),
+      );
+      const answer = async (url: string, response: Response | Error = ok()) => {
+        answers.get(url)!(response);
+        await vi.advanceTimersByTimeAsync(0);
+      };
+      return { fetch, asked, answer };
+    }
+
+    const urls = (count: number, origin = POD) =>
+      Array.from({ length: count }, (_, n) => `${origin}${n}.ttl`);
+
+    it(`lets ${REQUESTS_AT_ONCE} limited requests go to one server at once, the next once one is answered, and holds none to another`, async () => {
+      const pod = held();
+      const paced = gate().pace(pod.fetch, { limited: true });
+      const [first, ...rest] = urls(REQUESTS_AT_ONCE + 2);
+      const all = [first!, ...rest].map((url) => paced(url));
+      const elsewhere = paced("https://other.example/a.ttl");
+      await vi.advanceTimersByTimeAsync(0);
+      expect(pod.asked).toEqual([...urls(REQUESTS_AT_ONCE), "https://other.example/a.ttl"]);
+      // A failure gives its turn up as an answer does.
+      const failed = expect(all[0]).rejects.toThrow("down");
+      await pod.answer(first!, new Error("down"));
+      expect(pod.asked).toHaveLength(REQUESTS_AT_ONCE + 2);
+      await pod.answer(rest[0]!);
+      expect(pod.asked).toHaveLength(REQUESTS_AT_ONCE + 3);
+      for (const url of [...rest.slice(1), "https://other.example/a.ttl"]) await pod.answer(url);
+      await failed;
+      await Promise.all([...all.slice(1), elsewhere]);
+    });
+
+    it(`gives a turn up after TURN_MS though its request is still under way, without aborting it`, async () => {
+      const pod = held();
+      const paced = gate().pace(pod.fetch, { limited: true });
+      const writes = urls(REQUESTS_AT_ONCE).map((url) => paced(url, { method: "PUT", body: "x" }));
+      const next = paced(`${POD}next.ttl`);
+      await vi.advanceTimersByTimeAsync(TURN_MS - 1);
+      expect(pod.asked).toHaveLength(REQUESTS_AT_ONCE);
+      await vi.advanceTimersByTimeAsync(1);
+      expect(pod.asked.at(-1)).toBe(`${POD}next.ttl`);
+      await pod.answer(`${POD}next.ttl`);
+      expect((await next).status).toBe(200);
+      // The writes go on, and settle when the server answers them.
+      for (const url of urls(REQUESTS_AT_ONCE)) await pod.answer(url);
+      expect((await Promise.all(writes)).map(({ status }) => status)).toEqual(
+        urls(REQUESTS_AT_ONCE).map(() => 200),
+      );
+    });
+
+    it("hands out no turn more when a request settles after its turn was given up", async () => {
+      const pod = held();
+      const paced = createRateLimitGate({ atOnce: 1 }).pace(pod.fetch, { limited: true });
+      const slow = paced(`${POD}slow.ttl`);
+      const second = paced(`${POD}second.ttl`);
+      const third = paced(`${POD}third.ttl`);
+      await vi.advanceTimersByTimeAsync(TURN_MS);
+      expect(pod.asked).toEqual([`${POD}slow.ttl`, `${POD}second.ttl`]);
+      // The slow one settles: its turn was given up already, so the third still waits.
+      await pod.answer(`${POD}slow.ttl`);
+      expect(pod.asked).toHaveLength(2);
+      await pod.answer(`${POD}second.ttl`);
+      expect(pod.asked).toEqual([`${POD}slow.ttl`, `${POD}second.ttl`, `${POD}third.ttl`]);
+      await pod.answer(`${POD}third.ttl`);
+      await Promise.all([slow, second, third]);
+      expect(vi.getTimerCount()).toBe(0);
+    });
+
+    it("gives a turn up once the headers come, the body read in none", async () => {
+      const pod = server(() => new Response("a body read later"));
+      const paced = createRateLimitGate({ atOnce: 1 }).pace(pod.fetch, { limited: true });
+      const unread = await paced(`${POD}a.ttl`);
+      await paced(`${POD}b.ttl`);
+      expect(await unread.text()).toBe("a body read later");
+    });
+
+    it("takes no turn for a fetch paced without the limit", async () => {
+      const pod = held();
+      const shared = createRateLimitGate({ atOnce: 1 });
+      void shared.pace(pod.fetch, { limited: true })(`${POD}a.ttl`);
+      void shared.pace(pod.fetch)(`${POD}b.ttl`);
+      await vi.advanceTimersByTimeAsync(0);
+      expect(pod.asked.sort()).toEqual([`${POD}a.ttl`, `${POD}b.ttl`]);
+    });
+
+    it("gives its turn up while its server's wait lasts, and sends a refused request again in a turn", async () => {
+      const pod = held();
+      const paced = createRateLimitGate({ atOnce: 1 }).pace(pod.fetch, { limited: true });
+      const start = Date.now();
+      const refused = paced(`${POD}a.ttl`);
+      const next = paced(`${POD}b.ttl`);
+      await vi.advanceTimersByTimeAsync(0);
+      await pod.answer(`${POD}a.ttl`, tooMany("10"));
+      // The turn went to the next in line, which found the server paused and waits too.
+      expect(pod.asked).toEqual([`${POD}a.ttl`]);
+      await vi.advanceTimersByTimeAsync(10_000);
+      // Once it is over, one of them is sent, the other in the next turn.
+      expect(pod.asked).toHaveLength(2);
+      await pod.answer(pod.asked[1]!);
+      expect([...pod.asked].sort()).toEqual([`${POD}a.ttl`, `${POD}a.ttl`, `${POD}b.ttl`]);
+      await pod.answer(pod.asked[2]!);
+      await Promise.all([refused, next]);
+      expect(Date.now() - start).toBe(10_000);
+    });
+
+    it("fails a request aborted while it waits for a turn, before or in the line, leaving the line to the others", async () => {
+      const pod = held();
+      const paced = createRateLimitGate({ atOnce: 1 }).pace(pod.fetch, { limited: true });
+      const first = paced(`${POD}a.ttl`);
+      const caller = new AbortController();
+      const leaving = paced(`${POD}b.ttl`, { signal: caller.signal });
+      const last = paced(`${POD}c.ttl`);
+      await vi.advanceTimersByTimeAsync(0);
+      caller.abort("stop");
+      await expect(leaving).rejects.toBe("stop");
+      await expect(paced(`${POD}d.ttl`, { signal: caller.signal })).rejects.toBe("stop");
+      await pod.answer(`${POD}a.ttl`);
+      await pod.answer(`${POD}c.ttl`);
+      await Promise.all([first, last]);
+      expect(pod.asked).toEqual([`${POD}a.ttl`, `${POD}c.ttl`]);
+    });
   });
 
   describe("before the read deadline", () => {

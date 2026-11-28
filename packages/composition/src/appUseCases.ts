@@ -148,11 +148,20 @@ export function createAppUseCases({
    * for the time it waits, and each try has deadlines of its own; and
    * outside nothing that makes a request of its own on the way, such as
    * finding the user's storages, so a request held there holds no other
-   * up. A guest's pod is this browser's, and is never paced.
+   * up. A guest's pod is this browser's, and is never paced. The user's
+   * requests take turns too, REQUESTS_AT_ONCE of them under way to one
+   * server at most, so a screen's reads reach the pod as no burst: what
+   * they pass on their way makes no request as the user, which would
+   * wait for a turn its own request holds. A request that isn't
+   * answered gives its turn up after TURN_MS all the same.
    */
   const rateLimits = createRateLimitGate();
   const paced = (fetch: typeof globalThis.fetch) =>
-    routedFetch({ origin: GUEST_ORIGIN, local: fetch, remote: rateLimits.pace(fetch) });
+    routedFetch({
+      origin: GUEST_ORIGIN,
+      local: fetch,
+      remote: rateLimits.pace(fetch, { limited: true }),
+    });
   /** The user's fetch, paced, with no deadline on the whole read. */
   const podPaced = paced(writeFence.fetch);
   /**
