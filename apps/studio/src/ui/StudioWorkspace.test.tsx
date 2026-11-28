@@ -2413,11 +2413,7 @@ describe("StudioWorkspace", () => {
         ),
       );
       await waitFor(() =>
-        expect(useCases.makeReleasePublic).toHaveBeenCalledWith(
-          instanceA.url,
-          target,
-          session.webId,
-        ),
+        expect(useCases.makeReleasePublic).toHaveBeenCalledWith(instanceA.url, target),
       );
       expect(await screen.findByText("Anyone with its address can read it.")).toBeInTheDocument();
       fireEvent.click(screen.getByRole("button", { name: "Download .ttl" }));
@@ -2429,14 +2425,10 @@ describe("StudioWorkspace", () => {
           draftUrl: nextUrl,
         }),
       );
-      expect(useCases.createReleaseDraft).toHaveBeenCalledWith(
-        instanceA.url,
-        {
-          kind: "nextVersionOf",
-          url: target,
-        },
-        session.webId,
-      );
+      expect(useCases.createReleaseDraft).toHaveBeenCalledWith(instanceA.url, {
+        kind: "nextVersionOf",
+        url: target,
+      });
     });
 
     it("opens a draft made on the drafts screen, which the activity tells of", async () => {

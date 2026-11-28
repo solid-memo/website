@@ -399,14 +399,10 @@ describe("createAppUseCases", () => {
     await useCases.startGuest("My study");
     const [instance] = await useCases.listInstances(GUEST_SESSION);
     await useCases.createDeck(instance!.url, { en: "Capitals" });
-    const made = await useCases.createReleaseDraft(
-      instance!.url,
-      {
-        kind: "nextVersionOf",
-        url: `${SITE}decks/getting-started/v1.ttl`,
-      },
-      GUEST_SESSION.webId,
-    );
+    const made = await useCases.createReleaseDraft(instance!.url, {
+      kind: "nextVersionOf",
+      url: `${SITE}decks/getting-started/v1.ttl`,
+    });
     expect(made!.draft).toMatchObject({ name: "getting-started", version: 2, course: true });
     expect((await useCases.checkInstance(instance!.url)).conforms).toBe(true);
     // Assembled, the draft is the next version of the release it follows, read off the page.
@@ -415,14 +411,10 @@ describe("createAppUseCases", () => {
     expect(saved).toHaveBeenCalledOnce();
     saved.mockRestore();
     await expect(
-      useCases.createReleaseDraft(
-        instance!.url,
-        {
-          kind: "nextVersionOf",
-          url: `${instance!.url}releases/none/v1.ttl`,
-        },
-        GUEST_SESSION.webId,
-      ),
+      useCases.createReleaseDraft(instance!.url, {
+        kind: "nextVersionOf",
+        url: `${instance!.url}releases/none/v1.ttl`,
+      }),
     ).rejects.toMatchObject({
       code: "releaseUnreadable",
     });
@@ -459,7 +451,7 @@ describe("createAppUseCases", () => {
     );
     const useCases = createAppUseCases({ ...options, indexedDB: undefined });
     const nextVersionOf = (url: string) =>
-      useCases.createReleaseDraft(`${alice}memo/`, { kind: "nextVersionOf", url }, login.webId!);
+      useCases.createReleaseDraft(`${alice}memo/`, { kind: "nextVersionOf", url });
 
     const elsewhere = "https://attacker.example/r.ttl";
     await expect(nextVersionOf(elsewhere)).rejects.toMatchObject({ code: "releaseUnreadable" });
@@ -497,11 +489,10 @@ describe("createAppUseCases", () => {
     const useCases = createAppUseCases({ ...options, indexedDB: undefined });
     const own = `${alice}memo/releases/capitals/v1.ttl`;
     await expect(
-      useCases.createReleaseDraft(
-        "https://attacker.example/memo/",
-        { kind: "nextVersionOf", url: own },
-        login.webId,
-      ),
+      useCases.createReleaseDraft("https://attacker.example/memo/", {
+        kind: "nextVersionOf",
+        url: own,
+      }),
     ).rejects.toMatchObject({ code: "releaseUnreadable" });
     expect(login.sent).not.toContain(own);
     expect(vi.mocked(globalThis.fetch)).toHaveBeenCalledWith(
@@ -542,7 +533,7 @@ describe("createAppUseCases", () => {
       authors: [],
     };
     await expect(
-      useCases.createReleaseDraft(foreign, { kind: "fromDeck", deck }, login.webId),
+      useCases.createReleaseDraft(foreign, { kind: "fromDeck", deck }),
     ).rejects.toMatchObject({ code: "noCatalogToUpdate" });
     expect(login.sent).not.toContain(own);
     expect(vi.mocked(globalThis.fetch)).toHaveBeenCalledWith(
@@ -587,14 +578,7 @@ describe("createAppUseCases", () => {
     const from = deckOf("deck-1", ownCards, ownReviews);
     const to = deckOf("deck-2", `${foreign}decks/deck-2.ttl`, `${foreign}reviews/deck-2.ttl`);
     await expect(
-      useCases.transferCards(
-        foreign,
-        from,
-        to,
-        ["capital"],
-        { mode: "copy", keepProgress: true },
-        login.webId,
-      ),
+      useCases.transferCards(foreign, from, to, ["capital"], { mode: "copy", keepProgress: true }),
     ).resolves.toMatchObject({ missing: ["capital"] });
     // What the digest learned is written back after: until it is, the network stays.
     await digestWritten();
@@ -627,11 +611,7 @@ describe("createAppUseCases", () => {
     const [instance] = await guest.listInstances(GUEST_SESSION);
     const made = await guest.createDeck(instance!.url, { en: "Capitals" });
     await guest.addCard(made, { front: { en: "Sweden" }, back: { en: "Stockholm" } });
-    const drafted = await guest.createReleaseDraft(
-      instance!.url,
-      { kind: "fromDeck", deck: made },
-      GUEST_SESSION.webId,
-    );
+    const drafted = await guest.createReleaseDraft(instance!.url, { kind: "fromDeck", deck: made });
     expect(drafted!.draft.url.startsWith(instance!.url)).toBe(true);
     expect(read).toEqual([["Sweden"]]);
 
@@ -645,7 +625,7 @@ describe("createAppUseCases", () => {
       reviewsDocumentUrl: `${foreign}reviews/deck-1.ttl`,
     };
     await expect(
-      useCases.createReleaseDraft(foreign, { kind: "fromDeck", deck }, login.webId),
+      useCases.createReleaseDraft(foreign, { kind: "fromDeck", deck }),
     ).rejects.toMatchObject({ code: "deckGone" });
     expect(read).toEqual([["Sweden"]]);
     expect(vi.mocked(globalThis.fetch)).not.toHaveBeenCalledWith(
@@ -679,14 +659,10 @@ describe("createAppUseCases", () => {
     const useCases = createAppUseCases({ ...options, indexedDB: undefined });
     const elsewhere = "https://attacker.example/r.ttl";
     await expect(
-      useCases.createReleaseDraft(
-        "https://bob.example/memo/",
-        {
-          kind: "nextVersionOf",
-          url: elsewhere,
-        },
-        login.webId!,
-      ),
+      useCases.createReleaseDraft("https://bob.example/memo/", {
+        kind: "nextVersionOf",
+        url: elsewhere,
+      }),
     ).rejects.toMatchObject({ code: "releaseUnreadable" });
     expect(login.sent).not.toContain(elsewhere);
     expect(vi.mocked(globalThis.fetch)).toHaveBeenCalledWith(
@@ -727,11 +703,7 @@ describe("createAppUseCases", () => {
     ]);
     const own = `${alice}memo/releases/capitals/v1.ttl`;
     await expect(
-      useCases.createReleaseDraft(
-        `${alice}memo/`,
-        { kind: "nextVersionOf", url: own },
-        login.webId!,
-      ),
+      useCases.createReleaseDraft(`${alice}memo/`, { kind: "nextVersionOf", url: own }),
     ).rejects.toMatchObject({ code: "releaseUnreadable" });
     expect(login.sent).toContain(own);
   });
@@ -1794,11 +1766,10 @@ describe("createAppUseCases", () => {
     const noAnswer = { code: "podNoAnswer" };
     const started = Date.now();
     const plan = useCases.planMigration(shared.url);
-    const release = useCases.createReleaseDraft(
-      shared.url,
-      { kind: "nextVersionOf", url: `${bob}memo/releases/capitals/v1.ttl` },
-      login.webId,
-    );
+    const release = useCases.createReleaseDraft(shared.url, {
+      kind: "nextVersionOf",
+      url: `${bob}memo/releases/capitals/v1.ttl`,
+    });
     const attach = useCases.attachInstanceByUrl(session, `${bob}other/`, "private");
     await untilSettled([plan, release, attach], 10 * 60_000);
     expect(Date.now() - started).toBeLessThanOrEqual(WHOLE_READ_MS + READ_DEADLINE_MS);
@@ -2048,11 +2019,10 @@ describe("createAppUseCases", () => {
     let settledReads = 0;
     const reads = Array.from({ length: OFF_PAGE_WORKERS }, (_, at) =>
       useCases
-        .createReleaseDraft(
-          instance!.url,
-          { kind: "nextVersionOf", url: `${carol}releases/r${at}/v1.ttl` },
-          GUEST_SESSION.webId,
-        )
+        .createReleaseDraft(instance!.url, {
+          kind: "nextVersionOf",
+          url: `${carol}releases/r${at}/v1.ttl`,
+        })
         .finally(() => settledReads++),
     );
     // Each read waits on the host, its worker started.

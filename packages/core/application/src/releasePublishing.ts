@@ -11,8 +11,8 @@ import { releaseFileName } from "@solid-memo/domain/release/releasePlace";
 import type { ShapeValidator } from "./ports/checks";
 import type { FileExchange } from "./ports/device";
 import type { DeckLibrary, ReleaseDraftRepository, ReleasePublisher } from "./ports/library";
-import type { StorageGateway } from "./ports/session";
-import { followedAsNoOne, isInInstancePod, type ReleaseDraftUseCases } from "./releaseDrafts";
+import type { ReadScope } from "./readScope";
+import { followedAsNoOne, type ReleaseDraftUseCases } from "./releaseDrafts";
 import { mapAtOnce } from "./atOnce";
 
 /**
@@ -69,12 +69,12 @@ export interface ReleasePublishingUseCases {
   /**
    * Make a release the instance published readable by everyone, again;
    * publicAccessRefused when the pod will not, when it is not one the
-   * instance's catalog lists, and when it is neither in the instance nor
-   * in a storage of the user's (those of `webId`) that the instance is
-   * in: an instance attached from someone else's pod may list a release
+   * instance's catalog lists, and when it is not the instance's
+   * (ReadScope.isInstances): neither in the instance nor in a storage of
+   * the signed-in user's that the instance is in. An instance attached from someone else's pod may list a release
    * of the user's own that was kept from everyone.
    */
-  makeReleasePublic(instanceUrl: string, url: string, webId: string): Promise<void>;
+  makeReleasePublic(instanceUrl: string, url: string): Promise<void>;
   /** Whether someone with no login can read the release at `url`. */
   isReleasePublic(url: string): Promise<boolean>;
   /**
@@ -101,8 +101,7 @@ export function createReleasePublishingUseCases({
   shapeValidator,
   deckLibrary,
   fileExchange,
-  storageGateway,
-  webId,
+  readScope,
   now,
 }: {
   drafts: Pick<ReleaseDraftUseCases, "readReleaseDraft" | "checkReleaseDraft">;
@@ -111,14 +110,13 @@ export function createReleasePublishingUseCases({
   shapeValidator: Pick<ShapeValidator, "validateRelease">;
   deckLibrary: DeckLibrary;
   fileExchange: FileExchange;
-  storageGateway: Pick<StorageGateway, "discoverStorages">;
-  /** Who is logged in, whose own release a draft may follow as the user (followedAsNoOne). */
-  webId: () => string | undefined;
+  /** Whose a release is: one a draft follows is read as the user, and one is made public, only when it is the instance's. */
+  readScope: Pick<ReadScope, "isInstances">;
   now: () => Date;
 }): ReleasePublishingUseCases {
   /** Read the release the draft at `draftUrl` follows as the user only when it is the instance's (followedAsNoOne). */
   const followedAsUser = (draftUrl: string) => async (prev: string) =>
-    !(await followedAsNoOne(storageGateway, webId(), draftUrl, prev));
+    !(await followedAsNoOne(readScope, draftUrl, prev));
 
   return {
     async publishRelease(draftUrl, targetUrl, markdownCheck) {
@@ -160,8 +158,8 @@ export function createReleasePublishingUseCases({
       return { url: targetUrl, public: shared };
     },
 
-    async makeReleasePublic(instanceUrl, url, webId) {
-      if (!(await isInInstancePod(storageGateway, instanceUrl, url, webId)))
+    async makeReleasePublic(instanceUrl, url) {
+      if (!(await readScope.isInstances(instanceUrl, url)))
         throw new AppError("publicAccessRefused", { url });
       return releasePublisher.makePublic(instanceUrl, url);
     },

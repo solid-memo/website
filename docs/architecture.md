@@ -388,6 +388,10 @@ npm run crosscheck # the pySHACL cross-check CI runs (Python, scripts/requiremen
   the answers written to and read from the log
   ([answerStore.ts](../packages/core/application/src/answerStore.ts)), and
   the digest ([digestStore.ts](../packages/core/application/src/digestStore.ts)).
+  They share whose a document is too
+  ([readScope.ts](../packages/core/application/src/readScope.ts)). A
+  document read for an instance is read as the signed-in user only when
+  it's the instance's, so no slice takes a WebID from a screen.
   `createUseCases` makes the stores and composes every slice. No port
   in its `Dependencies` falls back to doing nothing, so a port the
   composition root forgets is a type error. A Studio trial composes

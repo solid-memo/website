@@ -32,14 +32,11 @@ import { queries } from "./queries";
  */
 export function ReleasePublishContainer({
   useCases,
-  webId,
   editor,
   links,
   onStarted,
 }: {
   useCases: UseCases;
-  /** Who makes the release public again (useMakePublic), or starts its next version (useStartNextVersion). */
-  webId: string;
   editor: DraftEditor;
   links: ReleasePublishLinks;
   /** A next version started: its draft. */
@@ -72,8 +69,8 @@ export function ReleasePublishContainer({
     onSuccess: (published) =>
       queryClient.setQueryData(queryKeys.releasePublic(published.url), published.public),
   });
-  const publicMutation = useMakePublic(useCases, instanceUrl, webId);
-  const nextMutation = useStartNextVersion(useCases, instanceUrl, webId, onStarted);
+  const publicMutation = useMakePublic(useCases, instanceUrl);
+  const nextMutation = useStartNextVersion(useCases, instanceUrl, onStarted);
   const downloadMutation = useMutation({ mutationFn: () => useCases.downloadRelease(draft.url) });
   const errors = rules.data === undefined ? undefined : publishErrors(rules.data);
   return (

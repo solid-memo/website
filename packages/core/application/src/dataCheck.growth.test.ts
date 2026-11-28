@@ -24,6 +24,7 @@ import type { DocumentReport } from "@solid-memo/domain/validation";
 import { deckSetAside } from "@solid-memo/domain/validation";
 import { createInstanceCheckUseCases } from "./instanceChecks";
 import { deck, instance, makeDeps } from "./testing/fakePorts";
+import { createReadScope } from "./readScope";
 
 const CARDS = `${instance.url}shared-cards.ttl`;
 const REVIEWS = `${instance.url}shared-reviews.ttl`;
@@ -71,7 +72,7 @@ it("checks many decks naming one cards and one reviews document in time that gro
           remember: () => undefined,
           isInstances: async () => true,
         },
-        webId: () => undefined,
+        readScope: createReadScope({ storageGateway: deps.storageGateway, webId: () => undefined }),
         ruleset: "rules",
       });
       return async () => {
@@ -139,7 +140,7 @@ it("checks many decks each spelling one cards and one reviews document its own w
           remember: () => undefined,
           isInstances: async () => false,
         },
-        webId: () => undefined,
+        readScope: createReadScope({ storageGateway: deps.storageGateway, webId: () => undefined }),
         ruleset: "rules",
       });
       return async () => {

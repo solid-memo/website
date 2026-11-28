@@ -17,7 +17,7 @@ import { createUseCases } from "@solid-memo/application/useCases";
 import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
 import type { ResourceStore } from "@solid-memo/application/ports/device";
 import type { DeckLibrary } from "@solid-memo/application/ports/library";
-import { GUEST_ORIGIN, GUEST_SESSION, GUEST_WEBID } from "@solid-memo/domain/guest";
+import { GUEST_ORIGIN, GUEST_SESSION } from "@solid-memo/domain/guest";
 import type { LibraryDeck } from "@solid-memo/domain/library";
 import { createLocalGuestPod } from "./localGuestPod";
 import { createLocalPod } from "./localPod";
@@ -360,11 +360,7 @@ describe("a guest's study", () => {
     const { useCases, guestStore, aliceStore } = await app(undefined, { name: "v1.ttl", text });
     await useCases.startGuest("My study");
     const [guestInstance] = await useCases.listInstances(GUEST_SESSION);
-    const made = await useCases.createReleaseDraft(
-      guestInstance!.url,
-      { kind: "fromFile" },
-      GUEST_WEBID,
-    );
+    const made = await useCases.createReleaseDraft(guestInstance!.url, { kind: "fromFile" });
     // The draft keeps what the release states of itself, the term too.
     expect(await everyTriple(guestStore)).toContain(`<${made!.draft.url}> ${later} .`);
     const target = await useCases.createInstance(ALICE, {

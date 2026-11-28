@@ -150,7 +150,7 @@ flowchart LR
   instance, the notice lists at most `LIST_LIMIT` (50) such decks and
   says how many more there are. A document outside the
   instance's folder, and not in a storage of the user's found to hold
-  the instance too (`isInInstancePod`), is named in `outsidePod` too,
+  the instance too (`ReadScope.isInstances`), is named in `outsidePod` too,
   and its deck gets no such button. A check reads a deck's two
   documents at once. It reads those outside the instance's folder
   within one minute in all (`OUTSIDE_READS_MS` in

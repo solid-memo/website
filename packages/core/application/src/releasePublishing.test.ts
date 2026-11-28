@@ -15,6 +15,7 @@ import type { FileExchange } from "./ports/device";
 import type { DeckLibrary, ReleaseDraftRepository, ReleasePublisher } from "./ports/library";
 import { READS_AT_ONCE } from "./atOnce";
 import { createReleasePublishingUseCases } from "./releasePublishing";
+import { createReadScope } from "./readScope";
 
 const INSTANCE = "https://pod.example/solid-memo/main/";
 const TARGET = `${INSTANCE}releases/solid/v2.ttl`;
@@ -68,13 +69,15 @@ function setUp({
     shapeValidator,
     deckLibrary,
     fileExchange,
-    storageGateway: {
-      discoverStorages: vi.fn(async () => {
-        if (storages instanceof Error) throw storages;
-        return storages as Storage[];
-      }),
-    },
-    webId: () => WEBID,
+    readScope: createReadScope({
+      storageGateway: {
+        discoverStorages: vi.fn(async () => {
+          if (storages instanceof Error) throw storages;
+          return storages as Storage[];
+        }),
+      },
+      webId: () => WEBID,
+    }),
     now: () => new Date(NOW),
   });
   return { drafts, repository, publisher, fileExchange, shapeValidator, useCases };
@@ -198,7 +201,7 @@ describe("publishRelease", () => {
 describe("makeReleasePublic, isReleasePublic and listPublishedReleases", () => {
   it("are the publisher's, each release listed with whether it is public", async () => {
     const { useCases, publisher } = setUp();
-    await useCases.makeReleasePublic(INSTANCE, TARGET, WEBID);
+    await useCases.makeReleasePublic(INSTANCE, TARGET);
     expect(publisher.makePublic).toHaveBeenCalledWith(INSTANCE, TARGET);
     await expect(useCases.isReleasePublic(TARGET)).resolves.toBe(true);
     await expect(useCases.listPublishedReleases(INSTANCE)).resolves.toEqual([
@@ -243,7 +246,7 @@ describe("makeReleasePublic, of a release elsewhere", () => {
 
   it("makes public a release in a folder of the user's storage the instance is in", async () => {
     const { useCases, publisher } = setUp();
-    await useCases.makeReleasePublic(INSTANCE, ELSEWHERE, WEBID);
+    await useCases.makeReleasePublic(INSTANCE, ELSEWHERE);
     expect(publisher.makePublic).toHaveBeenCalledWith(INSTANCE, ELSEWHERE);
   });
 
@@ -261,7 +264,7 @@ describe("makeReleasePublic, of a release elsewhere", () => {
     ];
     for (const [url, storages] of cases) {
       const { useCases, publisher } = setUp({ storages });
-      await expect(useCases.makeReleasePublic(INSTANCE, url, WEBID)).rejects.toMatchObject({
+      await expect(useCases.makeReleasePublic(INSTANCE, url)).rejects.toMatchObject({
         code: "publicAccessRefused",
         vars: { url },
       });
@@ -275,7 +278,7 @@ describe("makeReleasePublic, of a release elsewhere", () => {
     const { useCases, publisher } = setUp({
       storages: [{ url: root }, { url: "https://evil.example/" }],
     });
-    await expect(useCases.makeReleasePublic(root, url, WEBID)).rejects.toMatchObject({
+    await expect(useCases.makeReleasePublic(root, url)).rejects.toMatchObject({
       code: "publicAccessRefused",
       vars: { url },
     });

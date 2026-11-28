@@ -26,7 +26,6 @@ import type { InstanceDigest } from "@solid-memo/domain/studyDigest";
 import type { ShapeValidator, DocumentContext, ReadBudget, SharedReads } from "./ports/checks";
 import type { DeckLibrary, ReleaseDraftRepository } from "./ports/library";
 import type { DeckRepository } from "./ports/pod";
-import type { StorageGateway } from "./ports/session";
 import type { AnswerStore } from "./answerStore";
 import { AppError } from "@solid-memo/domain/appError";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
@@ -35,7 +34,7 @@ import { allSettledThen, inTurns, mapAtOnce, READS_AT_ONCE } from "./atOnce";
 import { readBudget } from "./readBudget";
 import { noting } from "./digestStore";
 import type { DigestStore } from "./digestStore";
-import { isInInstancePod } from "./releaseDrafts";
+import type { ReadScope } from "./readScope";
 
 export interface InstanceCheckUseCases {
   /**
@@ -290,8 +289,7 @@ export function createInstanceCheckUseCases({
   shapeValidator,
   deckLibrary,
   digestStore,
-  storageGateway,
-  webId,
+  readScope,
   ruleset,
 }: {
   deckRepository: DeckRepository;
@@ -300,9 +298,7 @@ export function createInstanceCheckUseCases({
   shapeValidator: ShapeValidator;
   deckLibrary: DeckLibrary;
   digestStore: Pick<DigestStore, "of" | "remember" | "isInstances">;
-  storageGateway: Pick<StorageGateway, "discoverStorages">;
-  /** The WebID of whoever is signed in, asked at each call; none when no one is. */
-  webId: () => string | undefined;
+  readScope: Pick<ReadScope, "isInstances">;
   ruleset: string;
 }): InstanceCheckUseCases {
   /** The instance checks' clock: it ticks as a check of a document starts, or what was found is forgotten. */
@@ -448,28 +444,19 @@ export function createInstanceCheckUseCases({
   /**
    * A test of which documents may not be claimed for a deck of the
    * instance, giving those of `documents` outside its folder and in no
-   * storage of the user's that holds it too (isInInstancePod): a claim
-   * lets the app write to a document as the user and delete from it, and
-   * an instance attached from someone else's pod may name a document of
-   * the user's own. A storage counts only when it can be found; when none
-   * can, or no one is signed in, only the instance's own folder does.
-   * The user's storages are found once for one test.
+   * storage of the user's that holds it too (ReadScope.isInstances): a
+   * claim lets the app write to a document as the user and delete from
+   * it, and an instance attached from someone else's pod may name a
+   * document of the user's own. A storage counts only when it can be
+   * found; when none can, or no one is signed in, only the instance's own
+   * folder does.
    */
   function outsidePodTest(
     instanceUrl: string,
   ): (documents: readonly string[]) => Promise<string[]> {
-    const user = webId();
-    let found: ReturnType<StorageGateway["discoverStorages"]> | undefined;
-    const storages: Pick<StorageGateway, "discoverStorages"> = {
-      discoverStorages: (id) => (found ??= storageGateway.discoverStorages(id)),
-    };
     return async (documents) => {
       const inside = await Promise.all(
-        documents.map(async (url) =>
-          user === undefined
-            ? isDocumentIn(url, instanceUrl)
-            : isInInstancePod(storages, instanceUrl, url, user),
-        ),
+        documents.map((url) => readScope.isInstances(instanceUrl, url)),
       );
       return documents.filter((_, index) => !inside[index]);
     };

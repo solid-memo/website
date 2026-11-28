@@ -143,14 +143,10 @@ describe("a review state a newer version wrote", () => {
     const moved = cards[0]!;
     const newer = await plant(a, `${a.cardsDocumentUrl}#${moved.id}`);
 
-    const plan = await u.transferCards(
-      INSTANCE,
-      a,
-      b,
-      [moved.id],
-      { mode: "move", keepProgress: true },
-      SESSION.webId,
-    );
+    const plan = await u.transferCards(INSTANCE, a, b, [moved.id], {
+      mode: "move",
+      keepProgress: true,
+    });
 
     const to = plan.cards[0]!.to;
     expect((await u.listCards(a)).map(({ id }) => id)).toEqual([cards[1]!.id]);
@@ -171,14 +167,10 @@ describe("a review state a newer version wrote", () => {
     expect((await u.listDeckReviewStates(b)).sm2.map(({ cardId }) => cardId)).toEqual([moved.id]);
     const newer = await plant(b, `${b.cardsDocumentUrl}#${moved.id}`);
 
-    const plan = await u.transferCards(
-      INSTANCE,
-      a,
-      b,
-      [moved.id],
-      { mode: "move", keepProgress: false },
-      SESSION.webId,
-    );
+    const plan = await u.transferCards(INSTANCE, a, b, [moved.id], {
+      mode: "move",
+      keepProgress: false,
+    });
 
     expect(plan.target.reviewRemovals).toHaveLength(1);
     expect((await u.listCards(a)).map(({ id }) => id)).toEqual([cards[1]!.id]);
@@ -273,14 +265,7 @@ describe("the state read of a card, when a newer version wrote it", () => {
 
       for (let attempt = 0; attempt < 2; attempt++) {
         await expect(
-          u.transferCards(
-            INSTANCE,
-            a,
-            b,
-            [cards[0]!.id],
-            { mode: "move", keepProgress },
-            SESSION.webId,
-          ),
+          u.transferCards(INSTANCE, a, b, [cards[0]!.id], { mode: "move", keepProgress }),
         ).rejects.toMatchObject(refused);
         expect(await held()).toEqual(before);
       }
@@ -295,14 +280,7 @@ describe("the state read of a card, when a newer version wrote it", () => {
     const before = await held();
 
     await expect(
-      u.transferCards(
-        INSTANCE,
-        a,
-        b,
-        [moved.id],
-        { mode: "move", keepProgress: false },
-        SESSION.webId,
-      ),
+      u.transferCards(INSTANCE, a, b, [moved.id], { mode: "move", keepProgress: false }),
     ).rejects.toMatchObject(refused);
 
     expect(await held()).toEqual(before);
@@ -333,14 +311,7 @@ describe("the state read of a card, when a newer version wrote it", () => {
     const before = await held();
 
     await expect(
-      u.transferCards(
-        INSTANCE,
-        a,
-        b,
-        [fresh.id],
-        { mode: "move", keepProgress: true },
-        SESSION.webId,
-      ),
+      u.transferCards(INSTANCE, a, b, [fresh.id], { mode: "move", keepProgress: true }),
     ).rejects.toMatchObject(refused);
 
     expect(await held()).toEqual(before);
@@ -377,14 +348,10 @@ describe("a card's subject a newer version wrote", () => {
       const moved = cards[0]!;
       const newer = await appendDistractor(fetch, a, moved.url);
 
-      const plan = await u.transferCards(
-        INSTANCE,
-        a,
-        b,
-        [moved.id],
-        { mode: "move", keepProgress },
-        SESSION.webId,
-      );
+      const plan = await u.transferCards(INSTANCE, a, b, [moved.id], {
+        mode: "move",
+        keepProgress,
+      });
 
       const after = await held();
       expect(after.a).toEqual([cards[1]!.id]);
@@ -434,14 +401,7 @@ describe("a card's subject a newer version wrote", () => {
 
     for (let attempt = 0; attempt < 2; attempt++) {
       await expect(
-        u.transferCards(
-          INSTANCE,
-          a,
-          b,
-          [moved.id],
-          { mode: "move", keepProgress: true },
-          SESSION.webId,
-        ),
+        u.transferCards(INSTANCE, a, b, [moved.id], { mode: "move", keepProgress: true }),
       ).rejects.toMatchObject({ code: "writtenByNewerApp" });
       expect(await held()).toEqual(before);
       expect(await states()).toEqual(statesBefore);
@@ -559,14 +519,10 @@ ${extra.map((line) => `<${subject}> ${line} .`).join("\n")}
       await plantAt(fetch, b, named, extra, version);
       const planted = await triplesOf(fetch, b, named);
 
-      const plan = await u.transferCards(
-        INSTANCE,
-        a,
-        b,
-        [moved.id],
-        { mode: "move", keepProgress },
-        SESSION.webId,
-      );
+      const plan = await u.transferCards(INSTANCE, a, b, [moved.id], {
+        mode: "move",
+        keepProgress,
+      });
 
       const to = plan.cards[0]!.to;
       expect(to).toBe(moved.id);

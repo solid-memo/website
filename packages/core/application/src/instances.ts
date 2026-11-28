@@ -252,7 +252,7 @@ export function createInstanceUseCases({
    * review states. A document still at a version with nothing outdated in
    * it, as the instance's digest says, is not read again. A deck's
    * document is read as the user only when it is the instance's
-   * (isInInstancePod), as no one otherwise. Reads only: the
+   * (ReadScope.isInstances), as no one otherwise. Reads only: the
    * digest's format notes are written by the deck list (getStudyCounts).
    */
   async function planOf(instanceUrl: string): Promise<MigrationPlan> {

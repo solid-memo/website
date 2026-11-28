@@ -15,6 +15,7 @@
  */
 import { describe, expect, inject, it } from "vitest";
 import { createReleasePublishingUseCases } from "@solid-memo/application/releasePublishing";
+import { createReadScope } from "@solid-memo/application/readScope";
 import { createPodFence } from "@solid-memo/solid/podFence";
 import { grantPublicRead } from "@solid-memo/solid-client/access";
 import { createSolidReleasePublisher } from "@solid-memo/solid/solidReleasePublisher";
@@ -135,14 +136,14 @@ describe.each(SERVERS)("making a release public on $name", ({ url: server }) => 
           shapeValidator: {} as never,
           deckLibrary: {} as never,
           fileExchange: {} as never,
-          storageGateway: { discoverStorages: async () => [] },
-          webId: () => undefined,
+          readScope: createReadScope({
+            storageGateway: { discoverStorages: async () => [] },
+            webId: () => undefined,
+          }),
           now: () => new Date(),
         });
         // Refused, or done as the other origin says, which changes nothing but there.
-        await publishing
-          .makeReleasePublic(INSTANCE, RELEASE, `${base}alice/profile/card#me`)
-          .catch(() => undefined);
+        await publishing.makeReleasePublic(INSTANCE, RELEASE).catch(() => undefined);
       }
       // Nothing at all asked of the real server, and what it holds unchanged.
       expect(sent).toEqual([]);

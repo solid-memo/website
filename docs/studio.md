@@ -1450,7 +1450,7 @@ are this deck's documents" asks once more, then marks them as the
 deck's (`claimDeckDocuments`), and the checks are read afresh. Until
 then nothing in those documents changes. A deck with a document outside
 the instance's folder, and not in a storage of the user's found to hold
-the instance too (`isInInstancePod`), has no such button: the notice
+the instance too (`ReadScope.isInstances`), has no such button: the notice
 says which document and why. It names at most 50 such decks, and says
 how many more there are.
 

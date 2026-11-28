@@ -6,6 +6,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { createReleaseDraftUseCases } from "@solid-memo/application/releaseDrafts";
+import { createReadScope } from "@solid-memo/application/readScope";
 import { createReleasePublishingUseCases } from "@solid-memo/application/releasePublishing";
 import { draftLibraryDeck } from "@solid-memo/domain/release/draftListing";
 import { draftReleaseModel } from "@solid-memo/domain/release/draftModel";
@@ -40,16 +41,14 @@ it("publishes an imported release's creator outside it by its IRI, as the Studio
     deckLibrary: {} as never,
     shapeValidator: {} as never,
     fileExchange: { open: async () => ({ name: "release.ttl", text }), save: () => undefined },
-    storageGateway: { discoverStorages: async () => [] },
-    webId: () => undefined,
+    readScope: createReadScope({
+      storageGateway: { discoverStorages: async () => [] },
+      webId: () => undefined,
+    }),
     releasePublisher: { listPublished: async () => [] },
     now: () => new Date(NOW),
   });
-  const created = await useCases.createReleaseDraft(
-    INSTANCE,
-    { kind: "fromFile" },
-    `${POD}profile/card#me`,
-  );
+  const created = await useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" });
   const draft = await useCases.getReleaseDraft(created!.draft.url);
   expect(draft.root.creator).toEqual([OUTSIDE]);
   expect(draft.triples.filter((triple) => triple.subject === OUTSIDE)).toEqual([]);
@@ -79,16 +78,14 @@ describe("a pod draft that states a name of a creator with no record (GHSA-q4pr-
       deckLibrary: {} as never,
       shapeValidator: {} as never,
       fileExchange: { open: async () => ({ name: "release.ttl", text }), save: () => undefined },
-      storageGateway: { discoverStorages: async () => [] },
-      webId: () => undefined,
+      readScope: createReadScope({
+        storageGateway: { discoverStorages: async () => [] },
+        webId: () => undefined,
+      }),
       releasePublisher: { listPublished: async () => [] },
       now: () => new Date(NOW),
     });
-    const made = await useCases.createReleaseDraft(
-      INSTANCE,
-      { kind: "fromFile" },
-      `${POD}profile/card#me`,
-    );
+    const made = await useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" });
     const url = made!.draft.url;
     await pod.put(url, `${await (await pod.fetch(url)).text()}\n${statements}\n`);
     return { pod, useCases, url };
@@ -117,8 +114,10 @@ describe("a pod draft that states a name of a creator with no record (GHSA-q4pr-
       shapeValidator: pod.validator,
       deckLibrary: {} as never,
       fileExchange: {} as never,
-      storageGateway: { discoverStorages: async () => [] },
-      webId: () => undefined,
+      readScope: createReadScope({
+        storageGateway: { discoverStorages: async () => [] },
+        webId: () => undefined,
+      }),
       now: () => new Date(NOW),
     });
     const target = `${POD}public/releases/academy-award-best-picture/v1.ttl`;
@@ -149,7 +148,6 @@ describe("a creator with no record, whatever its IRI (GHSA-mv57-839j-wrf6)", () 
   const PUBLISHER = "dcterms:publisher <https://solid-memo.com/decks/index.ttl#solid-memo> ;";
   const CREATOR = "dcterms:creator <#anton-wiklund> ;";
   const TWO_CLASSES = `<#anton-wiklund> a foaf:Agent, dcat:Distribution ; foaf:name "Unseen" ; dcat:accessURL <> .`;
-  const WEB_ID = `${POD}profile/card#me`;
 
   /** A library deck with its creator replaced, and a publisher of its own. */
   const releaseFile = (statements: string, creator = "<#anton-wiklund>") => {
@@ -168,8 +166,10 @@ describe("a creator with no record, whatever its IRI (GHSA-mv57-839j-wrf6)", () 
       deckLibrary: {} as never,
       shapeValidator: {} as never,
       fileExchange: { open: async () => ({ name: "release.ttl", text }), save: () => undefined },
-      storageGateway: { discoverStorages: async () => [] },
-      webId: () => undefined,
+      readScope: createReadScope({
+        storageGateway: { discoverStorages: async () => [] },
+        webId: () => undefined,
+      }),
       releasePublisher: { listPublished: async () => [] },
       now: () => new Date(NOW),
     });
@@ -195,7 +195,6 @@ describe("a creator with no record, whatever its IRI (GHSA-mv57-839j-wrf6)", () 
     const created = await useCasesOf(pod.repository, releaseFile(TWO_CLASSES)).createReleaseDraft(
       INSTANCE,
       { kind: "fromFile" },
-      WEB_ID,
     );
     await expectNoUnseenName(pod.repository, created!.draft.url);
   });
@@ -205,7 +204,7 @@ describe("a creator with no record, whatever its IRI (GHSA-mv57-839j-wrf6)", () 
     const created = await useCasesOf(
       pod.repository,
       releaseFile(`<> a foaf:Agent ; foaf:name "Unseen" .`, "<>"),
-    ).createReleaseDraft(INSTANCE, { kind: "fromFile" }, WEB_ID);
+    ).createReleaseDraft(INSTANCE, { kind: "fromFile" });
     await expectNoUnseenName(pod.repository, created!.draft.url);
   });
 
@@ -214,7 +213,7 @@ describe("a creator with no record, whatever its IRI (GHSA-mv57-839j-wrf6)", () 
     const made = await useCasesOf(
       other.repository,
       releaseFile(`<#p2> a foaf:Agent ; foaf:name "P" .`, "<#p2>"),
-    ).createReleaseDraft(INSTANCE, { kind: "fromFile" }, WEB_ID);
+    ).createReleaseDraft(INSTANCE, { kind: "fromFile" });
     const address = "https://elsewhere.example/public/releases/x/v1.ttl";
     const published = await other.repository.assemble(made!.draft.url, address, NOW);
     const crafted = `${published}\n<${address}#p2> a <http://www.w3.org/ns/dcat#Distribution> ; <http://xmlns.com/foaf/0.1/name> "Unseen" ; <http://www.w3.org/ns/dcat#accessURL> <${address}> .`;
@@ -223,11 +222,10 @@ describe("a creator with no record, whatever its IRI (GHSA-mv57-839j-wrf6)", () 
       fetch: pod.fetch,
       releaseFetch: turtleFetch(crafted),
     });
-    const next = await useCasesOf(repository, "").createReleaseDraft(
-      INSTANCE,
-      { kind: "nextVersionOf", url: address },
-      WEB_ID,
-    );
+    const next = await useCasesOf(repository, "").createReleaseDraft(INSTANCE, {
+      kind: "nextVersionOf",
+      url: address,
+    });
     await expectNoUnseenName(repository, next!.draft.url);
   });
 
@@ -236,7 +234,7 @@ describe("a creator with no record, whatever its IRI (GHSA-mv57-839j-wrf6)", () 
     const created = await useCasesOf(
       pod.repository,
       releaseFile(`<#anton-wiklund> a foaf:Agent ; foaf:name "Seen" .`),
-    ).createReleaseDraft(INSTANCE, { kind: "fromFile" }, WEB_ID);
+    ).createReleaseDraft(INSTANCE, { kind: "fromFile" });
     const { draft } = await pod.repository.read(created!.draft.url);
     expect(authorsOf(draft).map((node) => node.data.name)).toEqual(["Seen"]);
     expect(
@@ -251,7 +249,7 @@ describe("a creator with no record, whatever its IRI (GHSA-mv57-839j-wrf6)", () 
     const created = await useCasesOf(
       pod.repository,
       releaseFile(`<#anton-wiklund> a foaf:Agent ; foaf:name "Seen" .`),
-    ).createReleaseDraft(INSTANCE, { kind: "fromFile" }, WEB_ID);
+    ).createReleaseDraft(INSTANCE, { kind: "fromFile" });
     const { draft } = await pod.repository.read(created!.draft.url);
     const type = (subject: string, value: string) => ({
       subject,
