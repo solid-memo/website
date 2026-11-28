@@ -901,8 +901,9 @@ export interface InstanceCopier {
  * A wait a server asked of the app (docs/architecture.md#a-request-on-its-way-to-a-pod):
  * no request goes to `host` before `until`. `asked` says the server
  * refused a request as too many, or as unavailable for a while; without
- * it, many of its requests failed at once with no status, which a rate
- * limit without CORS headers looks like, and a server that is down too.
+ * it, soon after such a refusal, a request to it failed with no status,
+ * which a rate limit without CORS headers looks like, and a server that
+ * is down too.
  */
 export interface PodWait {
   readonly host: string;

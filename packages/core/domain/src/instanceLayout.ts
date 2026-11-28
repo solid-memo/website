@@ -94,10 +94,20 @@ export function instanceAddressOf(text: string): string {
   return ensureTrailingSlash(canonicalUrlOf(text) ?? text);
 }
 
-/** Whether a request would send `text` to an http(s) address (canonicalUrlOf) with no query or fragment. */
+/**
+ * Whether a request would send `text` to an http(s) address
+ * (canonicalUrlOf) with no query or fragment, and no user name or
+ * password, which a browser refuses to send at all, failing the request
+ * before it reaches the server.
+ */
 export function isPlainHttpUrl(text: string): boolean {
-  const url = canonicalUrlOf(text);
-  return url !== null && /^https?:\/\/[^?#]*$/.test(url);
+  const url = URL.parse(text);
+  return (
+    url !== null &&
+    /^https?:\/\/[^?#]*$/.test(url.href) &&
+    url.username === "" &&
+    url.password === ""
+  );
 }
 
 /**

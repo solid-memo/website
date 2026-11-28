@@ -218,7 +218,17 @@ describe("where an instance's documents are", () => {
     expect(isPlainHttpUrl("http://pod.example/a")).toBe(true);
     // Another spelling of an http(s) address is one.
     expect(isPlainHttpUrl("https://Pod.example/kortlekar-å/")).toBe(true);
-    for (const url of [`${ROOT}?x`, `${ROOT}#x`, "urn:x:a", "file:///a/", "not an address"]) {
+    // An address with a user name or password is none: a browser refuses to send it.
+    for (const url of [
+      `${ROOT}?x`,
+      `${ROOT}#x`,
+      "urn:x:a",
+      "file:///a/",
+      "not an address",
+      "https://x@pod.example/a.ttl",
+      "https://:p@pod.example/a.ttl",
+      "https://x:p@pod.example/a.ttl",
+    ]) {
       expect(isPlainHttpUrl(url), url).toBe(false);
     }
     expect(isSameUrl("https://Pod.example:443/a/./å", "https://pod.example/a/%C3%A5")).toBe(true);
@@ -281,6 +291,7 @@ describe("where an instance's documents are", () => {
       "https://pod.example/a//",
       `${ROOT}?x`,
       "urn:x:a",
+      "https://x@pod.example/a/",
     ]) {
       expect(isInstanceAddress(url), url).toBe(false);
     }
@@ -506,6 +517,8 @@ describe("where an instance's documents are", () => {
       "ftp://pod.example/x.ttl",
       "not an address",
       "decks/deck-1.ttl",
+      // A user name or password, which a browser refuses to send.
+      "https://x@pod.example/alice/a1.ttl",
     ]) {
       expect(isSafeDocumentUrl(url), url).toBe(false);
     }
