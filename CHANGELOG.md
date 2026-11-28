@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.6.1](https://github.com/solid-memo/website/compare/v8.6.0...v8.6.1) (2026-11-28)
+
+### Fixes
+
+* **composition:** check documents elsewhere in workers of their own ([d3e5652](https://github.com/solid-memo/website/commit/d3e5652cffc065770bad0faa4c6676ccc6c072e8))
+* **pod:** pause a server only after it refused with a status ([9389b14](https://github.com/solid-memo/website/commit/9389b146ad358a7492b0a135f19fd9ad1641a6c9))
+* **studio:** weigh the whole graph before laying it out ([85510fc](https://github.com/solid-memo/website/commit/85510fce70dcb034523ef5f36034e1920a5c6c07))
+
 ## [8.6.0](https://github.com/solid-memo/website/compare/v8.5.15...v8.6.0) (2026-11-28)
 
 ### Features
