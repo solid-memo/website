@@ -107,7 +107,7 @@
     "@semantic-release/exec": "^7.1.0",
     "@semantic-release/git": "^11.0.1",
     "@semantic-release/release-notes-generator": "^14.1.1",
-    "@vitest/coverage-v8": "^5.1.1",
+    "@vitest/coverage-v8": "^5.1.2",
     "conventional-changelog-conventionalcommits": "^9.3.1",
     "cspell": "^10.4.0",
     "json5": "^2.2.3",
@@ -117,7 +117,7 @@
     "turbo": "^2.11.13",
     "typescript": "^7.0.2",
     "vite": "^8.3.8",
-    "vitest": "^5.1.1"
+    "vitest": "^5.1.2"
   },
   "engines": {
     "node": ">=26.13"
