@@ -2126,6 +2126,99 @@ describe("createAppUseCases", () => {
     for (const read of reads) await expect(read).rejects.toBeDefined();
   });
 
+  it("checks the user's own instance while the checks of an attached instance's documents elsewhere, as many as there are workers, wait for a host that never sends them all", {
+    timeout: 60_000,
+  }, async () => {
+    const alice = "https://alice.example/";
+    const bob = "https://bob.example/";
+    const pod = podAt(alice);
+    const theirs = podAt(bob);
+    podsNetwork({ [alice]: pod, [bob]: theirs });
+    await put(
+      pod,
+      `${alice}profile/card`,
+      `<#me> <http://www.w3.org/ns/pim/space#storage> <${alice}>.`,
+    );
+    await put(
+      theirs,
+      `${bob}profile/card`,
+      `<#me> <http://www.w3.org/ns/pim/space#storage> <${bob}>.`,
+    );
+    const digestWritten = digestWork();
+    // Bob's instance, its decks' documents in its folder.
+    login.webId = `${bob}profile/card#me`;
+    const bobs = createAppUseCases({ ...options, indexedDB: undefined });
+    const shared = await bobs.createInstance(
+      { webId: login.webId },
+      { containerUrl: `${bob}memo/`, name: "Shared", registrationTarget: "private" },
+    );
+    const documents: string[] = [];
+    for (let at = 0; at < OFF_PAGE_WORKERS / 2; at++) {
+      const deck = await bobs.createDeck(shared.url, { en: `Rivers ${at}` });
+      documents.push(deck.cardsDocumentUrl, deck.reviewsDocumentUrl);
+    }
+    await digestWritten();
+
+    login.webId = `${alice}profile/card#me`;
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+    const session = { webId: login.webId };
+    await useCases.attachInstanceByUrl(session, shared.url, "private");
+    const own = await useCases.createInstance(session, {
+      containerUrl: `${alice}memo/`,
+      name: "Main",
+      registrationTarget: "private",
+    });
+    // From now on, the decks' documents on Bob's server are sent a little and never all.
+    const held = heldAt(bob, theirs);
+    let givenUp = 0;
+    podsNetwork({
+      [alice]: pod,
+      [bob]: (input, init) => {
+        const url = String(input instanceof Request ? input.url : input);
+        if (!documents.includes(url)) return theirs(input, init);
+        init?.signal?.addEventListener("abort", () => givenUp++);
+        return held.fetch(input, init);
+      },
+    });
+    // From now on the clock stands still, so no read is given up by its deadline, however slow this machine.
+    vi.useFakeTimers({
+      toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval", "Date"],
+    });
+    let over = false;
+    onTestFinished(() => {
+      over = true;
+      vi.useRealTimers();
+    });
+    /** Runs the work due now, and gives this process's other work, files read from disk, its turn, until `done`. */
+    const standingStill = async (done: () => boolean) => {
+      while (!done() && !over) {
+        await vi.advanceTimersByTimeAsync(0);
+        await new Promise((r) => setImmediate(r));
+      }
+    };
+    let settledCheck = false;
+    const theirCheck = useCases.checkInstance(shared.url).finally(() => {
+      settledCheck = true;
+    });
+    // Each check of their documents waits on the host, its worker started.
+    await standingStill(() => held.asked.length >= OFF_PAGE_WORKERS);
+    let ownCheck: { conforms: boolean } | undefined;
+    void useCases.checkInstance(own.url).then((report) => {
+      ownCheck = report;
+    });
+    await standingStill(() => ownCheck !== undefined);
+    expect(ownCheck!.conforms).toBe(true);
+    // Done while every one of those reads still waits on the host, the check of their instance too.
+    expect(givenUp).toBe(0);
+    expect(settledCheck).toBe(false);
+    held.letGo();
+    // Time moves again, as fast as the rest of the work allows.
+    const rest = theirCheck.then(digestWritten);
+    await untilSettled([rest], 30 * 60_000);
+    vi.useRealTimers();
+    await rest;
+  });
+
   it("reads the deck library the site publishes", async () => {
     const decks = await createAppUseCases({ ...options, indexedDB: undefined }).listLibraryDecks();
     expect(decks.length).toBeGreaterThan(0);

@@ -36,11 +36,11 @@ import {
 export const OFF_PAGE_DEADLINE_MS = 60_000;
 
 /**
- * How many jobs work at once, each in a worker of its own: as many as
- * the reads of releases from a link that run at once. Each worker holds
- * the shapes it has read, so more would take more of the device's
- * memory. A job keeps its worker while it waits for its requests too,
- * unless its runner frees it then (createOffPage `freeWhileWaiting`).
+ * How many jobs of one pool work at once, each in a worker of its own.
+ * Each worker holds the shapes it has read, so more would take more of
+ * the device's memory. A job keeps its worker while it waits for its
+ * requests too, unless its runner frees it then (createOffPage
+ * `freeWhileWaiting`).
  */
 export const OFF_PAGE_WORKERS = 4;
 

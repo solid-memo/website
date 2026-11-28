@@ -29,6 +29,7 @@ import { createLocalStorageUpdateJournal } from "@solid-memo/browser/localStorag
 import { createLogoutChannel } from "@solid-memo/browser/logoutChannel";
 import { createIndexedDbResourceStore } from "@solid-memo/browser/indexedDbResourceStore";
 import { GUEST_ORIGIN } from "@solid-memo/domain/guest";
+import { TRIAL_ORIGIN } from "@solid-memo/domain/release/trial";
 import { isInFolder } from "@solid-memo/domain/instanceLayout";
 import { createLocalGuestPod } from "@solid-memo/solid/localGuestPod";
 import { createLocalPod } from "@solid-memo/solid/localPod";
@@ -258,9 +259,10 @@ export function createAppUseCases({
   /**
    * The work on documents the app did not write, off the page, in
    * workers (docs/validation.md, Off the page): reading, parsing and
-   * checking a deck file, a release file and the documents an
-   * instance's check reads, its own and those elsewhere; a release read
-   * from a link or for a draft has workers of its own, below. Their requests are made here,
+   * checking a deck file, a release file and the documents in the
+   * user's storages that an instance's check reads; a check of a
+   * document elsewhere, and a release read from a link or for a draft,
+   * have workers of their own, below. Their requests are made here,
    * with the fetches below, so a worker never holds the user's login.
    * One past its deadline, or whose worker ends, is shown as a document
    * too large to read.
@@ -287,20 +289,30 @@ export function createAppUseCases({
     config: shapes,
     freeWhileWaiting: true,
   });
-  // An instance's documents outside the user's storages, the guest's pod being this browser's, are read off the page.
-  readElsewhere(
-    dataFetch,
-    (url) => !url.startsWith(GUEST_ORIGIN) && gate.isElsewhere(url),
-    readsOffPage,
-  );
+  /** Whether a document is outside the user's storages, the guest's pod and a trial's being this browser's. */
+  const isElsewhere = (url: string) =>
+    !url.startsWith(GUEST_ORIGIN) && !url.startsWith(TRIAL_ORIGIN) && gate.isElsewhere(url);
+  // An instance's documents outside the user's storages are read off the page.
+  readElsewhere(dataFetch, isElsewhere, readsOffPage);
   /** A deck's documents read as no one, outside the user's storages, off the page; never from a guest's pod. */
   const foreignData = () =>
     readElsewhere(createPodFence(foreignReads(noOneFetch)), () => true, readsOffPage);
 
+  /**
+   * The checks of documents outside the user's storages, off the page
+   * in workers of their own, which read the pod's shapes: a check
+   * waiting for a slow server gives up its place, so it holds up none
+   * of the user's own checks, deck files and release files.
+   */
+  const checksOffPage = createOffPage({
+    spawn: spawnWorker,
+    config: shapes,
+    freeWhileWaiting: true,
+  });
   const shapeValidator = offPageShapeValidator(
     offPage,
     createShaclShapeValidator({ fetch: dataFetch, shapesFetch: siteFetch, ...shapes }),
-    { fetch: dataFetch, siteFetch },
+    { fetch: dataFetch, siteFetch, elsewhere: { offPage: checksOffPage, isElsewhere } },
   );
   /** Every write is checked against the shapes before it reaches the pod (docs/validation.md). */
   const checkWrite = shapeValidator.checkSubjects;

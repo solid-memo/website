@@ -50,15 +50,38 @@ const pastDeadline = (url: string) => new ReadLimitError(url, FOREIGN_LIMITS);
  * (checkSubjects), of the user's own data, and of a dataset already read
  * (validateDataset), stay as `validator` makes them. A document past its
  * deadline is reported unreadable, the deadline named as why
- * (documentCheckTooLong); a draft, as releaseTooLarge. `over` gives the
- * same over another fetch.
+ * (documentCheckTooLong); a draft, as releaseTooLarge. A check of a
+ * document `elsewhere.isElsewhere` names runs in the workers of
+ * `elsewhere.offPage`, whose jobs give up their places while they wait
+ * for a server, so that a slow one holds up none of the user's own work
+ * in `offPage`. `over` gives the same over another fetch.
  */
 export function offPageShapeValidator(
   offPage: OffPage,
   validator: ShaclShapeValidator,
-  { fetch, siteFetch }: { fetch: typeof globalThis.fetch; siteFetch: typeof globalThis.fetch },
+  {
+    fetch,
+    siteFetch,
+    elsewhere,
+  }: {
+    fetch: typeof globalThis.fetch;
+    siteFetch: typeof globalThis.fetch;
+    elsewhere: { offPage: OffPage; isElsewhere: (url: string) => boolean | Promise<boolean> };
+  },
 ): ShaclShapeValidator {
   const fetches = { data: fetch, site: siteFetch };
+  /**
+   * The workers a check of the document at `url` runs in: those of
+   * `offPage` when it is not known to be elsewhere, its read failing
+   * there as the lookup did.
+   */
+  const poolFor = (url: string) =>
+    Promise.resolve()
+      .then(() => elsewhere.isElsewhere(url))
+      .then(
+        (isElsewhere) => (isElsewhere ? elsewhere.offPage : offPage),
+        () => offPage,
+      );
   /** The report of a document past its deadline: unreadable, for that. */
   const unreadable = (url: string) => (error: unknown) => {
     if (error !== PAST_DEADLINE) throw error;
@@ -67,26 +90,34 @@ export function offPageShapeValidator(
   return {
     ...validator,
     over: (other) =>
-      offPageShapeValidator(offPage, validator.over(other), { fetch: other, siteFetch }),
+      offPageShapeValidator(offPage, validator.over(other), {
+        fetch: other,
+        siteFetch,
+        elsewhere,
+      }),
     validateDocument: (url, context = "pod", budget) =>
-      offPage
-        .run<DocumentReport>({
-          job: "validateDocument",
-          input: { url, context },
-          fetches,
-          ...(budget === undefined ? {} : { budget }),
-          tooLarge: () => PAST_DEADLINE,
-        })
+      poolFor(url)
+        .then((pool) =>
+          pool.run<DocumentReport>({
+            job: "validateDocument",
+            input: { url, context },
+            fetches,
+            ...(budget === undefined ? {} : { budget }),
+            tooLarge: () => PAST_DEADLINE,
+          }),
+        )
         .catch(unreadable(url)),
     validateDocumentSince: (url, version, context = "pod", budget) =>
-      offPage
-        .run<Awaited<ReturnType<ShaclShapeValidator["validateDocumentSince"]>>>({
-          job: "validateDocumentSince",
-          input: { url, version, context },
-          fetches,
-          ...(budget === undefined ? {} : { budget }),
-          tooLarge: () => PAST_DEADLINE,
-        })
+      poolFor(url)
+        .then((pool) =>
+          pool.run<Awaited<ReturnType<ShaclShapeValidator["validateDocumentSince"]>>>({
+            job: "validateDocumentSince",
+            input: { url, version, context },
+            fetches,
+            ...(budget === undefined ? {} : { budget }),
+            tooLarge: () => PAST_DEADLINE,
+          }),
+        )
         .catch((error: unknown) => ({
           unchanged: false as const,
           value: unreadable(url)(error),
