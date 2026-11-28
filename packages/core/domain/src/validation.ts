@@ -4,6 +4,7 @@
 
 import type { LangText } from "./langText";
 import type { Deck } from "./deck";
+import type { InvalidDataPolicy } from "./invalidDataPolicy";
 import type { ShapeName } from "@solid-memo/vocab/types.generated";
 
 /**
@@ -357,4 +358,54 @@ export function deckSetAside(report: ValidationReport, deck: Deck): boolean {
  */
 export function arrangementSetAside(report: ValidationReport): boolean {
   return failingOf(report).arrangement;
+}
+
+/**
+ * Why nothing may be written to a target while the data check holds it
+ * back (docs/validation.md, The invalid data policy): "checking" until
+ * the check is in (a policy that sets data aside may yet set it aside),
+ * "unchecked" while it could not be made, "blocked" under "block the
+ * instance" with invalid data, "setAside" for data set aside.
+ */
+export type HoldReason = "checking" | "unchecked" | "blocked" | "setAside";
+
+/** The check of an instance as far as it has come, and the policy it is held to. */
+export interface CheckState {
+  readonly policy: InvalidDataPolicy;
+  /** "pending" until the check is in, "failed" while it could not be made; else its report. */
+  readonly status: "pending" | "failed" | ValidationReport;
+}
+
+/**
+ * What a write is to: the instance's own documents alone (a draft's,
+ * say), which nothing sets aside one by one; the catalog, which its
+ * arrangement holds (the instance's name and catalog, an import, the
+ * drafts, publishing a release, starting a next version); a list of
+ * decks, held when any of them is set aside; or one deck.
+ */
+export type HoldTarget =
+  | { readonly kind: "instance" }
+  | { readonly kind: "catalogue" }
+  | { readonly kind: "decks"; readonly decks: readonly Deck[] }
+  | { readonly kind: "deck"; readonly deck: Deck };
+
+/**
+ * Why the check holds back a write to `target`, or null when it may be
+ * made. Under "only warn" nothing waits. What another app wrote only
+ * warns, and sets nothing aside (the report marks it `foreign`).
+ */
+export function holdOf(state: CheckState, target: HoldTarget): HoldReason | null {
+  if (state.policy === "warn-only") return null;
+  if (state.status === "failed") return "unchecked";
+  if (state.status === "pending") return "checking";
+  const report = state.status;
+  if (report.conforms) return null;
+  if (state.policy === "block-instance") return "blocked";
+  const setAside =
+    target.kind === "catalogue"
+      ? arrangementSetAside(report)
+      : target.kind === "decks"
+        ? target.decks.some((deck) => deckSetAside(report, deck))
+        : target.kind === "deck" && deckSetAside(report, target.deck);
+  return setAside ? "setAside" : null;
 }

@@ -12,6 +12,9 @@ import {
 import {
   arrangementSetAside,
   deckSetAside,
+  holdOf,
+  type CheckState,
+  type HoldReason,
   type UnclaimedDeck,
   type ValidationReport,
 } from "@solid-memo/domain/validation";
@@ -51,7 +54,8 @@ export interface DataCheck {
   readOnly: (deck?: Deck) => ReadOnlyReason | null;
 }
 
-export type ReadOnlyReason = "checking" | "unchecked" | "blocked" | "setAside";
+/** Why the check holds a write back (holdOf in the domain). */
+export type ReadOnlyReason = HoldReason;
 
 /**
  * The check of the instance at `instanceUrl` (null: none open), the same
@@ -71,6 +75,10 @@ export function useDataCheck(useCases: UseCases, instanceUrl: string | null): Da
   const isSetAside = (deck: Deck) => setsAside && deckSetAside(report, deck);
   // A check that fails holds back as one not in yet: the instance stays held while it cannot be checked.
   const unsettled = checkQuery.isPending || checkQuery.isError;
+  const state: CheckState = {
+    policy,
+    status: checkQuery.isError ? "failed" : (checkQuery.data ?? "pending"),
+  };
   return {
     policy,
     pending: checkQuery.isPending,
@@ -80,12 +88,7 @@ export function useDataCheck(useCases: UseCases, instanceUrl: string | null): Da
     unclaimed: checkQuery.data?.unclaimed ?? [],
     isSetAside,
     arrangementSetAside: setsAside && arrangementSetAside(report),
-    readOnly(deck) {
-      if (policy === "warn-only") return null;
-      if (checkQuery.isError) return "unchecked";
-      if (checkQuery.isPending) return "checking";
-      if (report !== null && policy === "block-instance") return "blocked";
-      return deck !== undefined && isSetAside(deck) ? "setAside" : null;
-    },
+    readOnly: (deck) =>
+      holdOf(state, deck === undefined ? { kind: "instance" } : { kind: "deck", deck }),
   };
 }
