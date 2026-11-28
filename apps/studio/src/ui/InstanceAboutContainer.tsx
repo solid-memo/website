@@ -52,7 +52,7 @@ export function InstanceAboutContainer({
       instance={instance}
       catalog={catalogQuery.data}
       preferencesHref={routeToHash({ screen: "preferences", instanceUrl: instance.url })}
-      readOnly={check.readOnly() ?? (check.arrangementSetAside ? "setAside" : null)}
+      readOnly={check.hold({ kind: "catalogue" })}
       healthHref={healthHref}
       busy={save.isPending}
       saved={save.isSuccess}

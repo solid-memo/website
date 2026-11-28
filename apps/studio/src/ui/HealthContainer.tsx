@@ -80,7 +80,7 @@ function DeckHealthContainer({
   const { t, errorText } = useI18n();
   const queryClient = useQueryClient();
   const health = queries.deckHealth(useCases, queryClient, instance.url, deck, { afresh: true });
-  const reason = useDataCheck(useCases, instance.url).readOnly(deck);
+  const reason = useDataCheck(useCases, instance.url).hold({ kind: "deck", deck });
   // Read afresh each time the screen opens, as a card edited since may have mended (or made) a problem.
   const healthQuery = useQuery({ ...health, refetchOnMount: "always" });
   const cardsQuery = useQuery(queries.cards(useCases, deck));

@@ -510,7 +510,7 @@ conform is a preference, `sm:invalidDataPolicy`, a concept of
 | Policy | What the app does |
 |---|---|
 | Block the instance (`sm:blockInstance`) | The workspace waits for the check, then shows the Data check notice in place of every screen. Preferences and the validation view stay reachable, so the policy can be changed. |
-| Set invalid data aside (`sm:blockSubject`, the default) | A deck whose entry, cards or review states don't conform is set aside (`deckSetAside`): listed as "Set aside", not offered for study, its pages saying so. When the catalog or a deck group doesn't conform, the deck list's arrangement is set aside (`arrangementSetAside`): until it's fixed, the list shows every deck but can't be rearranged, nor its groups renamed or deleted, as with a list a [newer version arranged](data-model.md#deck-groups). Any other subject that doesn't conform (a deck's agents or distribution, the catalog's publisher, the preferences, the instance record) sets nothing aside; the write check still refuses a write that leaves it not conforming. Everything else works. The notice names the decks set aside, says when the list can't be rearranged, and reports the rest. |
+| Set invalid data aside (`sm:blockSubject`, the default) | A deck whose entry, cards or review states don't conform is set aside (`deckSetAside`): listed as "Set aside", not offered for study, its pages saying so. The deck list still offers to rename, pause and delete it, as each list states (`deckHeld` on `DeckListScreen`); the Studio holds those too ([studio.md](studio.md#groups)). When the catalog or a deck group doesn't conform, the deck list's arrangement is set aside (`arrangementSetAside`): until it's fixed, the list shows every deck but can't be rearranged, nor its groups renamed or deleted, as with a list a [newer version arranged](data-model.md#deck-groups). Any other subject that doesn't conform (a deck's agents or distribution, the catalog's publisher, the preferences, the instance record) sets nothing aside; the write check still refuses a write that leaves it not conforming. Everything else works. The notice names the decks set aside, says when the list can't be rearranged, and reports the rest. |
 | Warn only (`sm:warnOnly`) | The notice, and nothing else. |
 
 The notice sits above every screen, so what it lists is bounded. It
@@ -592,6 +592,16 @@ lists at most 50 of each of its data check's lists too.
   held screen. Under "Warn only" the warning is all.
 - **The Studio holds to the same check and policy** (`useDataCheck` in
   `ui`, which Solid Memo's workspace uses too), as [studio.md](studio.md#data-set-aside) says.
+- **What a write waits for is decided in one place**: `holdOf` in the
+  domain's `validation.ts`.
+  It's given the check's state and what the write is to: the
+  instance's own documents, its catalog, a list of decks or one deck.
+  It answers why the write waits ("checking", "unchecked", "blocked"
+  or "setAside"), or that it may be made. The catalog waits while its
+  arrangement is set aside, a list while any of its decks is, and the
+  instance alone only while the check is made or blocks it. A screen
+  asks `useDataCheck`'s `hold` for its target and doesn't combine the
+  parts itself.
 
 ### Data another app wrote
 

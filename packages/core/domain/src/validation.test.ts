@@ -8,10 +8,13 @@ import { catalogUrlOf } from "./instanceLayout";
 import {
   arrangementSetAside,
   deckSetAside,
+  holdOf,
   limitResults,
   summarize,
   unreadableDocument,
+  type CheckState,
   type DocumentReport,
+  type HoldTarget,
   type Violation,
 } from "./validation";
 
@@ -456,5 +459,87 @@ describe("limitResults", () => {
     // Its own violations left out still make it a violation.
     const own = Array.from({ length: 1001 }, (_, i) => result(i));
     expect(limitResults([...ownLast, ...own], undefined, rank).at(-1)?.severity).toBe("violation");
+  });
+});
+
+describe("holdOf", () => {
+  const deck = (id: string): Deck => ({
+    id,
+    url: `${INSTANCE}catalog.ttl#${id}`,
+    title: { en: id },
+    cardsDocumentUrl: `${INSTANCE}decks/${id}.ttl`,
+    reviewsDocumentUrl: `${INSTANCE}reviews/${id}.ttl`,
+    createdAt: "",
+    formatVersion: 6,
+    direction: "front-to-back",
+    authors: [],
+  });
+  const bad = deck("bad");
+  const good = deck("good");
+  const broken = [{ message: { en: "x" }, severity: "violation" as const, constraint: "MinCount" }];
+  const failing = (url: string, shape: "card" | "catalog") => ({
+    url: url.replace(/#.*/, ""),
+    status: "checked" as const,
+    subjects: [{ url, status: "checked" as const, shape, version: 1, violations: broken }],
+  });
+  const conforming = summarize(INSTANCE, []);
+  const badDeck = summarize(INSTANCE, [failing(`${bad.cardsDocumentUrl}#c1`, "card")]);
+  const badCatalog = summarize(INSTANCE, [failing(`${INSTANCE}catalog.ttl#it`, "catalog")]);
+  const targets: Record<string, HoldTarget> = {
+    instance: { kind: "instance" },
+    catalogue: { kind: "catalogue" },
+    good: { kind: "deck", deck: good },
+    bad: { kind: "deck", deck: bad },
+    list: { kind: "decks", decks: [good, bad] },
+    goodList: { kind: "decks", decks: [good] },
+  };
+  const holds = (state: CheckState) =>
+    Object.fromEntries(Object.entries(targets).map(([name, t]) => [name, holdOf(state, t)]));
+  const every = (reason: string | null) =>
+    Object.fromEntries(Object.keys(targets).map((name) => [name, reason]));
+
+  it("holds every target while the check is made, and while it could not be made", () => {
+    for (const policy of ["block-subject", "block-instance"] as const) {
+      expect(holds({ policy, status: "pending" })).toEqual(every("checking"));
+      expect(holds({ policy, status: "failed" })).toEqual(every("unchecked"));
+    }
+  });
+
+  it("holds nothing under only warning, whatever the check found or whether it is in", () => {
+    for (const status of ["pending", "failed", badDeck, badCatalog] as const) {
+      expect(holds({ policy: "warn-only", status })).toEqual(every(null));
+    }
+  });
+
+  it("holds nothing when the data conforms", () => {
+    for (const policy of ["block-subject", "block-instance", "warn-only"] as const) {
+      expect(holds({ policy, status: conforming })).toEqual(every(null));
+    }
+  });
+
+  it("blocks every target under blocking the instance with invalid data", () => {
+    expect(holds({ policy: "block-instance", status: badDeck })).toEqual(every("blocked"));
+  });
+
+  it("sets aside the deck with invalid data, and a list holding it, but not the catalog", () => {
+    expect(holds({ policy: "block-subject", status: badDeck })).toEqual({
+      instance: null,
+      catalogue: null,
+      good: null,
+      bad: "setAside",
+      list: "setAside",
+      goodList: null,
+    });
+  });
+
+  it("sets aside the catalog when its arrangement is invalid, but neither the decks nor the instance", () => {
+    expect(holds({ policy: "block-subject", status: badCatalog })).toEqual({
+      instance: null,
+      catalogue: "setAside",
+      good: null,
+      bad: null,
+      list: null,
+      goodList: null,
+    });
   });
 });

@@ -11,9 +11,15 @@ import { ActionsMenu, MenuItem } from "@solid-memo/ui/ActionsMenu";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { useConfirm } from "./shell/ConfirmDialog";
 import { Dialog } from "@solid-memo/ui/Dialog";
+import type { ReadOnlyReason } from "@solid-memo/ui/dataCheck";
+import { ReadOnlyNotice } from "./ReadOnly";
 
-/** Why no deck can be moved into a group: a newer version arranged them, or the arrangement has invalid data, set aside. */
-export type MoveLock = "newerVersion" | "setAside";
+/**
+ * Why no deck can be moved into a group: a newer version arranged them,
+ * or the data check holds the catalog (useDataCheck's `hold`), its
+ * arrangement set aside among the reasons.
+ */
+export type MoveLock = "newerVersion" | ReadOnlyReason;
 
 /** The form a bulk action opens, to say how: in a dialog. */
 type Form = "move" | "pace" | "direction";
@@ -34,6 +40,7 @@ export function DeckBulkActions({
   moveLocked,
   busy,
   exportHref,
+  healthHref,
   onMove,
   onPace,
   onDirection,
@@ -47,6 +54,8 @@ export function DeckBulkActions({
   busy: boolean;
   /** Import and export, the selected decks checked to export. */
   exportHref: string;
+  /** The instance's health, which names what does not conform. */
+  healthHref: string;
   /** Into the group of that URL; null for the top level. */
   onMove: (parent: string | null) => Promise<boolean>;
   onPace: (pace: DeckPace) => Promise<boolean>;
@@ -115,7 +124,7 @@ export function DeckBulkActions({
       {form !== null && (
         <Dialog heading={t(`studio.bulk.${form}`)} onClose={() => setForm(null)}>
           {form === "move" &&
-            (moveLocked !== null ? (
+            (moveLocked === "newerVersion" || moveLocked === "setAside" ? (
               <p class="hint">
                 {t(
                   moveLocked === "newerVersion"
@@ -123,6 +132,9 @@ export function DeckBulkActions({
                     : "studio.bulk.moveSetAside",
                 )}
               </p>
+            ) : moveLocked !== null ? (
+              // The check is made, could not be made, or blocks the instance: its own line says so.
+              <ReadOnlyNotice reason={moveLocked} subject="catalogue" healthHref={healthHref} />
             ) : (
               <form
                 aria-label={t("studio.bulk.move")}

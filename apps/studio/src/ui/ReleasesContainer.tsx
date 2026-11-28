@@ -70,7 +70,7 @@ export function ReleasesContainer({
     <ReleasesScreen
       instance={instance}
       releases={releasesQuery.data}
-      hold={check.readOnly() ?? (check.arrangementSetAside ? "setAside" : null)}
+      hold={check.hold({ kind: "catalogue" })}
       healthHref={healthHref}
       draftsHref={draftsHref}
       draftOf={draftOf}

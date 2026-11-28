@@ -59,7 +59,7 @@ export function DeckAboutContainer({
 
   const preferencesQuery = useQuery(queries.preferences(useCases, instance.url));
   // After the preferences' own query, which reads them.
-  const readOnly = useDataCheck(useCases, instance.url).readOnly(deck);
+  const readOnly = useDataCheck(useCases, instance.url).hold({ kind: "deck", deck });
   const cardsQuery = useQuery(queries.cards(useCases, deck));
   // The same query as Solid Memo's course screens, so a change shows there.
   const courseQuery = useQuery({ ...queries.course(useCases, deck), enabled: isCourse });

@@ -3233,7 +3233,10 @@ Every Studio screen holds to the check Solid Memo runs when an
 instance is opened, and to the user's invalid data policy
 ([validation.md](validation.md)). `useDataCheck` in `ui` reads both
 with Solid Memo's workspace's queries, once
-([health](#health)):
+([health](#health)). Each screen asks its `hold` about what it
+writes (the instance, its catalog, a list of decks or one deck), which
+`holdOf` in the domain answers, and its line names the same kind
+(`ReadOnlySubject`):
 
 - **Until the check is done**, nothing can be changed, under any policy
   but "only warn". The screens are shown, and say so. A check that
@@ -3248,7 +3251,8 @@ with Solid Memo's workspace's queries, once
   every bulk action: Home and the library copies don't let
   it be selected, and moving or copying cards doesn't offer it.
 - **The arrangement set aside** (the catalog or a deck group invalid):
-  Groups can't be rearranged, and Home moves no deck into a group. The
+  Groups can't be rearranged, and Home moves no deck into a group:
+  its move asks the catalog's hold, as the screens below do. The
   instance's name and catalog, an import, making or deleting a draft,
   publishing a release and starting a next version are held.
 - **Under "block the instance"**, invalid data holds every deck and the

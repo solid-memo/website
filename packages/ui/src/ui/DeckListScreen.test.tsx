@@ -93,6 +93,7 @@ function Harness({
   return (
     <DeckListScreen
       tree={shown}
+      deckHeld={() => false}
       collapsed={collapsed}
       onToggle={(url) => {
         onToggle(url);
@@ -908,6 +909,7 @@ describe("DeckListScreen", () => {
     let settle: (removed: boolean) => void = () => undefined;
     const props = (initial: DeckTree): Props => ({
       tree: initial,
+      deckHeld: () => false,
       collapsed: new Set(),
       onToggle: () => undefined,
       onUnfold: () => undefined,
@@ -1169,6 +1171,7 @@ describe("DeckListScreen", () => {
     let settle: (written: boolean) => void = () => undefined;
     const props: Props = {
       tree: flat,
+      deckHeld: () => false,
       collapsed: new Set(),
       onToggle: () => undefined,
       onUnfold: () => undefined,
@@ -1868,6 +1871,7 @@ describe("DeckListScreen dragging while the list changes", () => {
     const onEdit = vi.fn(async () => true);
     const props = (shown: DeckTree): Props => ({
       tree: shown,
+      deckHeld: () => false,
       collapsed: new Set(),
       onToggle: () => undefined,
       onUnfold: () => undefined,

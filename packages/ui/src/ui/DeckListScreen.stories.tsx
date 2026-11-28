@@ -98,6 +98,7 @@ const meta = {
   component: DeckListScreen,
   args: {
     tree,
+    deckHeld: (_deck: Deck): boolean => false,
     collapsed: new Set<string>(),
     onToggle: fn(),
     onUnfold: fn(),

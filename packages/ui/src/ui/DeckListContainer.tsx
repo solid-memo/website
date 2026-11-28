@@ -139,6 +139,8 @@ export function DeckListContainer({
         {...editor}
         arrangementSetAside={arrangementSetAside}
         checking={checking}
+        // A deck set aside keeps its own name, pause and deletion here, unlike in the Studio (docs/validation.md).
+        deckHeld={() => false}
         libraryHref={libraryHref(instance.url)}
         deckHref={(deck) => deckHref(instance.url, deck.url)}
         courseHref={(deck) => (isCourse(deck) ? courseHref(instance.url, deck.url) : undefined)}

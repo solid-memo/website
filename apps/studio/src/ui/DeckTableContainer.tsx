@@ -239,11 +239,9 @@ export function DeckTableContainer({
       pending={pending}
       badges={badges}
       groups={groupTrails(treeQuery.data)}
-      moveLocked={
-        treeQuery.data.readOnly ? "newerVersion" : check.arrangementSetAside ? "setAside" : null
-      }
-      readOnly={check.readOnly() ?? (decks.some(check.isSetAside) ? "setAside" : null)}
-      selectable={(deck) => check.readOnly(deck) === null}
+      moveLocked={treeQuery.data.readOnly ? "newerVersion" : check.hold({ kind: "catalogue" })}
+      readOnly={check.hold({ kind: "decks", decks })}
+      selectable={(deck) => check.hold({ kind: "deck", deck: deck }) === null}
       deckHref={deckHref}
       cardsHref={cardsHref}
       appHref={appHref}

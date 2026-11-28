@@ -116,7 +116,9 @@ export function CardWorkbenchContainer({
   // other deck's address.
   const others = useMemo(() => {
     const shares = sharesDocumentsWith(deck);
-    return decks.filter((other) => check.readOnly(other) === null && !shares(other));
+    return decks.filter(
+      (other) => check.hold({ kind: "deck", deck: other }) === null && !shares(other),
+    );
   }, [deck, decks, check.policy, check.unsettled, check.report]);
   const answersQuery = useQuery(queries.answerLog(useCases, instance.url));
   const answers = answersQuery.data;
@@ -300,7 +302,7 @@ export function CardWorkbenchContainer({
         )
       }
       transferDone={transferDone}
-      readOnly={check.readOnly(deck)}
+      readOnly={check.hold({ kind: "deck", deck: deck })}
       busy={
         editMutation.isPending ||
         undoMutation.isPending ||

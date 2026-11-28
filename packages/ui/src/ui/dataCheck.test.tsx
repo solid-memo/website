@@ -93,10 +93,12 @@ function Probe({ useCases, instanceUrl }: { useCases: UseCases; instanceUrl: str
     <p>
       {[
         `policy ${check.policy}`,
-        `instance ${check.readOnly() ?? "open"}`,
-        `bad ${check.readOnly(bad) ?? "open"}`,
-        `good ${check.readOnly(good) ?? "open"}`,
+        `instance ${check.hold({ kind: "instance" }) ?? "open"}`,
+        `bad ${check.hold({ kind: "deck", deck: bad }) ?? "open"}`,
+        `good ${check.hold({ kind: "deck", deck: good }) ?? "open"}`,
         `arrangement ${check.arrangementSetAside ? "aside" : "open"}`,
+        `catalogue ${check.hold({ kind: "catalogue" }) ?? "open"}`,
+        `list ${check.hold({ kind: "decks", decks: [good, bad] }) ?? "open"}`,
         `error ${check.error === null ? "none" : check.error.message}`,
         `unclaimed ${check.unclaimed.length}`,
       ].join(", ")}
@@ -143,7 +145,7 @@ describe("useDataCheck", () => {
     renderProbe({ checkInstance: vi.fn(async () => invalid()) });
     expect(
       await screen.findByText(
-        "policy block-subject, instance open, bad setAside, good open, arrangement open, error none, unclaimed 0",
+        "policy block-subject, instance open, bad setAside, good open, arrangement open, catalogue open, list setAside, error none, unclaimed 0",
       ),
     ).toBeInTheDocument();
   });
@@ -166,7 +168,9 @@ describe("useDataCheck", () => {
 
   it("sets the arrangement aside when the catalog is invalid", async () => {
     renderProbe({ checkInstance: vi.fn(async () => invalid(true)) });
-    expect(await screen.findByText(/arrangement aside/)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/arrangement aside, catalogue setAside, list setAside/),
+    ).toBeInTheDocument();
   });
 
   it("blocks every deck under blocking the instance, and none under only warning", async () => {
@@ -196,7 +200,7 @@ describe("useDataCheck", () => {
       });
       expect(
         await screen.findByText(
-          `policy ${policy}, instance unchecked, bad unchecked, good unchecked, arrangement open, error offline, unclaimed 0`,
+          `policy ${policy}, instance unchecked, bad unchecked, good unchecked, arrangement open, catalogue unchecked, list unchecked, error offline, unclaimed 0`,
         ),
       ).toBeInTheDocument();
       unmount();
@@ -239,7 +243,7 @@ describe("useDataCheck", () => {
     function Kept({ useCases }: { useCases: UseCases }) {
       const check = useDataCheck(useCases, INSTANCE);
       return (
-        <p>{`report ${check.report === null ? "none" : "kept"}, good ${check.readOnly(good) ?? "open"}, error ${check.error?.message ?? "none"}`}</p>
+        <p>{`report ${check.report === null ? "none" : "kept"}, good ${check.hold({ kind: "deck", deck: good }) ?? "open"}, error ${check.error?.message ?? "none"}`}</p>
       );
     }
     render(
@@ -264,7 +268,7 @@ describe("useDataCheck", () => {
     const { unmount } = renderProbe({ checkInstance });
     expect(
       await screen.findByText(
-        "policy block-subject, instance open, bad setAside, good open, arrangement open, error none, unclaimed 0",
+        "policy block-subject, instance open, bad setAside, good open, arrangement open, catalogue open, list setAside, error none, unclaimed 0",
       ),
     ).toBeInTheDocument();
     try {
@@ -294,7 +298,9 @@ describe("useDataCheck", () => {
     } as ValidationReport;
     function Many({ useCases, round }: { useCases: UseCases; round: number }) {
       const check = useDataCheck(useCases, INSTANCE);
-      const aside = [bad, ...decks].filter((deck) => check.readOnly(deck) === "setAside");
+      const aside = [bad, ...decks].filter(
+        (deck) => check.hold({ kind: "deck", deck: deck }) === "setAside",
+      );
       return (
         <p>
           {`round ${round}, aside ${aside.length}, arrangement ${check.arrangementSetAside ? "aside" : "open"}`}

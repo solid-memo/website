@@ -12,6 +12,10 @@ import {
 import {
   arrangementSetAside,
   deckSetAside,
+  holdOf,
+  type CheckState,
+  type HoldReason,
+  type HoldTarget,
   type UnclaimedDeck,
   type ValidationReport,
 } from "@solid-memo/domain/validation";
@@ -40,18 +44,15 @@ export interface DataCheck {
   /** Under "set invalid data aside", the catalog or a deck group has invalid data: the arrangement is read-only. */
   arrangementSetAside: boolean;
   /**
-   * Why nothing may be written to the instance, or (given) to the deck:
-   * "checking" until the check is done (a policy that sets data aside
-   * may yet set it aside), "unchecked" while it could not be made, "blocked"
-   * under "block the instance" with invalid data, "setAside" for a deck
-   * set aside; null when it may be.
-   * Under "only warn" nothing waits. What another app wrote only warns,
-   * and sets nothing aside.
+   * Why nothing may be written to `target` (the instance, its catalog, a
+   * list of decks or one deck), or null when it may be: holdOf in the
+   * domain, which every screen asks rather than combine the parts above.
    */
-  readOnly: (deck?: Deck) => ReadOnlyReason | null;
+  hold: (target: HoldTarget) => ReadOnlyReason | null;
 }
 
-export type ReadOnlyReason = "checking" | "unchecked" | "blocked" | "setAside";
+/** Why the check holds a write back (holdOf in the domain). */
+export type ReadOnlyReason = HoldReason;
 
 /**
  * The check of the instance at `instanceUrl` (null: none open), the same
@@ -71,6 +72,10 @@ export function useDataCheck(useCases: UseCases, instanceUrl: string | null): Da
   const isSetAside = (deck: Deck) => setsAside && deckSetAside(report, deck);
   // A check that fails holds back as one not in yet: the instance stays held while it cannot be checked.
   const unsettled = checkQuery.isPending || checkQuery.isError;
+  const state: CheckState = {
+    policy,
+    status: checkQuery.isError ? "failed" : (checkQuery.data ?? "pending"),
+  };
   return {
     policy,
     pending: checkQuery.isPending,
@@ -80,12 +85,6 @@ export function useDataCheck(useCases: UseCases, instanceUrl: string | null): Da
     unclaimed: checkQuery.data?.unclaimed ?? [],
     isSetAside,
     arrangementSetAside: setsAside && arrangementSetAside(report),
-    readOnly(deck) {
-      if (policy === "warn-only") return null;
-      if (checkQuery.isError) return "unchecked";
-      if (checkQuery.isPending) return "checking";
-      if (report !== null && policy === "block-instance") return "blocked";
-      return deck !== undefined && isSetAside(deck) ? "setAside" : null;
-    },
+    hold: (target) => holdOf(state, target),
   };
 }
