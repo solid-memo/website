@@ -592,6 +592,16 @@ lists at most 50 of each of its data check's lists too.
   held screen. Under "Warn only" the warning is all.
 - **The Studio holds to the same check and policy** (`useDataCheck` in
   `ui`, which Solid Memo's workspace uses too), as [studio.md](studio.md#data-set-aside) says.
+- **What a write waits for is decided in one place**: `holdOf` in the
+  domain's `validation.ts`.
+  It's given the check's state and what the write is to: the
+  instance's own documents, its catalog, a list of decks or one deck.
+  It answers why the write waits ("checking", "unchecked", "blocked"
+  or "setAside"), or that it may be made. The catalog waits while its
+  arrangement is set aside, a list while any of its decks is, and the
+  instance alone only while the check is made or blocks it. A screen
+  asks `useDataCheck`'s `hold` for its target and doesn't combine the
+  parts itself.
 
 ### Data another app wrote
 

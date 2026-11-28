@@ -230,7 +230,7 @@ export function useDraftEditor(useCases: UseCases, draftUrl: string): DraftEdito
   useEffect(() => () => report(self.current, { waiting: 0, failed: false }), []);
 
   const released = query.data?.root.releasedAs !== undefined;
-  const readOnly: DraftReadOnly | null = released ? "released" : check.readOnly();
+  const readOnly: DraftReadOnly | null = released ? "released" : check.hold({ kind: "instance" });
 
   function edit(
     changes: readonly DraftChange[],

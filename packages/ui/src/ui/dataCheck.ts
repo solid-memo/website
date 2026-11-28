@@ -15,6 +15,7 @@ import {
   holdOf,
   type CheckState,
   type HoldReason,
+  type HoldTarget,
   type UnclaimedDeck,
   type ValidationReport,
 } from "@solid-memo/domain/validation";
@@ -43,15 +44,11 @@ export interface DataCheck {
   /** Under "set invalid data aside", the catalog or a deck group has invalid data: the arrangement is read-only. */
   arrangementSetAside: boolean;
   /**
-   * Why nothing may be written to the instance, or (given) to the deck:
-   * "checking" until the check is done (a policy that sets data aside
-   * may yet set it aside), "unchecked" while it could not be made, "blocked"
-   * under "block the instance" with invalid data, "setAside" for a deck
-   * set aside; null when it may be.
-   * Under "only warn" nothing waits. What another app wrote only warns,
-   * and sets nothing aside.
+   * Why nothing may be written to `target` (the instance, its catalog, a
+   * list of decks or one deck), or null when it may be: holdOf in the
+   * domain, which every screen asks rather than combine the parts above.
    */
-  readOnly: (deck?: Deck) => ReadOnlyReason | null;
+  hold: (target: HoldTarget) => ReadOnlyReason | null;
 }
 
 /** Why the check holds a write back (holdOf in the domain). */
@@ -88,7 +85,6 @@ export function useDataCheck(useCases: UseCases, instanceUrl: string | null): Da
     unclaimed: checkQuery.data?.unclaimed ?? [],
     isSetAside,
     arrangementSetAside: setsAside && arrangementSetAside(report),
-    readOnly: (deck) =>
-      holdOf(state, deck === undefined ? { kind: "instance" } : { kind: "deck", deck }),
+    hold: (target) => holdOf(state, target),
   };
 }

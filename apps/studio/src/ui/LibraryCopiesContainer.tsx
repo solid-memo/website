@@ -101,10 +101,8 @@ export function LibraryCopiesContainer({
       results={results}
       deckHref={deckHref}
       libraryHref={libraryHref}
-      readOnly={
-        check.readOnly() ?? (copies.some((copy) => check.isSetAside(copy.deck)) ? "setAside" : null)
-      }
-      selectable={(deck) => check.readOnly(deck) === null}
+      readOnly={check.hold({ kind: "decks", decks: copies.map((copy) => copy.deck) })}
+      selectable={(deck) => check.hold({ kind: "deck", deck: deck }) === null}
       healthHref={healthHref}
       onUpgrade={(chosen) => batchMutation.mutate(chosen)}
       current={current}

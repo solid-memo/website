@@ -92,7 +92,7 @@ export function DraftsContainer({
       instance={instance}
       drafts={draftsQuery.data}
       decks={decksOf(treeQuery.data.children)}
-      readOnly={check.readOnly() ?? (check.arrangementSetAside ? "setAside" : null)}
+      readOnly={check.hold({ kind: "catalogue" })}
       healthHref={healthHref}
       releasesHref={releasesHref}
       draftHref={draftHref}

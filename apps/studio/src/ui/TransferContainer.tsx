@@ -106,7 +106,7 @@ export function TransferContainer({
       imported={importMutation.data ?? null}
       importError={errorText(importMutation.error)}
       onImport={(withProgress) => importMutation.mutate(withProgress)}
-      importReadOnly={check.readOnly() ?? (check.arrangementSetAside ? "setAside" : null)}
+      importReadOnly={check.hold({ kind: "catalogue" })}
       healthHref={healthHref}
       cardsHref={cardsHref}
     />

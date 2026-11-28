@@ -3,11 +3,17 @@
 // SPDX-License-Identifier: MIT
 
 import type { ComponentChildren } from "preact";
+import type { HoldTarget } from "@solid-memo/domain/validation";
 import type { ReadOnlyReason } from "@solid-memo/ui/dataCheck";
 import { useI18n } from "@solid-memo/ui/i18n";
 
-/** What a screen cannot change: a deck, the decks it lists, or the instance's catalog. */
-export type ReadOnlySubject = "deck" | "decks" | "catalogue";
+/**
+ * What a screen cannot change: a deck, the decks it lists, or the
+ * instance's catalog, named as the check's hold is asked about it
+ * (useDataCheck's `hold`). The instance alone has no line of its own: it
+ * is held only while the check is made, could not be made or blocks it.
+ */
+export type ReadOnlySubject = Exclude<HoldTarget["kind"], "instance">;
 
 /**
  * Why a screen changes nothing (useDataCheck): the instance's data is

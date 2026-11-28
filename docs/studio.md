@@ -3233,7 +3233,10 @@ Every Studio screen holds to the check Solid Memo runs when an
 instance is opened, and to the user's invalid data policy
 ([validation.md](validation.md)). `useDataCheck` in `ui` reads both
 with Solid Memo's workspace's queries, once
-([health](#health)):
+([health](#health)). Each screen asks its `hold` about what it
+writes (the instance, its catalog, a list of decks or one deck), which
+`holdOf` in the domain answers, and its line names the same kind
+(`ReadOnlySubject`):
 
 - **Until the check is done**, nothing can be changed, under any policy
   but "only warn". The screens are shown, and say so. A check that

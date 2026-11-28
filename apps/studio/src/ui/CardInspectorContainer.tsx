@@ -104,7 +104,7 @@ export function CardInspectorContainer({
   const log = useActivityLog();
   const logSaved = () => log(t("studio.card.saved", { card: cardName(card, cardText) }));
   const release = useDeckRelease(useCases, deck);
-  const readOnly = useDataCheck(useCases, instanceUrlOfDeck(deck.url)).readOnly(deck);
+  const readOnly = useDataCheck(useCases, instanceUrlOfDeck(deck.url)).hold({ kind: "deck", deck });
   const answersQuery = useQuery({
     ...queries.cardAnswers(useCases, instanceUrlOfDeck(deck.url), deck, card.id),
     enabled: tab === "history" || tab === "distractors",

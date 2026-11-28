@@ -52,11 +52,11 @@ export function GroupsContainer({
       {...editor}
       arrangementSetAside={check.arrangementSetAside}
       // Checking, or the whole instance blocked: the list waits, as while the check is made.
-      checking={check.readOnly() !== null}
-      deckHeld={(deck) => check.readOnly(deck) !== null}
+      checking={check.hold({ kind: "instance" }) !== null}
+      deckHeld={(deck) => check.hold({ kind: "deck", deck: deck }) !== null}
       offer={
         <ReadOnlyNotice
-          reason={check.readOnly() ?? (decks.some(check.isSetAside) ? "setAside" : null)}
+          reason={check.hold({ kind: "decks", decks })}
           subject="decks"
           healthHref={healthHref}
         />

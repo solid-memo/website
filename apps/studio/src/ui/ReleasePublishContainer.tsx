@@ -76,7 +76,7 @@ export function ReleasePublishContainer({
   return (
     <ReleasePublishScreen
       draft={draft}
-      hold={check.readOnly() ?? (check.arrangementSetAside ? "setAside" : null)}
+      hold={check.hold({ kind: "catalogue" })}
       saving={editor.saving}
       errors={errors}
       links={links}
