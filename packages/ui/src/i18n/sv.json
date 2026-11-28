@@ -1840,6 +1840,7 @@
     "alreadyExists": "Något finns redan på den platsen i din Pod. Välj en annan plats.",
     "cannotCheck": "Solid Memo kunde inte kontrollera din Pod. Kontrollera anslutningen och försök igen.",
     "podNoAnswer": "Servern svarade inte i tid. Kontrollera anslutningen och försök igen.",
+    "podBusy": "Servern är upptagen och bad Solid Memo att sakta ner, så det här gjordes inte. Vänta några minuter och försök sedan igen.",
     "documentCheckTooLong": "Solid Memo slutade läsa och kontrollera dokumentet efter {seconds} sekunders arbete. Försök igen senare, eller kontrollera det med ett annat verktyg.",
     "dataNotConforming": "Solid Memo sparade inte det här: det har inte det format Solid Memo förväntar sig. Inget ändrades. Läs in sidan igen och försök på nytt.",
     "deckGone": "Kortleken ”{deck}” finns inte längre. Kanske togs den bort i en annan flik eller app.",

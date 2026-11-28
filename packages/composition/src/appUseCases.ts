@@ -8,6 +8,7 @@ import { createPodFence } from "@solid-memo/solid/podFence";
 import { createWriteFence } from "@solid-memo/solid/writeFence";
 import { anonymousFetch } from "@solid-memo/solid/authFetch";
 import { READ_DEADLINE_MS, WHOLE_READ_MS, withReadDeadline } from "@solid-memo/solid/readDeadline";
+import { createRateLimitGate } from "@solid-memo/solid/rateLimitGate";
 import { createSolidSession } from "@solid-memo/solid/solidSession";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { SHAPES_BASE, SITE, VOCAB_BASE } from "@solid-memo/vocab/ns";
@@ -140,11 +141,29 @@ export function createAppUseCases({
     }),
   );
   /**
+   * One wait per server (rateLimitGate.ts), which every request to it
+   * shares, as the user and as no one: one a server asked to wait is
+   * held, and one it refused is sent again after the wait. The gate is
+   * outside the read deadlines, so a read waiting there isn't given up
+   * for the time it waits, and each try has deadlines of its own; and
+   * outside nothing that makes a request of its own on the way, such as
+   * finding the user's storages, so a request held there holds no other
+   * up. A guest's pod is this browser's, and is never paced.
+   */
+  const rateLimits = createRateLimitGate();
+  const paced = (fetch: typeof globalThis.fetch) =>
+    routedFetch({ origin: GUEST_ORIGIN, local: fetch, remote: rateLimits.pace(fetch) });
+  /** The user's fetch, paced, with no deadline on the whole read. */
+  const podPaced = paced(writeFence.fetch);
+  /**
    * A fetch as no one (authFetch.ts), whose reads have the deadlines the
    * user's do and one on the whole read as well: they are of servers
-   * anyone may name.
+   * anyone may name. Its storages, which a refused token is checked
+   * against while a request as the user is under way (ownStorages), are
+   * read with it unpaced, so that request never waits on its own server.
    */
-  const noOneFetch = withReadDeadline(anonymousFetch, READ_DEADLINE_MS, WHOLE_READ_MS);
+  const noOneUnpaced = withReadDeadline(anonymousFetch, READ_DEADLINE_MS, WHOLE_READ_MS);
+  const noOneFetch = rateLimits.pace(noOneUnpaced);
   /**
    * What is read outside the user's storages as no one, each document
    * under FOREIGN_LIMITS and all of them within FOREIGN_READS_BUDGET
@@ -170,8 +189,8 @@ export function createAppUseCases({
     scope: (url) => new URL(url).origin,
     total: INSTANCE_READS_TOTAL,
   });
-  /** The user's fetch, with a deadline on the whole read too, as a read as no one has. */
-  const elsewhereFetch = withReadDeadline(writeFence.fetch, READ_DEADLINE_MS, WHOLE_READ_MS);
+  /** The user's fetch, paced, with a deadline on the whole read too, as a read as no one has. */
+  const elsewhereFetch = paced(withReadDeadline(writeFence.fetch, READ_DEADLINE_MS, WHOLE_READ_MS));
   /**
    * The user's fetch, whose reads outside the user's storages and the
    * folders they entered or made on this page have a deadline on the
@@ -188,7 +207,7 @@ export function createAppUseCases({
       const url = input instanceof Request ? input.url : String(input);
       const storages = await userStorages().catch(() => []);
       const own = [...storages, ...entered].some((folder) => isInFolder(url, folder));
-      return (own ? writeFence.fetch : elsewhereFetch)(input, init);
+      return (own ? podPaced : elsewhereFetch)(input, init);
     },
   });
   const podFetch = createPodFence(userFetch);
@@ -210,7 +229,7 @@ export function createAppUseCases({
    * instanceReads).
    */
   const gate = createOwnPodGate({
-    fetch: writeFence.fetch,
+    fetch: podPaced,
     // Another's server, read as the user: with a deadline on the whole read, as a read as no one.
     instanceFetch: instanceReads(elsewhereFetch),
     publicFetch: foreignReads(noOneFetch),
@@ -280,7 +299,7 @@ export function createAppUseCases({
   const randomId = () => crypto.randomUUID();
   /** The storages a user's profile names, read as no one (ownStorages). */
   const publicStorages = createSolidStorageGateway({
-    fetch: noOneFetch,
+    fetch: noOneUnpaced,
     profileStorages: getProfileStorages,
   });
   /**

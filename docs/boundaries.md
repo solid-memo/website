@@ -333,7 +333,10 @@ user outside their storages and the folders they entered on this page:
 an instance registered elsewhere, its `meta.ttl`, its deck documents
 and its releases among them. Past any of them, the read is aborted and
 fails with `podNoAnswer`, which the app tries again
-([style.md](style.md#typescript)). Without them, a server that never
+([style.md](style.md#typescript)). The deadlines start once a read is
+sent: a read the rate-limit gate holds while its server's wait lasts
+isn't given up for the wait
+([architecture.md](architecture.md#a-request-on-its-way-to-a-pod)). Without them, a server that never
 answers, or answers and then sends its body slowly or not at all, keeps
 a screen loading for good. A read of the user's own pod, a document or
 a folder, takes as long in all as its body keeps coming, so a large

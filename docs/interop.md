@@ -37,6 +37,33 @@ every test and journey.
 - **Upstream** links the issue or pull request that tracks the cause,
   or says that none does yet.
 
+## A server that rate-limits
+
+Solid Memo waits as long as a server asks when the server refuses a
+request as too many (`429`), or as unavailable for a while (`503` with
+`Retry-After`). The wait is shared by every request to that server
+([architecture.md](architecture.md#a-request-on-its-way-to-a-pod)).
+The browser shows the app the refusal only when the response carries
+the same CORS headers as any other:
+
+- **`Access-Control-Allow-Origin`** on the `429` or `503` itself.
+  Without it, the browser shows a network failure with no status, and
+  the app can only guess at a rate limit from many such failures at
+  once.
+- **`Retry-After` in `Access-Control-Expose-Headers`.** Without it, the
+  app can't read how long to wait, and backs off on its own, with
+  waits from 1 second, doubling up to a minute.
+
+```http
+HTTP/1.1 429 Too Many Requests
+Access-Control-Allow-Origin: https://solid-memo.com
+Access-Control-Expose-Headers: Retry-After
+Retry-After: 30
+```
+
+A proxy in front of the server, such as a content delivery network's
+rate limiting, sends its own `429`s, so its rules need the headers too.
+
 ## JavaScript Solid Server
 
 Version 0.0.231 from npm, started with `--conneg` (Turtle as well as

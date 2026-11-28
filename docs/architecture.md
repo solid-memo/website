@@ -142,12 +142,12 @@ step guards one thing, so no adapter has to.
 ```mermaid
 flowchart LR
     accTitle: A request on its way to a pod
-    accDescr: An adapter's request passes the pod fence, which refuses writes Solid Memo never makes; the credential gate then sends it as the learner into their own pod, through the write fence, or reads anywhere else as no one; a guest's pod is answered from IndexedDB.
+    accDescr: An adapter's request passes the pod fence, which refuses writes Solid Memo never makes; the credential gate then sends it as the learner into their own pod, through the write fence, or reads anywhere else as no one; either way it passes the rate-limit gate, which holds it while its server's wait lasts; a guest's pod is answered from IndexedDB.
     adapter["Solid adapter"] --> podFence["Pod fence<br/>refuses a write to an address<br/>Solid Memo never writes to"]
     podFence --> where{"Where does<br/>it go?"}
     where -->|"the guest's pod"| guestFence["Write fence"] --> local[("Guest's pod<br/>[IndexedDB]")]
-    where -->|"the learner's own pod"| ownFence["Write fence<br/>no write to a study<br/>being moved"] --> session["As the learner<br/>[Solid-OIDC session]"] --> pod[("The learner's pod")]
-    where -->|"anywhere else"| noOne["As no one: reads only,<br/>under limits and a budget,<br/>parsed off the page"] --> others[("Other servers")]
+    where -->|"the learner's own pod"| ownFence["Write fence<br/>no write to a study<br/>being moved"] --> ownGate["Rate-limit gate<br/>one wait per server"] --> session["As the learner<br/>[Solid-OIDC session]"] --> pod[("The learner's pod")]
+    where -->|"anywhere else"| noOne["As no one: reads only,<br/>under limits and a budget,<br/>parsed off the page"] --> otherGate["Rate-limit gate<br/>one wait per server"] --> others[("Other servers")]
 ```
 
 The credential gate sends the learner's login only into their own pod,
@@ -155,6 +155,42 @@ so a catalog that names a document on another server can't make the
 app write there or show it the learner's login
 ([boundaries.md](boundaries.md#the-pod-fence)). An instance the learner
 registered on another server is read as them, under the same limits.
+
+Every request to a server, as the learner or as no one, passes the
+rate-limit gate
+([rateLimitGate.ts](../packages/adapters/solid/src/rateLimitGate.ts)),
+which keeps one wait per server. A server that refuses a request as
+too many (`429`), or as unavailable for a while (`503` with
+`Retry-After`), pauses every request to it. The pause lasts as long as
+its `Retry-After` asks, up to two minutes. Where the browser shows no
+`Retry-After`, it's a backoff instead: 1 second, doubling while the
+server keeps refusing, up to a minute, half of each wait chosen at
+random so that tabs and requests don't come back together. An answer
+that's no refusal starts the backoff again. After the wait, the gate
+sends the refused request again: any request refused with `429`, which
+the server didn't act on, and a read refused with `503`. A write's
+`503` is passed on, as the server may have acted on it. A request that
+would be held more than three minutes in all, or sent more than six
+times, fails with `podBusy`.
+
+A browser shows a `429` sent without CORS headers as a network failure
+with no status ([interop.md](interop.md#a-server-that-rate-limits)).
+Such a failure counts as a refusal only while the browser is online.
+Then it counts while the server's wait lasts, within a minute of the
+server's last refusal, or as the third such failure of that server
+within two seconds. A rate limit refuses a page's many requests
+together, where a dropped connection fails the one under way. A read is
+then sent again after the backoff, and a write's failure is passed on.
+Past its time or its tries, the request fails as it did, with no
+`podBusy`, since a server that sends no status may be down instead.
+
+The gate is outside the read deadlines (`boundaries.md`), so a read held there
+isn't given up for the time it waits, and each try has deadlines of its
+own. It's inside every step that makes a request of its own, such as
+finding the learner's storages, so a request held there holds up no
+request it waits on. The storages that tell an expired session from a
+refused token are read past the gate, since a request as the learner
+waits on them. A guest's pod is never paced.
 
 ## Runtime: a grade
 

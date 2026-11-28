@@ -1825,6 +1825,69 @@ describe("createAppUseCases", () => {
     },
   );
 
+  it("holds every request to a pod that asked to wait, as the user and as no one, its reads not given up for the wait", {
+    timeout: 60_000,
+  }, async () => {
+    const alice = "https://alice.example/";
+    const pod = podAt(alice);
+    // Once `busy` is on, the pod refuses its next request as too many, asking for a minute.
+    const WAIT_S = 60;
+    let busy = false;
+    const sent = podsNetwork({
+      [alice]: (input, init) => {
+        if (!busy) return pod(input, init);
+        busy = false;
+        return Promise.resolve(
+          new Response("", { status: 429, headers: { "Retry-After": String(WAIT_S) } }),
+        );
+      },
+    });
+    await put(
+      pod,
+      `${alice}profile/card`,
+      `<#me> <http://www.w3.org/ns/pim/space#storage> <${alice}>.`,
+    );
+    await put(pod, `${alice}memo/a.ttl`, "<#a> <#b> <#c>.");
+    login.webId = `${alice}profile/card#me`;
+    given.clear();
+    createAppUseCases({ ...options, indexedDB: undefined });
+    const { fetch, publicFetch } = given.get("createSolidInstanceRepository")!;
+    // The user's storages are found before the pod is busy.
+    await fetch!(`${alice}memo/a.ttl`);
+    vi.useFakeTimers();
+    onTestFinished(() => {
+      vi.useRealTimers();
+    });
+    busy = true;
+    const started = Date.now();
+    const read = fetch!(`${alice}memo/a.ttl`);
+    await vi.advanceTimersByTimeAsync(0);
+    const before = sent.length;
+    // Sent while the pod's wait lasts: held until it is over.
+    const write = fetch!(`${alice}memo/b.ttl`, {
+      method: "PUT",
+      headers: { "Content-Type": "text/turtle" },
+      body: "<#a> <#b> <#c>.",
+    });
+    const asNoOne = publicFetch!(`${alice}memo/a.ttl`);
+    await vi.advanceTimersByTimeAsync(WAIT_S * 1000 - 1);
+    expect(sent.length).toBe(before);
+    await untilSettled([read, write, asNoOne], 10 * 60_000);
+    // Ten times the read deadline and more, none of it counted against the reads.
+    expect(Date.now() - started).toBeLessThan(WAIT_S * 1000 + 1000);
+    vi.useRealTimers();
+    expect((await read).status).toBe(200);
+    expect((await write).status).toBeLessThan(300);
+    expect((await asNoOne).status).toBe(200);
+    // The refused read, sent again once the wait was over, and the two held behind it.
+    const after = sent.slice(before).map(({ url, method }) => `${method} ${url}`);
+    expect(after.sort()).toEqual([
+      `GET ${alice}memo/a.ttl`,
+      `GET ${alice}memo/a.ttl`,
+      `PUT ${alice}memo/b.ttl`,
+    ]);
+  });
+
   it("gives up finding the user's storages by the deadline on the whole read, when their profile never ends", {
     timeout: 60_000,
   }, async () => {
