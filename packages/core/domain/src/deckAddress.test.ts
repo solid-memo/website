@@ -150,5 +150,7 @@ describe("where a deck's documents may be", () => {
     expect(isDeckDocumentAddress(GUEST_INSTANCE_URL, guestDeck.cardsDocumentUrl)).toBe(true);
     expect(isDeckDocumentAddress(ROOT, guestDeck.cardsDocumentUrl)).toBe(false);
     expect(isDeckDocumentAddress("not an address", guestDeck.cardsDocumentUrl)).toBe(false);
+    // A document on another server's origin with a user name, which a browser refuses to send.
+    expect(isDeckDocumentAddress(ROOT, "https://x@victim.example/alice/a1.ttl")).toBe(false);
   });
 });

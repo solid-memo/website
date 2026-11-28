@@ -6,8 +6,6 @@ import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 
 import { AppError } from "@solid-memo/domain/appError";
 import {
   BACKOFF_CAP_MS,
-  BURST_FAILURES,
-  BURST_MS,
   createRateLimitGate,
   GATE_TRIES,
   GATE_WAIT_MS,
@@ -234,6 +232,66 @@ describe("createRateLimitGate", () => {
     expect(pod.sent).toHaveLength(1);
   });
 
+  it("fails a request with podBusy, unsent, once its first wait would pass GATE_WAIT_MS, a write's too", async () => {
+    // A read under way when the server first refuses is refused too, later, and makes the wait longer.
+    const fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url.endsWith("slow.ttl") && fetch.mock.calls.length === 1)
+        return new Promise<Response>((resolve) =>
+          setTimeout(() => resolve(tooMany("120")), 100_000),
+        );
+      if (init?.method === "PUT" || fetch.mock.calls.length > 3) return ok();
+      return tooMany("120");
+    });
+    const shared = gate();
+    const paced = shared.pace(fetch);
+    const others = Promise.allSettled([paced(`${POD}slow.ttl`), paced(`${POD}a.ttl`)]);
+    await vi.advanceTimersByTimeAsync(0);
+    const write = shared.pace(fetch, { limited: true })(`${POD}answers.ttl`, {
+      method: "PUT",
+      body: "x",
+    });
+    const failed = expect(write).rejects.toMatchObject({
+      code: "podBusy",
+      vars: { host: "pod.example", seconds: 100 },
+    });
+    await vi.advanceTimersByTimeAsync(120_000);
+    await failed;
+    await vi.advanceTimersByTimeAsync(GATE_WAIT_MS);
+    await others;
+    expect(fetch.mock.calls.map(([, init]) => init?.method)).not.toContain("PUT");
+  });
+
+  it("passes an address with a user name or password on as it is, pausing nothing for its server though it refused lately", async () => {
+    const pod = server(() => tooMany("1"), ok);
+    // As a browser's fetch does, refusing such an address before it sends anything.
+    const browser = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const { username, password } = new URL(String(input));
+      if (username !== "" || password !== "") throw new TypeError("URL includes credentials");
+      return pod.fetch(input, init);
+    });
+    const shared = gate();
+    const paced = shared.pace(browser);
+    const refused = paced(`${POD}alice/a.ttl`);
+    await vi.advanceTimersByTimeAsync(1000);
+    await refused;
+    const planted = [
+      "https://x@pod.example/alice/a1.ttl",
+      "https://:p@pod.example/alice/a2.ttl",
+      "https://x:p@pod.example/alice/a3.ttl",
+    ];
+    for (const url of planted) await expect(paced(url)).rejects.toBeInstanceOf(TypeError);
+    expect(browser).toHaveBeenCalledTimes(2 + planted.length);
+    expect(shared.current()).toEqual([]);
+    // The learner's own write goes at once.
+    const write = await shared.pace(browser, { limited: true })(`${POD}alice/answers.ttl`, {
+      method: "PUT",
+      body: "x",
+    });
+    expect(write.status).toBe(200);
+    expect(pod.sent.at(-1)).toMatchObject({ at: Date.now(), method: "PUT" });
+  });
+
   describe("a request that fails with no status", () => {
     it("fails as it did when it is alone, pausing nothing", async () => {
       const pod = server(corsLess, ok);
@@ -242,28 +300,30 @@ describe("createRateLimitGate", () => {
       expect((await paced(`${POD}a.ttl`)).status).toBe(200);
     });
 
-    it(`counts as refused as the ${BURST_FAILURES}th in a burst, the read sent again after the backoff`, async () => {
-      const pod = server(corsLess, corsLess, corsLess, ok);
-      const paced = gate().pace(pod.fetch);
-      const reads = [1, 2, 3].map((n) => paced(`${POD}${n}.ttl`));
-      const settled = Promise.allSettled(reads);
-      await vi.advanceTimersByTimeAsync(1000);
-      expect(await settled).toMatchObject([
-        { status: "rejected", reason: { name: "TypeError" } },
-        { status: "rejected", reason: { name: "TypeError" } },
-        { status: "fulfilled", value: { status: 200 } },
-      ]);
-      // Half of 1 s and half of it at random, at the middle.
-      expect(pod.sent.at(-1)!.at - pod.sent[0]!.at).toBe(750);
+    it("never pauses a server that sent no refusal with a status, however many fail at once", async () => {
+      const pod = server(corsLess);
+      const shared = gate();
+      const paced = shared.pace(pod.fetch);
+      const reads = Array.from({ length: 12 }, (_, n) => paced(`${POD}${n}.ttl`));
+      for (const read of reads) await expect(read).rejects.toBeInstanceOf(TypeError);
+      expect(pod.sent).toHaveLength(12);
+      expect(shared.current()).toEqual([]);
     });
 
-    it("isn't counted in a burst once BURST_MS has passed since the others", async () => {
-      const pod = server(corsLess, corsLess, corsLess, ok);
-      const paced = gate().pace(pod.fetch);
-      await expect(paced(`${POD}a.ttl`)).rejects.toBeInstanceOf(TypeError);
-      await vi.advanceTimersByTimeAsync(BURST_MS);
-      await expect(paced(`${POD}a.ttl`)).rejects.toBeInstanceOf(TypeError);
-      await expect(paced(`${POD}a.ttl`)).rejects.toBeInstanceOf(TypeError);
+    it("stops counting REFUSED_LATELY_MS after the refusal with a status, though failures counted made the wait longer", async () => {
+      const pod = server(() => tooMany(), corsLess);
+      const shared = gate();
+      const paced = shared.pace(pod.fetch);
+      const start = Date.now();
+      const read = paced(`${POD}a.ttl`);
+      const failed = expect(read).rejects.toBeInstanceOf(TypeError);
+      await vi.advanceTimersByTimeAsync(REFUSED_LATELY_MS);
+      await failed;
+      expect(pod.sent).toHaveLength(GATE_TRIES);
+      await vi.advanceTimersByTimeAsync(start + REFUSED_LATELY_MS - Date.now());
+      await expect(paced(`${POD}b.ttl`)).rejects.toBeInstanceOf(TypeError);
+      expect(pod.sent).toHaveLength(GATE_TRIES + 1);
+      expect(shared.current()).toEqual([]);
     });
 
     it("counts as refused within REFUSED_LATELY_MS of a refusal with a status, a write's failure passed on", async () => {
@@ -290,11 +350,13 @@ describe("createRateLimitGate", () => {
       onTestFinished(() => {
         vi.unstubAllGlobals();
       });
-      const pod = server(corsLess);
+      const pod = server(() => tooMany("1"), corsLess);
       const paced = createRateLimitGate().pace(pod.fetch);
-      const reads = [1, 2, 3, 4].map((n) => paced(`${POD}${n}.ttl`));
-      for (const read of reads) await expect(read).rejects.toBeInstanceOf(TypeError);
-      expect(pod.sent).toHaveLength(4);
+      const read = paced(`${POD}a.ttl`);
+      const failed = expect(read).rejects.toBeInstanceOf(TypeError);
+      await vi.advanceTimersByTimeAsync(1000);
+      await failed;
+      expect(pod.sent).toHaveLength(2);
     });
 
     it("isn't counted when it is no network failure", async () => {
@@ -311,14 +373,13 @@ describe("createRateLimitGate", () => {
     });
 
     it("fails with its last failure once its tries are spent, as a server that sends no status may be down", async () => {
-      const pod = server(corsLess);
+      const pod = server(() => tooMany(), corsLess);
       const paced = gate().pace(pod.fetch);
-      const reads = [1, 2, 3].map((n) => paced(`${POD}${n}.ttl`));
-      const settled = Promise.allSettled(reads);
+      const read = paced(`${POD}a.ttl`);
+      const failed = expect(read).rejects.toBeInstanceOf(TypeError);
       await vi.advanceTimersByTimeAsync(GATE_WAIT_MS);
-      for (const read of await settled)
-        expect(read).toMatchObject({ status: "rejected", reason: { name: "TypeError" } });
-      expect(pod.sent).toHaveLength(2 + GATE_TRIES);
+      await failed;
+      expect(pod.sent).toHaveLength(GATE_TRIES);
     });
   });
 
@@ -340,16 +401,20 @@ describe("createRateLimitGate", () => {
 
   it("passes on a failure of a request its caller aborted, counting it as no refusal", async () => {
     const caller = new AbortController();
-    const pod = server(() => {
-      caller.abort();
-      return corsLess();
-    });
-    const paced = gate().pace(pod.fetch);
-    for (const n of [1, 2, 3])
-      await expect(paced(`${POD}${n}`, { signal: caller.signal })).rejects.toBeInstanceOf(
-        TypeError,
-      );
+    const pod = server(
+      () => tooMany("0"),
+      ok,
+      () => {
+        caller.abort();
+        return corsLess();
+      },
+    );
+    const shared = gate();
+    const paced = shared.pace(pod.fetch);
+    await paced(`${POD}a`);
+    await expect(paced(`${POD}b`, { signal: caller.signal })).rejects.toBeInstanceOf(TypeError);
     expect(pod.sent).toHaveLength(3);
+    expect(shared.current()).toEqual([]);
   });
 
   it("passes a request to no server, such as a data: URL, on as it is", async () => {
@@ -357,6 +422,35 @@ describe("createRateLimitGate", () => {
     const paced = gate().pace(pod.fetch);
     expect((await paced("data:text/plain,a")).status).toBe(429);
     expect((await paced("data:text/plain,a")).status).toBe(429);
+  });
+
+  it("passes any address but an http: or https: one on as it is, its failures touching no server's wait", async () => {
+    const pod = server(() => tooMany("1"), ok);
+    const browser = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      if (!String(input).startsWith("https:")) throw new TypeError("Failed to fetch");
+      return pod.fetch(input, init);
+    });
+    const shared = gate();
+    const paced = shared.pace(browser);
+    const refused = paced(`${POD}alice/a.ttl`);
+    await vi.advanceTimersByTimeAsync(1000);
+    await refused;
+    // A blob: URL's origin is the https: one inside it, yet nothing of it is paced.
+    const others = [
+      `blob:${POD}alice/1`,
+      `blob:${POD}alice/2`,
+      `blob:${POD}alice/3`,
+      "ftp://pod.example/alice/a.ttl",
+    ];
+    for (const url of others) await expect(paced(url)).rejects.toBeInstanceOf(TypeError);
+    expect(browser).toHaveBeenCalledTimes(2 + others.length);
+    expect(shared.current()).toEqual([]);
+    const write = await shared.pace(browser, { limited: true })(`${POD}alice/answers.ttl`, {
+      method: "PUT",
+      body: "x",
+    });
+    expect(write.status).toBe(200);
+    expect(pod.sent.at(-1)).toMatchObject({ at: Date.now(), method: "PUT" });
   });
 
   describe("as the waits servers asked for", () => {
@@ -402,15 +496,18 @@ describe("createRateLimitGate", () => {
       expect(listener).toHaveBeenCalledTimes(1);
     });
 
-    it("says a wait after many failures with no status wasn't asked for", async () => {
+    it("says a wait a failure with no status started, after the server's wait was over, wasn't asked for", async () => {
       const shared = gate();
-      const pod = server(corsLess, corsLess, corsLess, ok);
+      const pod = server(() => tooMany("1"), ok, corsLess, ok);
       const paced = shared.pace(pod.fetch);
-      const burst = Promise.allSettled([1, 2, 3].map((n) => paced(`${POD}${n}.ttl`)));
+      const first = paced(`${POD}a.ttl`);
+      await vi.advanceTimersByTimeAsync(1000);
+      await first;
+      const read = paced(`${POD}b.ttl`);
       await vi.advanceTimersByTimeAsync(0);
       expect(shared.current()).toMatchObject([{ host: "pod.example", asked: false }]);
-      await vi.advanceTimersByTimeAsync(1000);
-      await burst;
+      await vi.advanceTimersByTimeAsync(BACKOFF_CAP_MS);
+      expect((await read).status).toBe(200);
     });
 
     it("keeps a wait the server asked for one it asked for, though a failure with no status makes it longer", async () => {

@@ -19,6 +19,9 @@ import { AppError } from "@solid-memo/domain/appError";
 /** Methods that only read; every other one writes. */
 const READS = new Set(["GET", "HEAD", "OPTIONS"]);
 
+/** The schemes of the addresses the gate paces: those sent to a server. */
+const PACED = new Set(["http:", "https:"]);
+
 /** The longest wait a server's Retry-After is taken at, in milliseconds: a longer one is cut to it. */
 export const RETRY_AFTER_CAP_MS = 120_000;
 
@@ -39,23 +42,17 @@ export const GATE_WAIT_MS = 180_000;
 export const GATE_TRIES = 6;
 
 /**
- * How long after a server refused a request a request to it that fails
- * with no status at all counts as refused too, in milliseconds: a proxy
- * may send its 429s without CORS headers, which the browser shows as a
- * network failure.
+ * How long after a server refused a request with a status (429, or 503
+ * with Retry-After) a request to it that fails with no status at all
+ * counts as refused too, in milliseconds, or as long as the wait it
+ * asked for lasts, if longer: a proxy may send its 429s without CORS
+ * headers, which the browser shows as a network failure. A failure with
+ * no status from a server that sent no such status lately is no refusal:
+ * an address the browser refuses to send, or one a front end turns away
+ * without CORS headers, fails that way too, and must not pause the
+ * server's other requests.
  */
 export const REFUSED_LATELY_MS = 60_000;
-
-/**
- * How many requests to one server must fail with no status within
- * BURST_MS for those failures to count as refusals: a rate limit
- * refuses the many requests of a page together, where a dropped
- * connection fails the one under way.
- */
-export const BURST_FAILURES = 3;
-
-/** The window BURST_FAILURES counts in, in milliseconds. */
-export const BURST_MS = 2_000;
 
 /**
  * How many requests the gate lets go to one server at once, for a fetch
@@ -85,10 +82,14 @@ interface Origin {
   asked: boolean;
   /** The refusals in a row, which the backoff grows with; a response that isn't one starts it again. */
   refusals: number;
-  /** When the server last refused a request, with a status or a failure counted as one, in milliseconds since the epoch. */
-  refusedAt: number;
-  /** When requests to it failed with no status lately, within BURST_MS. */
-  failures: number[];
+  /**
+   * Until when a request to it that fails with no status counts as
+   * refused, in milliseconds since the epoch: REFUSED_LATELY_MS after
+   * its last refusal with a status, or the end of the wait that refusal
+   * asked for, if later; 0 when it never refused with one. A failure
+   * counted as a refusal leaves it as it is.
+   */
+  lately: number;
   /** How many limited requests to it are under way. */
   running: number;
   /** The limited requests waiting for one under way to end, in the order they came. */
@@ -127,15 +128,17 @@ export interface RateLimitGate extends PodWaits {
  * reads, it is sent again after the wait: the server didn't act on it.
  * A write refused with 503 pauses the origin, and its answer is passed
  * on as it is, as the server may have acted on it. A request that fails
- * with no status (a TypeError) counts as refused only while its origin
- * is paused, within REFUSED_LATELY_MS of a refusal (with a status, or a
- * failure counted as one), or as the BURST_FAILURES-th such failure
- * within BURST_MS, and only while the browser is online; a read is then
- * sent again, and a write's failure is passed on. Past GATE_TRIES, or
- * when the next try would come after GATE_WAIT_MS, it fails: with
- * podBusy when the server refused it with a status, with its last
- * failure otherwise, as a server that sends no status may be down
- * instead. A request aborted while it waits fails as its signal says.
+ * with no status (a TypeError) counts as refused only lately after its
+ * server refused one with a status: within REFUSED_LATELY_MS of that
+ * refusal, or while the wait it asked for lasts, and only while the
+ * browser is online; a read is then sent again, and a write's failure is
+ * passed on. Any other such failure is that request's alone. Past
+ * GATE_TRIES, or when the next try would come after GATE_WAIT_MS, it
+ * fails: with podBusy when the server refused it with a status, with its
+ * last failure otherwise, as a server that sends no status may be down
+ * instead. A request whose wait at the gate, its first try's too, would
+ * end after GATE_WAIT_MS fails with podBusy. A request aborted while it
+ * waits fails as its signal says.
  *
  * A limited request takes a turn of its server's after its wait, and
  * gives it up once its answer's headers come or it fails, before any
@@ -164,8 +167,7 @@ export function createRateLimitGate({
         until: 0,
         asked: false,
         refusals: 0,
-        refusedAt: -Infinity,
-        failures: [],
+        lately: 0,
         running: 0,
         waiting: [],
       };
@@ -191,49 +193,70 @@ export function createRateLimitGate({
 
   /** Pauses `origin` after `response` refused a request: as long as it asks, or for the backoff. */
   function refused(origin: Origin, response: Response): void {
-    origin.refusedAt = now();
+    const at = now();
     origin.asked = true;
-    const asked = retryAfterMs(response.headers.get("Retry-After"), now());
-    if (asked === undefined) pause(origin, backoff(origin));
+    const asked = retryAfterMs(response.headers.get("Retry-After"), at);
+    let wait: number;
+    if (asked === undefined) wait = backoff(origin);
     else {
       origin.refusals++;
-      pause(origin, asked);
+      wait = asked;
     }
+    origin.lately = Math.max(origin.lately, at + Math.max(wait, REFUSED_LATELY_MS));
+    pause(origin, wait);
   }
 
-  /** Whether a request to `origin` that failed with `error` and no status counts as refused, pausing it if so. */
+  /**
+   * Whether a request to `origin` that failed with `error` and no status
+   * counts as refused, pausing it if so: only while the browser is online,
+   * and only lately after the server refused a request with a status
+   * (Origin.lately).
+   */
   function failedAsRefused(origin: Origin, error: unknown): boolean {
-    if (!(error instanceof TypeError) || !online()) return false;
     const at = now();
-    origin.failures = origin.failures.filter((failed) => at - failed < BURST_MS);
-    origin.failures.push(at);
-    const refusing =
-      at < origin.until ||
-      at - origin.refusedAt <= REFUSED_LATELY_MS ||
-      origin.failures.length >= BURST_FAILURES;
-    if (refusing) {
-      origin.refusedAt = at;
-      // A wait the server asked for stays one it asked for, though a failure makes it longer.
-      if (at >= origin.until) origin.asked = false;
-      pause(origin, backoff(origin));
-    }
-    return refusing;
+    if (!(error instanceof TypeError) || !online() || at >= origin.lately) return false;
+    // A wait the server asked for stays one it asked for, though a failure makes it longer.
+    if (at >= origin.until) origin.asked = false;
+    pause(origin, backoff(origin));
+    return true;
   }
 
-  /** Waits while `origin` is paused: another request may pause it longer meanwhile. */
-  async function turn(origin: Origin, signal: AbortSignal | undefined): Promise<void> {
-    for (let left = origin.until - now(); left > 0; left = origin.until - now())
+  /** The failure of a request to `origin` held at the gate too long: podBusy, with the seconds its wait has left. */
+  function busy(origin: Origin): AppError {
+    const seconds = Math.ceil((origin.until - now()) / 1000);
+    return new AppError("podBusy", { host: origin.host, seconds });
+  }
+
+  /**
+   * Waits while `origin` is paused: another request may pause it longer
+   * meanwhile. Fails with podBusy, without waiting, once the wait would
+   * end more than GATE_WAIT_MS after `start`, when the request reached
+   * the gate, its first try's wait as much as any other's.
+   */
+  async function turn(
+    origin: Origin,
+    signal: AbortSignal | undefined,
+    start: number,
+  ): Promise<void> {
+    for (let left = origin.until - now(); left > 0; left = origin.until - now()) {
+      if (origin.until - start > GATE_WAIT_MS) throw busy(origin);
       await sleep(left, signal);
+    }
   }
 
   /**
    * Waits for one of `origin`'s turns, `atOnce` at most under way, and
    * then while it is paused, giving the turn up meanwhile; fails as
-   * `signal` says once it is aborted.
+   * `signal` says once it is aborted, or as turn says once the wait
+   * would end too long after `start`.
    */
-  async function take(origin: Origin, signal: AbortSignal | undefined): Promise<void> {
+  async function take(
+    origin: Origin,
+    signal: AbortSignal | undefined,
+    start: number,
+  ): Promise<void> {
     for (;;) {
-      await turn(origin, signal);
+      await turn(origin, signal, start);
       if (origin.running < atOnce) origin.running++;
       else await queued(origin, signal);
       // Paused while it waited: the turn goes to the next, and the wait is waited.
@@ -309,12 +332,13 @@ export function createRateLimitGate({
         input: RequestInfo | URL,
         init: RequestInit | undefined,
         signal: AbortSignal | null | undefined,
+        start: number,
       ): Promise<{ response: Response } | { error: unknown; refused: boolean }> => {
         let release = () => {};
         if (limited) {
-          await take(origin, signal ?? undefined);
+          await take(origin, signal ?? undefined, start);
           release = held(origin);
-        } else await turn(origin, signal ?? undefined);
+        } else await turn(origin, signal ?? undefined, start);
         try {
           const response = await fetch(input, init);
           if (isRefusal(response)) refused(origin, response);
@@ -328,7 +352,9 @@ export function createRateLimitGate({
       };
       return async (input, init) => {
         const asked = requestOf(input, init);
-        // Only a request to a server has an origin to pace; any other, such as a data: URL, goes on as it is.
+        // Only an http: or https: request to a server has an origin to pace; any other, such as a
+        // data: or blob: URL, or one the browser refuses to send (with a user name or password),
+        // goes on as it is.
         if (asked === undefined) return fetch(input, init);
         const { request, reads, signal, again } = asked;
         const origin = originOf(asked.url);
@@ -338,7 +364,7 @@ export function createRateLimitGate({
           !again || tries >= GATE_TRIES || origin.until - start > GATE_WAIT_MS;
         for (let tries = 1; ; tries++) {
           // Each try sends a copy, so a Request's body is there to send again.
-          const sent = await send(origin, request?.clone() ?? input, init, signal);
+          const sent = await send(origin, request?.clone() ?? input, init, signal, start);
           if ("error" in sent) {
             if (!sent.refused || !reads || tooLong(tries)) throw sent.error;
             continue;
@@ -347,10 +373,7 @@ export function createRateLimitGate({
           if (!isRefusal(response) || (response.status === 503 && !reads)) return response;
           // The refusal's body is let go: the request is sent again, or fails.
           await response.body?.cancel().catch(() => undefined);
-          if (tooLong(tries)) {
-            const seconds = Math.ceil((origin.until - now()) / 1000);
-            throw new AppError("podBusy", { host: origin.host, seconds });
-          }
+          if (tooLong(tries)) throw busy(origin);
         }
       };
     },
@@ -360,12 +383,16 @@ export function createRateLimitGate({
 /**
  * What the gate reads of a request: its address, whether it only reads,
  * its signal, and whether its body can be sent again (one from a stream
- * can't); undefined for a request to no server, which has no origin.
+ * can't); undefined for any address but an http: or https: one (a blob:
+ * URL's origin is that of the page that made it, not of a server it was
+ * sent to), and for one with a user name or password, which the browser
+ * refuses to send, so its failure is that request's alone and no server's.
  */
 function requestOf(input: RequestInfo | URL, init: RequestInit | undefined) {
   const request = input instanceof Request ? input : undefined;
   const url = URL.parse(request?.url ?? String(input));
-  if (url === null || url.origin === "null") return undefined;
+  if (url === null || !PACED.has(url.protocol) || url.username !== "" || url.password !== "")
+    return undefined;
   const method = (init?.method ?? request?.method ?? "GET").toUpperCase();
   return {
     request,

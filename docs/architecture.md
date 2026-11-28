@@ -171,18 +171,25 @@ sends the refused request again: any request refused with `429`, which
 the server didn't act on, and a read refused with `503`. A write's
 `503` is passed on, as the server may have acted on it. A request that
 would be held more than three minutes in all, or sent more than six
-times, fails with `podBusy`.
+times, fails with `podBusy`. That holds for its first wait too, a
+write's as much as a read's, so a wait that others keep making longer
+holds no request for good.
 
 A browser shows a `429` sent without CORS headers as a network failure
 with no status ([interop.md](interop.md#a-server-that-rate-limits)).
-Such a failure counts as a refusal only while the browser is online.
-Then it counts while the server's wait lasts, within a minute of the
-server's last refusal, or as the third such failure of that server
-within two seconds. A rate limit refuses a page's many requests
-together, where a dropped connection fails the one under way. A read is
-then sent again after the backoff, and a write's failure is passed on.
-Past its time or its tries, the request fails as it did, with no
-`podBusy`, since a server that sends no status may be down instead.
+Such a failure counts as a refusal only after the server has refused a
+request with a status (`429`, or `503` with `Retry-After`). It counts
+while the wait that refusal asked for lasts, or within a minute of it,
+and only while the browser is online. A failure counted that way makes
+the wait longer, but not the minute it counts in. Any other failure
+with no status is that request's alone and pauses nothing. An address
+the browser refuses to send fails the same way, as does one a front end
+turns away without CORS headers. A counted read is sent again after the
+backoff, and a write's failure is passed on. Past its time or its
+tries, the request fails as it did, with no `podBusy`, since a server
+that sends no status may be down instead. Only an `http:` or `https:`
+address is paced at all: not one with a user name or password, which
+the browser refuses to send, nor a `blob:` or `data:` one.
 
 The gate is outside the read deadlines (`boundaries.md`), so a read held there
 isn't given up for the time it waits, and each try has deadlines of its
@@ -207,14 +214,15 @@ holds itself.
 While a server's wait lasts, every screen says so above its content
 ([PodWaitStatus.tsx](../packages/ui/src/ui/PodWaitStatus.tsx)): "The
 server pod.example asked Solid Memo to slow down. Trying again in 40
-s.", counting down. Where only failures with no status started the
-wait, the line says the server isn't answering for now. The screen goes
-on meanwhile. The line is a polite live region, which tells a screen
-reader of each wait once, as it starts or grows longer. The screens
-learn of the waits through the `podWaits` use cases, over the
-`PodWaits` port the gate implements, since `ui` doesn't import `solid`
-([boundaries.md](boundaries.md#layers)). Once the gate gives a request
-up, `podBusy` says the server is busy and that waiting helps.
+s.", counting down. Where a failure with no status, soon after such a
+refusal, started the wait, the line says the server isn't answering for
+now. The screen goes on meanwhile. The line is a polite live region,
+which tells a screen reader of each wait once, as it starts or grows
+longer. The screens learn of the waits through the `podWaits` use
+cases, over the `PodWaits` port the gate implements, since `ui`
+doesn't import `solid` ([boundaries.md](boundaries.md#layers)). Once
+the gate gives a request up, `podBusy` says the server is busy and
+that waiting helps.
 
 ## Runtime: a grade
 

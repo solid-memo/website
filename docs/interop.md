@@ -47,9 +47,9 @@ The browser shows the app the refusal only when the response carries
 the same CORS headers as any other:
 
 - **`Access-Control-Allow-Origin`** on the `429` or `503` itself.
-  Without it, the browser shows a network failure with no status, and
-  the app can only guess at a rate limit from many such failures at
-  once.
+  Without it, the browser shows a network failure with no status,
+  which the app takes as a refusal only soon after the server refused
+  a request with a status it could read.
 - **`Retry-After` in `Access-Control-Expose-Headers`.** Without it, the
   app can't read how long to wait, and backs off on its own, with
   waits from 1 second, doubling up to a minute.

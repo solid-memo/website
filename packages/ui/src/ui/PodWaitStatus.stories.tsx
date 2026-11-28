@@ -37,7 +37,7 @@ export const Asked: Story = {
   },
 };
 
-/** Many requests failed at once with no status, as a rate limit without CORS headers looks. */
+/** A request failed with no status soon after the server refused one, as a rate limit without CORS headers looks. */
 export const NotAnswering: Story = {
   args: { useCases: waiting({ host: "pod.example", seconds: 12, asked: false }) },
 };

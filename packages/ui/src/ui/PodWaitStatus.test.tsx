@@ -73,7 +73,7 @@ describe("PodWaitStatus", () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 
-  it("says a server that failed many requests with no status isn't answering", () => {
+  it("says a server that failed a request with no status after a refusal isn't answering", () => {
     const { useCases } = podWaits([{ host: "pod.example", until: inSeconds(1.5), asked: false }]);
     render(<PodWaitStatus useCases={useCases} />);
     expect(shown().seen).toEqual([

@@ -18,9 +18,10 @@ function secondsLeft(wait: PodWait, now: number): number {
  * Tells the learner that a server asked Solid Memo to slow down, and in
  * how many seconds it tries again, one line per server whose wait lasts
  * (docs/architecture.md#a-request-on-its-way-to-a-pod). It holds nothing
- * up: the screen goes on, and its requests to that server wait. A
- * server's many failures with no status are told as a server not
- * answering, as the app can't tell whether it asked. The lines count
+ * up: the screen goes on, and its requests to that server wait. A wait
+ * a failure with no status started, soon after the server refused with
+ * a status, is told as a server not answering, as the app can't tell
+ * whether it asked. The lines count
  * down each second; a polite live region tells a screen reader of each
  * wait once, as it starts or grows longer, not of each second.
  */
